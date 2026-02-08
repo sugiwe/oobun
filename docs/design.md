@@ -8,7 +8,7 @@
 
 - id
 - username (unique, URL用: `@alice` 形式)
-- name (表示名)
+- display_name (表示名)
 - email
 - avatar_url
 - created_at / updated_at
