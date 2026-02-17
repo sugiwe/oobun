@@ -45,6 +45,9 @@ gem "image_processing", "~> 1.2"
 # Use Slim for templates [https://github.com/slim-template/slim-rails]
 gem "slim-rails"
 
+# Google OAuth authentication [https://github.com/googleapis/google-auth-library-ruby]
+gem "googleauth"
+
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 7.1"
