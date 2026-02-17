@@ -21,6 +21,7 @@ class UsernamesController < ApplicationController
       session[:user_id] = user.id
       redirect_to root_path, notice: "ようこそ！アカウントを作成しました"
     else
+      @user = user
       render :new, status: :unprocessable_entity
     end
   end

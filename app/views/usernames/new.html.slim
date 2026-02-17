@@ -1,0 +1,26 @@
+- content_for :title, "ユーザー名の設定 - oobun"
+
+.flex.flex-col.items-center.justify-center.min-h-64
+  .w-full.max-w-sm
+    .text-center.mb-8
+      h1.text-2xl.font-semibold.mb-2 ユーザー名を設定してください
+      p.text-gray-500.text-sm
+        | @username 形式で表示されます。
+        br
+        | 英数字・ハイフン・アンダースコアで 3〜20 文字
+
+    = form_with url: username_path, method: :post do |f|
+      .flex.flex-col.gap-4
+        .flex.items-center.gap-2
+          span.text-gray-400.text-lg @
+          = f.text_field :username,
+              placeholder: "username",
+              autofocus: true,
+              class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+
+        - if @user&.errors&.any?
+          ul.text-red-500.text-sm.list-disc.list-inside
+            - @user.errors.full_messages.each do |msg|
+              li = msg
+
+        = f.submit "決定", class: "w-full bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"

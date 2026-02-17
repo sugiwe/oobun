@@ -1,0 +1,21 @@
+- content_for :title, "ログイン - oobun"
+
+.flex.flex-col.items-center.justify-center.min-h-64.gap-8
+  .text-center
+    h1.text-2xl.font-semibold.mb-2 oobun にログイン
+    p.text-gray-500.text-sm Google アカウントでログインしてください
+
+  .flex.flex-col.items-center.gap-4
+    / Google One Tap（自動ポップアップ）
+    #g_id_onload data-client_id=GOOGLE_CLIENT_ID
+                 data-login_uri=session_url
+                 data-auto_prompt="true"
+                 data-itp_support="true"
+
+    / Sign In With Google ボタン
+    .g_id_signin data-type="standard"
+                 data-size="large"
+                 data-text="signin_with"
+                 data-shape="rectangular"
+                 data-logo_alignment="left"
+                 data-width="280"

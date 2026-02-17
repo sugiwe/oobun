@@ -1,0 +1,36 @@
+doctype html
+html
+  head
+    title
+      = content_for(:title) || "oobun"
+    meta name="viewport" content="width=device-width,initial-scale=1"
+    = csrf_meta_tags
+    = csp_meta_tag
+    = yield :head
+    link rel="icon" href="/icon.png" type="image/png"
+    link rel="icon" href="/icon.svg" type="image/svg+xml"
+    = stylesheet_link_tag :app, "data-turbo-track": "reload"
+    = javascript_importmap_tags
+    / Sign In With Google スクリプト
+    script src="https://accounts.google.com/gsi/client" async=true defer=true
+
+  body
+    header.border-b.border-gray-200.bg-white
+      nav.container.mx-auto.px-4.h-14.flex.items-center.justify-between
+        = link_to "oobun", root_path, class: "text-lg font-semibold tracking-tight"
+        .flex.items-center.gap-4
+          - if logged_in?
+            = link_to "@#{current_user.username}", user_path(username: current_user.username), class: "text-sm text-gray-600 hover:text-gray-900"
+            = button_to "ログアウト", logout_path, method: :delete, class: "text-sm text-gray-500 hover:text-gray-700"
+          - else
+            = link_to "ログイン", login_path, class: "text-sm text-gray-600 hover:text-gray-900"
+
+    - if flash[:notice]
+      .bg-green-50.border-b.border-green-200.px-4.py-3.text-sm.text-green-800
+        .container.mx-auto = flash[:notice]
+    - if flash[:alert]
+      .bg-red-50.border-b.border-red-200.px-4.py-3.text-sm.text-red-800
+        .container.mx-auto = flash[:alert]
+
+    main.container.mx-auto.px-4.py-8
+      = yield
