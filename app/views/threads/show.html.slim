@@ -20,17 +20,13 @@
               span ×
       / 招待ボタン（メンバーのみ）
       - if is_member
-        div data-controller="invite" data-invite-create-url-value=thread_invitation_path(@thread.slug)
-          button.text-sm.text-gray-500.border.border-gray-300.rounded-md.px-3.py-1\.5.hover:border-gray-500.hover:text-gray-700 \
-            data-action="click->invite#generate" \
-            data-invite-target="button" 招待URLを発行
-          .hidden.mt-2.flex.items-center.gap-2 data-invite-target="urlBox"
-            input.text-xs.border.border-gray-300.rounded.px-2.py-1\.5.w-64.bg-gray-50 \
-              type="text" readonly=true \
-              data-invite-target="urlInput"
-            button.text-xs.text-gray-500.hover:text-gray-700 \
-              data-action="click->invite#copy" \
-              data-invite-target="copyButton" コピー
+        div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
+          button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
+            | 招待URLを発行
+          div class="hidden mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
+            input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
+            button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
+              | コピー
 
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member
@@ -55,10 +51,11 @@
             - if post.user.avatar_url.present?
               img.w-full.h-full.object-cover src=post.user.avatar_url alt=post.user.display_name
           .flex-1
-            .flex.items-baseline.gap-2.mb-2
-              span.text-sm.font-medium = "@#{post.user.username}"
-              span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
-            = link_to thread_post_path(@thread.slug, post), class: "block" do
-              .text-sm.text-gray-800.whitespace-pre-wrap = truncate(post.body, length: 300, separator: "\n")
-              - if post.body.length > 300
+            = link_to thread_post_path(@thread.slug, post), class: "block group" do
+              h3.text-base.font-medium.text-gray-900.group-hover:underline.mb-1 = post.title
+              .flex.items-baseline.gap-2.mb-2
+                span.text-xs.text-gray-500 = "@#{post.user.username}"
+                span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
+              .text-sm.text-gray-600.whitespace-pre-wrap = truncate(post.body, length: 200, separator: "\n")
+              - if post.body.length > 200
                 span.text-xs.text-gray-400.mt-1.block 続きを読む →

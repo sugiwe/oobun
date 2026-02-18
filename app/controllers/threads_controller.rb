@@ -10,7 +10,7 @@ class ThreadsController < ApplicationController
   end
 
   def show
-    @posts = @thread.posts.includes(:user)
+    @posts = @thread.posts.includes(:user).reorder(created_at: :desc)
     @members = @thread.memberships.includes(:user).order(:position)
   end
 

@@ -2,8 +2,8 @@ class Invitation < ApplicationRecord
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :invited_by, class_name: "User"
 
-  before_create :generate_token
-  before_create :set_expiry
+  before_validation :generate_token, on: :create
+  before_validation :set_expiry, on: :create
 
   validates :token, presence: true, uniqueness: true
 
