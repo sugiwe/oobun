@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   # Associations
   has_many :memberships, dependent: :destroy
-  has_many :threads, through: :memberships
+  has_many :correspondence_threads, through: :memberships, source: :thread
   has_many :posts, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_threads, through: :subscriptions, source: :thread

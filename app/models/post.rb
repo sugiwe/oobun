@@ -1,6 +1,6 @@
 class Post < ApplicationRecord
   # Associations
-  belongs_to :thread
+  belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :user
 
   # Validations

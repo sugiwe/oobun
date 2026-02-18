@@ -4,9 +4,9 @@ class ThreadsController < ApplicationController
   before_action :require_membership, only: [:edit, :update]
 
   def index
-    @threads = Thread.includes(:users, :memberships)
-                     .where(visibility: "public")
-                     .order(last_posted_at: :desc, created_at: :desc)
+    @threads = CorrespondenceThread.includes(:users, :memberships)
+                                   .where(visibility: "public")
+                                   .order(last_posted_at: :desc, created_at: :desc)
   end
 
   def show
@@ -15,13 +15,13 @@ class ThreadsController < ApplicationController
   end
 
   def new
-    @thread = Thread.new
+    @thread = CorrespondenceThread.new
   end
 
   def create
-    @thread = Thread.new(thread_params)
+    @thread = CorrespondenceThread.new(thread_params)
 
-    Thread.transaction do
+    ActiveRecord::Base.transaction do
       @thread.save!
       @thread.memberships.create!(user: current_user, position: 1, role: "writer")
     end
@@ -45,7 +45,7 @@ class ThreadsController < ApplicationController
   private
 
   def set_thread
-    @thread = Thread.find_by!(slug: params[:slug])
+    @thread = CorrespondenceThread.find_by!(slug: params[:slug])
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: "スレッドが見つかりません"
   end
@@ -57,6 +57,6 @@ class ThreadsController < ApplicationController
   end
 
   def thread_params
-    params.require(:thread).permit(:title, :slug, :description, :visibility, :turn_based)
+    params.require(:correspondence_thread).permit(:title, :slug, :description, :visibility, :turn_based)
   end
 end

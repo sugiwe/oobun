@@ -1,11 +1,18 @@
-class Thread < ApplicationRecord
+class CorrespondenceThread < ApplicationRecord
+  self.table_name = "threads"
+
+  # ルーティングヘルパーを :thread ベースで生成（thread_path, new_thread_path など）
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Thread")
+  end
+
   # Associations
-  has_many :memberships, dependent: :destroy
+  has_many :memberships, foreign_key: :thread_id, dependent: :destroy
   has_many :users, through: :memberships
-  has_many :posts, dependent: :destroy
-  has_many :subscriptions, dependent: :destroy
+  has_many :posts, foreign_key: :thread_id, dependent: :destroy
+  has_many :subscriptions, foreign_key: :thread_id, dependent: :destroy
   has_many :subscribers, through: :subscriptions, source: :user
-  has_many :skips, dependent: :destroy
+  has_many :skips, foreign_key: :thread_id, dependent: :destroy
 
   # Validations
   validates :title, presence: true
