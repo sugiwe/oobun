@@ -32,6 +32,7 @@ class CorrespondenceThread < ApplicationRecord
   has_many :subscriptions, foreign_key: :thread_id, dependent: :destroy
   has_many :subscribers, through: :subscriptions, source: :user
   has_many :skips, foreign_key: :thread_id, dependent: :destroy
+  has_many :invitations, foreign_key: :thread_id, dependent: :destroy
 
   # Validations
   validates :title, presence: true

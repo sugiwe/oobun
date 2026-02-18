@@ -57,6 +57,6 @@ class ThreadsController < ApplicationController
   end
 
   def thread_params
-    params.require(:correspondence_thread).permit(:title, :slug, :description, :visibility, :turn_based)
+    params.require(:thread).permit(:title, :slug, :description, :visibility, :turn_based)
   end
 end

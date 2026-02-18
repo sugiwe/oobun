@@ -1,0 +1,26 @@
+- content_for :title, "招待 - #{@invitation.thread.title} - oobun"
+
+.flex.flex-col.items-center.justify-center.min-h-64.gap-8
+  .text-center.max-w-sm
+    h1.text-xl.font-semibold.mb-2 交換日記への招待
+    p.text-gray-500.text-sm.mb-1
+      = "@#{@invitation.invited_by.username}"
+      | さんから招待が届いています
+    p.text-lg.font-medium.mt-4 = @invitation.thread.title
+    - if @invitation.thread.description.present?
+      p.text-sm.text-gray-500.mt-1 = @invitation.thread.description
+
+    .mt-6.text-xs.text-gray-400
+      | 有効期限：
+      = @invitation.expires_at.strftime("%Y年%m月%d日")
+      | まで
+
+  - if logged_in?
+    = form_with url: accept_invitation_path(@invitation.token), method: :post do |f|
+      .flex.flex-col.items-center.gap-3
+        = f.submit "参加する", class: "bg-gray-900 text-white rounded-md px-8 py-3 text-sm font-medium hover:bg-gray-700 cursor-pointer"
+        = link_to "断る", root_path, class: "text-sm text-gray-400 hover:text-gray-600"
+  - else
+    .flex.flex-col.items-center.gap-3
+      p.text-sm.text-gray-500 参加するにはログインが必要です
+      = link_to "ログインして参加する", login_path, class: "bg-gray-900 text-white rounded-md px-8 py-3 text-sm font-medium hover:bg-gray-700"
