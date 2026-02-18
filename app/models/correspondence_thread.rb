@@ -6,6 +6,25 @@ class CorrespondenceThread < ApplicationRecord
     ActiveModel::Name.new(self, nil, "Thread")
   end
 
+  # 交代制ロジック: 現在のターンのユーザーを返す
+  def current_turn_user
+    return nil unless turn_based?
+
+    ordered_memberships = memberships.order(:position)
+    return ordered_memberships.first&.user if last_post_user_id.nil?
+
+    last_membership = ordered_memberships.find { |m| m.user_id == last_post_user_id }
+    return ordered_memberships.first&.user unless last_membership
+
+    next_position = last_membership.position % ordered_memberships.size + 1
+    ordered_memberships.find { |m| m.position == next_position }&.user
+  end
+
+  def my_turn?(user)
+    return true unless turn_based?
+    current_turn_user == user
+  end
+
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy
   has_many :users, through: :memberships

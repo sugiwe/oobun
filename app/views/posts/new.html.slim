@@ -1,0 +1,27 @@
+- content_for :title, "投稿 - #{@thread.title} - oobun"
+
+.max-w-2xl.mx-auto
+  .mb-6
+    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
+
+  h1.text-xl.font-semibold.mb-6 投稿する
+
+  = form_with model: [@thread, @post], url: thread_posts_path(@thread.slug) do |f|
+    .flex.flex-col.gap-4
+
+      = f.text_area :body,
+          rows: 12,
+          placeholder: "ここに文章を書いてください（10文字以上）",
+          autofocus: true,
+          class: "border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+      - if @post.errors.any?
+        ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+          - @post.errors.full_messages.each do |msg|
+            li = msg
+
+      .flex.justify-between.items-center
+        .text-xs.text-gray-400 10〜10,000文字
+        .flex.gap-3
+          = link_to "キャンセル", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+          = f.submit "投稿する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"

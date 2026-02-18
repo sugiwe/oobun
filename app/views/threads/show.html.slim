@@ -1,5 +1,9 @@
 - content_for :title, "#{@thread.title} - oobun"
 
+- turn_user = @thread.current_turn_user
+- is_member = logged_in? && @thread.memberships.exists?(user: current_user)
+- my_turn = logged_in? && @thread.my_turn?(current_user)
+
 .flex.flex-col.gap-6
 
   / スレッドヘッダー
@@ -14,6 +18,17 @@
             span = "@#{m.user.username}"
             - unless i == @members.size - 1
               span ×
+
+  / ターン表示・投稿ボタン（メンバーのみ）
+  - if is_member
+    .flex.items-center.justify-between.bg-gray-50.rounded-lg.px-4.py-3
+      .text-sm
+        - if my_turn
+          span.font-medium.text-gray-900 あなたのターンです
+        - elsif turn_user
+          span.text-gray-500 = "@#{turn_user.username} のターンです"
+      - if my_turn
+        = link_to "投稿する", new_thread_post_path(@thread.slug), class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
 
   / 投稿一覧
   - if @posts.empty?
@@ -30,4 +45,7 @@
             .flex.items-baseline.gap-2.mb-2
               span.text-sm.font-medium = "@#{post.user.username}"
               span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
-            .text-sm.text-gray-800.whitespace-pre-wrap = post.body
+            = link_to thread_post_path(@thread.slug, post), class: "block" do
+              .text-sm.text-gray-800.whitespace-pre-wrap = truncate(post.body, length: 300, separator: "\n")
+              - if post.body.length > 300
+                span.text-xs.text-gray-400.mt-1.block 続きを読む →
