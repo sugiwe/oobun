@@ -4,6 +4,10 @@ export default class extends Controller {
   static targets = ["button", "urlBox", "urlInput", "copyButton"]
   static values = { createUrl: String }
 
+  connect() {
+    this.urlBoxTarget.style.display = "none"
+  }
+
   async generate() {
     this.buttonTarget.disabled = true
     this.buttonTarget.textContent = "発行中..."
@@ -21,8 +25,8 @@ export default class extends Controller {
 
       const data = await response.json()
       this.urlInputTarget.value = data.url
-      this.urlBoxTarget.classList.remove("hidden")
-      this.buttonTarget.classList.add("hidden")
+      this.urlBoxTarget.style.display = "flex"
+      this.buttonTarget.style.display = "none"
     } catch (e) {
       alert(e.message)
       this.buttonTarget.disabled = false

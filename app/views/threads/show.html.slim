@@ -23,7 +23,7 @@
         div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
           button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
             | 招待URLを発行
-          div class="hidden mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
+          div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
             input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
             button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
               | コピー
