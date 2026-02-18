@@ -7,15 +7,7 @@
 
   .flex.flex-col.items-center.gap-4
     / Google One Tap（自動ポップアップ）
-    #g_id_onload data-client_id=GOOGLE_CLIENT_ID
-                 data-login_uri=session_url
-                 data-auto_prompt="true"
-                 data-itp_support="true"
+    #g_id_onload data={"client_id" => GOOGLE_CLIENT_ID, "login_uri" => session_url, "auto_prompt" => "true", "itp_support" => "true"}
 
     / Sign In With Google ボタン
-    .g_id_signin data-type="standard"
-                 data-size="large"
-                 data-text="signin_with"
-                 data-shape="rectangular"
-                 data-logo_alignment="left"
-                 data-width="280"
+    .g_id_signin data={"type" => "standard", "size" => "large", "text" => "signin_with", "shape" => "rectangular", "logo_alignment" => "left", "width" => "280"}

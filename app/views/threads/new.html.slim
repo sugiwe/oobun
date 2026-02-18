@@ -1,0 +1,34 @@
+- content_for :title, "新しいスレッド - oobun"
+
+.max-w-lg.mx-auto
+  h1.text-xl.font-semibold.mb-6 新しいスレッドを作成
+
+  = form_with model: @thread, url: threads_path, method: :post do |f|
+    .flex.flex-col.gap-5
+
+      .flex.flex-col.gap-1
+        = f.label :title, "タイトル", class: "text-sm font-medium text-gray-700"
+        = f.text_field :title, autofocus: true, placeholder: "スレッドのタイトル",
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+
+      .flex.flex-col.gap-1
+        = f.label :slug, "URL スラッグ", class: "text-sm font-medium text-gray-700"
+        .flex.items-center.gap-1
+          span.text-gray-400.text-sm oobun.example.com/
+          = f.text_field :slug, placeholder: "my-thread",
+              class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 英小文字・数字・ハイフン、3〜50文字
+
+      .flex.flex-col.gap-1
+        = f.label :description, "説明（任意）", class: "text-sm font-medium text-gray-700"
+        = f.text_area :description, rows: 3, placeholder: "このスレッドについて",
+            class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+      - if @thread.errors.any?
+        ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+          - @thread.errors.full_messages.each do |msg|
+            li = msg
+
+      .flex.justify-end.gap-3
+        = link_to "キャンセル", root_path, class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+        = f.submit "作成する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"

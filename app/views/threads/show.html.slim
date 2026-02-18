@@ -1,0 +1,33 @@
+- content_for :title, "#{@thread.title} - oobun"
+
+.flex.flex-col.gap-6
+
+  / スレッドヘッダー
+  .border-b.border-gray-200.pb-6
+    .flex.items-start.justify-between.gap-4
+      .flex-1
+        h1.text-2xl.font-semibold = @thread.title
+        - if @thread.description.present?
+          p.text-gray-500.text-sm.mt-2 = @thread.description
+        .flex.items-center.gap-2.mt-3.text-xs.text-gray-400
+          - @members.each_with_index do |m, i|
+            span = "@#{m.user.username}"
+            - unless i == @members.size - 1
+              span ×
+
+  / 投稿一覧
+  - if @posts.empty?
+    .text-center.py-12.text-gray-400
+      p まだ投稿がありません
+  - else
+    .flex.flex-col.gap-6
+      - @posts.each do |post|
+        .flex.gap-4
+          .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+            - if post.user.avatar_url.present?
+              img.w-full.h-full.object-cover src=post.user.avatar_url alt=post.user.display_name
+          .flex-1
+            .flex.items-baseline.gap-2.mb-2
+              span.text-sm.font-medium = "@#{post.user.username}"
+              span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
+            .text-sm.text-gray-800.whitespace-pre-wrap = post.body
