@@ -6,6 +6,6 @@ class CreateSkips < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :skips, [:thread_id, :created_at]
+    add_index :skips, [ :thread_id, :created_at ]
   end
 end

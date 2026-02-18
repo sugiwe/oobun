@@ -1,7 +1,7 @@
 class ThreadsController < ApplicationController
-  skip_before_action :require_login, only: [:index, :show]
-  before_action :set_thread, only: [:show, :edit, :update]
-  before_action :require_membership, only: [:edit, :update]
+  skip_before_action :require_login, only: [ :index, :show ]
+  before_action :set_thread, only: [ :show, :edit, :update ]
+  before_action :require_membership, only: [ :edit, :update ]
 
   def index
     @threads = CorrespondenceThread.includes(:users, :memberships)

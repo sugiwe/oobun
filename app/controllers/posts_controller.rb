@@ -1,9 +1,9 @@
 class PostsController < ApplicationController
-  skip_before_action :require_login, only: [:show]
+  skip_before_action :require_login, only: [ :show ]
   before_action :set_thread
-  before_action :set_post, only: [:show]
-  before_action :require_membership, only: [:new, :create]
-  before_action :require_my_turn, only: [:new, :create]
+  before_action :set_post, only: [ :show ]
+  before_action :require_membership, only: [ :new, :create ]
+  before_action :require_my_turn, only: [ :new, :create ]
 
   def show
   end

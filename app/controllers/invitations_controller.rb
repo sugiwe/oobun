@@ -1,8 +1,8 @@
 class InvitationsController < ApplicationController
-  skip_before_action :require_login, only: [:show]
-  before_action :set_thread, only: [:create]
-  before_action :require_membership, only: [:create]
-  before_action :set_invitation, only: [:show, :accept]
+  skip_before_action :require_login, only: [ :show ]
+  before_action :set_thread, only: [ :create ]
+  before_action :require_membership, only: [ :create ]
+  before_action :set_invitation, only: [ :show, :accept ]
 
   # POST /:thread_slug/invitation
   # スレッドメンバーが招待URLを発行する

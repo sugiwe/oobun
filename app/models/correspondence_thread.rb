@@ -40,7 +40,7 @@ class CorrespondenceThread < ApplicationRecord
     format: { with: /\A[a-z0-9-]+\z/, message: "英数字とハイフンのみ使用できます" },
     length: { in: 3..50 }
   validates :visibility, presence: true, inclusion: { in: %w[public url_only followers_only paid] }
-  validates :turn_based, inclusion: { in: [true, false] }
+  validates :turn_based, inclusion: { in: [ true, false ] }
   validate :slug_not_reserved
 
   # Reserved slugs
