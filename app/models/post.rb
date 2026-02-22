@@ -19,7 +19,7 @@ class Post < ApplicationRecord
   end
 
   def next
-    thread.posts.where("created_at > ?", created_at).first
+    thread.posts.where("created_at > ?", created_at).reorder(created_at: :asc).first
   end
 
   private
