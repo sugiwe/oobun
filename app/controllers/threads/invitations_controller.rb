@@ -1,8 +1,7 @@
 class Threads::InvitationsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
-  skip_before_action :set_thread
+  skip_before_action :set_thread, only: [ :show, :accept ]
   before_action :require_membership, only: [ :create ]
-  before_action :set_thread_for_create, only: [ :create ]
   before_action :set_invitation, only: [ :show, :accept ]
 
   # POST /:thread_slug/invitation
@@ -49,12 +48,6 @@ class Threads::InvitationsController < Threads::ApplicationController
   end
 
   private
-
-  def set_thread_for_create
-    @thread = CorrespondenceThread.find_by!(slug: params[:thread_slug])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "スレッドが見つかりません"
-  end
 
   def set_invitation
     @invitation = Invitation.includes(:thread).find_by!(token: params[:token])
