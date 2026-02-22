@@ -35,12 +35,6 @@ class Threads::PostsController < Threads::ApplicationController
     redirect_to thread_path(@thread.slug), alert: "投稿が見つかりません"
   end
 
-  def require_my_turn
-    unless @thread.my_turn?(current_user)
-      redirect_to thread_path(@thread.slug), alert: "今はあなたのターンではありません"
-    end
-  end
-
   def post_params
     params.require(:post).permit(:title, :body)
   end
