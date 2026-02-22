@@ -16,6 +16,11 @@ class ThreadsController < ApplicationController
   end
 
   def show
+    unless can_view_thread?(@thread)
+      redirect_to root_path, alert: "アクセス権限がありません"
+      return
+    end
+
     @posts = @thread.posts.includes(:user).reorder(created_at: :desc)
     @members = @thread.memberships.includes(:user).order(:position)
 
@@ -65,6 +70,20 @@ class ThreadsController < ApplicationController
     unless @thread.memberships.exists?(user: current_user)
       redirect_to thread_path(@thread.slug), alert: "権限がありません"
     end
+  end
+
+  def can_view_thread?(thread)
+    # Phase 1: public のみ閲覧可能
+    return true if thread.visibility == "public"
+
+    # Phase 3 で追加予定の visibility:
+    # - url_only: URL を知っていれば誰でも閲覧可能
+    #   return true if thread.visibility == "url_only"
+    #
+    # - followers_only / paid: メンバーのみ閲覧可能
+    #   return true if logged_in? && thread.memberships.exists?(user: current_user)
+
+    false
   end
 
   def thread_params
