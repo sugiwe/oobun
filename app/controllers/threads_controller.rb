@@ -6,12 +6,13 @@ class ThreadsController < ApplicationController
   def index
     base_query = CorrespondenceThread.includes(:users, :memberships)
                                      .where(visibility: "public")
+                                     .recent_order
 
     if logged_in?
-      @subscribed_threads = current_user.subscribed_threads.merge(base_query).order(last_posted_at: :desc, created_at: :desc)
-      @other_threads = base_query.where.not(id: @subscribed_threads).order(last_posted_at: :desc, created_at: :desc)
+      @subscribed_threads = current_user.subscribed_threads.merge(base_query)
+      @other_threads = base_query.where.not(id: @subscribed_threads)
     else
-      @threads = base_query.order(last_posted_at: :desc, created_at: :desc)
+      @threads = base_query
     end
   end
 
