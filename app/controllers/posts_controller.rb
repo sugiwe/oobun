@@ -6,6 +6,8 @@ class PostsController < ApplicationController
   before_action :require_my_turn, only: [ :new, :create ]
 
   def show
+    @prev_post = @post.prev
+    @next_post = @post.next
   end
 
   def new
