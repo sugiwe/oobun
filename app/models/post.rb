@@ -15,11 +15,11 @@ class Post < ApplicationRecord
 
   # 前後のナビゲーション
   def prev
-    thread.posts.where("created_at < ?", created_at).order(created_at: :desc).first
+    thread.posts.where("created_at < ?", created_at).reorder(created_at: :desc).first
   end
 
   def next
-    thread.posts.where("created_at > ?", created_at).order(created_at: :asc).first
+    thread.posts.where("created_at > ?", created_at).first
   end
 
   private
