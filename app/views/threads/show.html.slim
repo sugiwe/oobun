@@ -3,6 +3,7 @@
 - turn_user = @thread.current_turn_user
 - is_member = logged_in? && @thread.memberships.exists?(user: current_user)
 - my_turn = logged_in? && @thread.my_turn?(current_user)
+- is_subscribing = logged_in? && @thread.subscriptions.exists?(user: current_user)
 
 .flex.flex-col.gap-6
 
@@ -18,15 +19,25 @@
             span = "@#{m.user.username}"
             - unless i == @members.size - 1
               span ×
-      / 招待ボタン（メンバーのみ）
-      - if is_member
-        div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
-          button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
-            | 招待URLを発行
-          div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
-            input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
-            button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
-              | コピー
+          span ·
+          = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "hover:text-gray-600 underline"
+      / 招待・購読ボタン
+      .flex.flex-col.gap-2.items-end
+        / 招待ボタン（メンバーのみ）
+        - if is_member
+          div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
+            button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
+              | 招待URLを発行
+            div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
+              input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
+              button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
+                | コピー
+        / 購読ボタン（非メンバー＆ログインユーザー）
+        - if logged_in? && !is_member
+          - if is_subscribing
+            = button_to "購読中", thread_subscription_path(@thread.slug), method: :delete, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700"
+          - else
+            = button_to "購読する", thread_subscription_path(@thread.slug), method: :post, class: "text-sm bg-gray-900 text-white rounded-md px-3 py-1.5 hover:bg-gray-700"
 
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member
@@ -37,7 +48,9 @@
         - elsif turn_user
           span.text-gray-500 = "@#{turn_user.username} のターンです"
       - if my_turn
-        = link_to "投稿する", new_thread_post_path(@thread.slug), class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
+        .flex.items-center.gap-2
+          = link_to "投稿する", new_thread_post_path(@thread.slug), class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
+          = button_to "今回はパス", thread_skip_path(@thread.slug), method: :post, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700", data: { turbo_confirm: "本当にスキップしますか？次のメンバーにターンが移ります。" }
 
   / 投稿一覧
   - if @posts.empty?

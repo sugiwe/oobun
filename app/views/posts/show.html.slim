@@ -17,4 +17,21 @@
 
     .text-sm.text-gray-800.leading-relaxed.whitespace-pre-wrap = @post.body
 
-  / 前後ナビゲーション（将来実装）
+  / 前後ナビゲーション
+  .flex.items-center.justify-between.mt-8.pt-6.border-t.border-gray-200
+    - if @post.prev
+      = link_to thread_post_path(@thread.slug, @post.prev), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700" do
+        span ←
+        .flex.flex-col.items-start
+          span.text-xs 前の投稿
+          span.font-medium = truncate(@post.prev.title, length: 30)
+    - else
+      .w-32
+    - if @post.next
+      = link_to thread_post_path(@thread.slug, @post.next), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700" do
+        .flex.flex-col.items-end
+          span.text-xs 次の投稿
+          span.font-medium = truncate(@post.next.title, length: 30)
+        span →
+    - else
+      .w-32
