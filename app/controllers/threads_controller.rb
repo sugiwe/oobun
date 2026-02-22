@@ -9,7 +9,7 @@ class ThreadsController < ApplicationController
 
     if logged_in?
       @subscribed_threads = current_user.subscribed_threads.merge(base_query).order(last_posted_at: :desc, created_at: :desc)
-      @other_threads = base_query.where.not(id: @subscribed_threads.pluck(:id)).order(last_posted_at: :desc, created_at: :desc)
+      @other_threads = base_query.where.not(id: @subscribed_threads).order(last_posted_at: :desc, created_at: :desc)
     else
       @threads = base_query.order(last_posted_at: :desc, created_at: :desc)
     end
