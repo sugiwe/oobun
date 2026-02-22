@@ -18,16 +18,16 @@ Rails.application.routes.draw do
   root "threads#index"
 
   # 招待URL（トークンベース、スレッドURLとは独立）
-  get  "/invite/:token", to: "invitations#show",  as: :invitation
-  post "/invite/:token", to: "invitations#accept", as: :accept_invitation
+  get  "/invite/:token", to: "threads/invitations#show",  as: :invitation
+  post "/invite/:token", to: "threads/invitations#accept", as: :accept_invitation
 
   # Thread リソース（path: '' でプレフィックスなし）
   resources :threads, path: "", param: :slug, except: [ :index ] do
     # 招待発行（POST /:slug/invitation）
-    resource :invitation, only: [ :create ]
+    resource :invitation, only: [ :create ], controller: "threads/invitations"
     # ネストされたリソース
-    resources :posts, only: [ :new, :create, :show ]
-    resource :skip,         only: [ :create ]
-    resource :subscription, only: [ :create, :destroy ]
+    resources :posts, only: [ :new, :create, :show ], controller: "threads/posts"
+    resource :skip,         only: [ :create ], controller: "threads/skips"
+    resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
   end
 end

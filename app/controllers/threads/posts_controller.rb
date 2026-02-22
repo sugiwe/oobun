@@ -1,6 +1,5 @@
-class PostsController < ApplicationController
+class Threads::PostsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
-  before_action :set_thread
   before_action :set_post, only: [ :show ]
   before_action :require_membership, only: [ :new, :create ]
   before_action :require_my_turn, only: [ :new, :create ]
@@ -30,22 +29,10 @@ class PostsController < ApplicationController
 
   private
 
-  def set_thread
-    @thread = CorrespondenceThread.find_by!(slug: params[:thread_slug])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "スレッドが見つかりません"
-  end
-
   def set_post
     @post = @thread.posts.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to thread_path(@thread.slug), alert: "投稿が見つかりません"
-  end
-
-  def require_membership
-    unless @thread.memberships.exists?(user: current_user)
-      redirect_to thread_path(@thread.slug), alert: "このスレッドのメンバーではありません"
-    end
   end
 
   def require_my_turn
