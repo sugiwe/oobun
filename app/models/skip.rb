@@ -7,7 +7,7 @@ class Skip < ApplicationRecord
   after_create :update_thread_turn
 
   # Scopes
-  default_scope -> { order(created_at: :desc) }
+  scope :recent, -> { order(created_at: :desc) }
 
   private
 
