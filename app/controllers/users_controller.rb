@@ -3,7 +3,10 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find_by!(username: params[:username])
-    @threads = @user.correspondence_threads.includes(:users, :memberships).order(last_posted_at: :desc, created_at: :desc)
+    @threads = @user.correspondence_threads
+                    .where(visibility: "public")
+                    .includes(:users, :memberships)
+                    .order(last_posted_at: :desc, created_at: :desc)
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: "ユーザーが見つかりません"
   end
