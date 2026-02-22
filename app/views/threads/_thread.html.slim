@@ -1,4 +1,4 @@
-- highlight_class = local_assigns[:highlight] ? "bg-blue-50" : ""
+- highlight_class = highlight ? "bg-blue-50" : ""
 = link_to thread_path(thread.slug), class: "block border border-gray-200 rounded-lg p-5 hover:border-gray-400 transition-colors #{highlight_class}" do
   .flex.items-start.justify-between.gap-4
     .flex-1.min-w-0
