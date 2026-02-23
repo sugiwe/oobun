@@ -1,0 +1,12 @@
+- highlight_class = highlight ? "bg-blue-50" : ""
+= link_to thread_path(thread.slug), class: "block border border-gray-200 rounded-lg p-5 hover:border-gray-400 transition-colors #{highlight_class}" do
+  .flex.items-start.justify-between.gap-4
+    .flex-1.min-w-0
+      h3.text-base.font-medium.truncate = thread.title
+      - if thread.description.present?
+        p.text-sm.text-gray-500.mt-1.line-clamp-2 = thread.description
+      .flex.items-center.gap-3.mt-3.text-xs.text-gray-400
+        span = thread.users.map { |u| "@#{u.username}" }.join(" × ")
+        - if thread.last_posted_at
+          span ·
+          span = time_ago_in_words(thread.last_posted_at) + "前"

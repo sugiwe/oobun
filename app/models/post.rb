@@ -13,6 +13,15 @@ class Post < ApplicationRecord
   # Scopes
   default_scope -> { order(created_at: :asc) }
 
+  # 前後のナビゲーション
+  def prev
+    thread.posts.where("created_at < ?", created_at).reorder(created_at: :desc).first
+  end
+
+  def next
+    thread.posts.where("created_at > ?", created_at).reorder(created_at: :asc).first
+  end
+
   private
 
   def set_default_title

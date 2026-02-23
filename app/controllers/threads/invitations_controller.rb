@@ -1,6 +1,6 @@
-class InvitationsController < ApplicationController
+class Threads::InvitationsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
-  before_action :set_thread, only: [ :create ]
+  skip_before_action :set_thread, only: [ :show, :accept ]
   before_action :require_membership, only: [ :create ]
   before_action :set_invitation, only: [ :show, :accept ]
 
@@ -48,18 +48,6 @@ class InvitationsController < ApplicationController
   end
 
   private
-
-  def set_thread
-    @thread = CorrespondenceThread.find_by!(slug: params[:thread_slug])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "スレッドが見つかりません"
-  end
-
-  def require_membership
-    unless @thread.memberships.exists?(user: current_user)
-      redirect_to thread_path(@thread.slug), alert: "権限がありません"
-    end
-  end
 
   def set_invitation
     @invitation = Invitation.includes(:thread).find_by!(token: params[:token])

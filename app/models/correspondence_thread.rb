@@ -25,6 +25,9 @@ class CorrespondenceThread < ApplicationRecord
     current_turn_user == user
   end
 
+  # Scopes
+  scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
+
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy
   has_many :users, through: :memberships

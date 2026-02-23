@@ -1,0 +1,23 @@
+- content_for :title, "@#{@user.username} - oobun"
+
+.max-w-4xl.mx-auto
+  / ユーザー情報
+  .border-b.border-gray-200.pb-6.mb-8
+    .flex.items-center.gap-4
+      .w-16.h-16.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+        - if @user.avatar_url.present?
+          img.w-full.h-full.object-cover src=@user.avatar_url alt=@user.display_name
+      .flex-1
+        h1.text-2xl.font-semibold = @user.display_name
+        p.text-gray-500.text-sm = "@#{@user.username}"
+
+  / 参加中のスレッド
+  .mb-8
+    h2.text-lg.font-semibold.mb-4 参加中のスレッド
+
+    - if @threads.empty?
+      .text-center.py-12.text-gray-400
+        p まだスレッドに参加していません
+    - else
+      .grid.gap-4
+        = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
