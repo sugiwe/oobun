@@ -31,7 +31,7 @@ html
             - else
               .w-full.h-full.flex.items-center.justify-center.text-gray-400.text-sm = current_user.display_name[0]
         / ドロップダウンメニュー（上に表示）
-        .absolute.w-48.bg-white.rounded-lg.shadow-lg.border.border-gray-200.py-2.hidden data-dropdown-target="menu" style="left: 10px; bottom: calc(100% - 4px)"
+        .absolute.w-48.bg-white.rounded-lg.shadow-lg.border.border-gray-200.py-2.hidden.left-[10px].bottom-[calc(100%-4px)] data-dropdown-target="menu"
           .px-4.py-2.border-b.border-gray-100
             .text-sm.font-medium.text-gray-900 = current_user.display_name
             .text-xs.text-gray-500 = "@#{current_user.username}"

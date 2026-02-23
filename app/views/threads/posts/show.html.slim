@@ -27,7 +27,7 @@
 
     / ヘッダー（タイトル・著者）
     header.mb-12
-      h1.text-2xl.font-semibold.text-gray-900.mb-6 style="line-height: 1.5" = @post.title
+      h1.text-2xl.font-semibold.text-gray-900.mb-6.leading-9 = @post.title
       .flex.items-center.gap-3
         .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
           - if @post.user.avatar_url.present?
@@ -37,7 +37,7 @@
           span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
 
     / 本文（手紙の内容）
-    .text-base.text-gray-800.whitespace-pre-wrap style="line-height: 2.0" = @post.body
+    .text-base.text-gray-800.whitespace-pre-wrap.leading-loose = @post.body
 
     / 次の投稿（チラ見せ）
     - if @next_post
