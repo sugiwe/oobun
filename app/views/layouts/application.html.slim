@@ -15,10 +15,11 @@ html
     script src="https://accounts.google.com/gsi/client" async=true defer=true
 
   body
-    header.border-b.border-gray-200.bg-white
+    header.bg-white
       nav.h-14.flex.items-center
-        .px-4
+        .px-4.flex.items-center.gap-3
           = link_to "oobun", root_path, class: "text-lg font-semibold tracking-tight"
+          = yield :back_link
 
     / ユーザーアイコン（左下固定）
     - if logged_in?
