@@ -1,54 +1,55 @@
 - content_for :title, "#{@post.title} - #{@thread.title} - oobun"
+- content_for :back_link do
+  = link_to "←", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700", title: @thread.title
 
 .max-w-3xl.mx-auto
-  .mb-8
-    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
-
-  / 前回の投稿（チラ見せ）
-  - if @prev_post
-    = link_to thread_post_path(@thread.slug, @prev_post), class: "block bg-gray-50 border border-gray-200 rounded-t-lg p-4 hover:bg-gray-100 transition-colors group" do
-      .flex.items-start.gap-3
-        - if @prev_post.thumbnail.attached?
-          .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
-            = image_tag @prev_post.thumbnail, class: "w-full h-full object-cover", alt: @prev_post.title
-        - else
-          .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
-        .flex-1.min-w-0
-          .text-xs.text-gray-400.mb-1 前回の投稿
-          .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.title
-          .text-sm.text-gray-500.line-clamp-1 = truncate(@prev_post.body, length: 80)
-
   / 今回の投稿（メイン）
-  article.bg-white.border-x.border-gray-200 class=((@prev_post && @next_post) ? '' : (@prev_post ? 'border-b rounded-b-lg' : (@next_post ? 'border-t rounded-t-lg' : 'border rounded-lg'))) style="padding: 4rem"
-      / サムネイル画像（あれば）
-      - if @post.thumbnail.attached?
-        .mb-8
-          = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.title
+  article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
+    / 前回の投稿（チラ見せ）
+    - if @prev_post
+      .mb-8
+        = link_to thread_post_path(@thread.slug, @prev_post), class: "block bg-white border border-gray-200 rounded-lg p-4 opacity-70 hover:opacity-100 transition-opacity group" do
+          .flex.items-start.gap-3
+            - if @prev_post.thumbnail.attached?
+              .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
+                = image_tag @prev_post.thumbnail, class: "w-full h-full object-cover", alt: @prev_post.title
+            - else
+              .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
+            .flex-1.min-w-0
+              .text-xs.text-gray-400.mb-1 前回の投稿
+              .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.title
+              .text-sm.text-gray-500.line-clamp-1 = truncate(@prev_post.body, length: 80)
 
-      / ヘッダー（タイトル・著者）
-      header.mb-12
-        h1.text-2xl.font-semibold.text-gray-900.mb-6 style="line-height: 1.5" = @post.title
-        .flex.items-center.gap-3
-          .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-            - if @post.user.avatar_url.present?
-              img.w-full.h-full.object-cover src=@post.user.avatar_url alt=@post.user.display_name
-          .flex.flex-col
-            span.text-base.font-medium.text-gray-700 = @post.user.display_name
-            span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
+    / サムネイル画像（あれば）
+    - if @post.thumbnail.attached?
+      .mb-8
+        = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.title
 
-      / 本文（手紙の内容）
-      .text-base.text-gray-800.whitespace-pre-wrap style="line-height: 2.0" = @post.body
+    / ヘッダー（タイトル・著者）
+    header.mb-12
+      h1.text-2xl.font-semibold.text-gray-900.mb-6 style="line-height: 1.5" = @post.title
+      .flex.items-center.gap-3
+        .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+          - if @post.user.avatar_url.present?
+            img.w-full.h-full.object-cover src=@post.user.avatar_url alt=@post.user.display_name
+        .flex.flex-col
+          span.text-base.font-medium.text-gray-700 = @post.user.display_name
+          span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
 
-  / 次の投稿（チラ見せ）
-  - if @next_post
-    = link_to thread_post_path(@thread.slug, @next_post), class: "block bg-gray-50 border border-gray-200 rounded-b-lg p-4 hover:bg-gray-100 transition-colors group" do
-      .flex.items-start.gap-3
-        - if @next_post.thumbnail.attached?
-          .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
-            = image_tag @next_post.thumbnail, class: "w-full h-full object-cover", alt: @next_post.title
-        - else
-          .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
-        .flex-1.min-w-0
-          .text-xs.text-gray-400.mb-1 次の投稿
-          .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @next_post.title
-          .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
+    / 本文（手紙の内容）
+    .text-base.text-gray-800.whitespace-pre-wrap style="line-height: 2.0" = @post.body
+
+    / 次の投稿（チラ見せ）
+    - if @next_post
+      .mt-12
+        = link_to thread_post_path(@thread.slug, @next_post), class: "block bg-white border border-gray-200 rounded-lg p-4 opacity-70 hover:opacity-100 transition-opacity group" do
+          .flex.items-start.gap-3
+            - if @next_post.thumbnail.attached?
+              .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
+                = image_tag @next_post.thumbnail, class: "w-full h-full object-cover", alt: @next_post.title
+            - else
+              .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
+            .flex-1.min-w-0
+              .text-xs.text-gray-400.mb-1 次の投稿
+              .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @next_post.title
+              .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
