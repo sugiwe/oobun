@@ -48,12 +48,24 @@ class SessionsController < ApplicationController
     Google::Auth::IDTokens.verify_oidc(credential, aud: GOOGLE_CLIENT_ID)
   rescue Google::Auth::IDTokens::VerificationError => e
     Rails.logger.warn "Google ID token verification failed: #{e.message}"
-    # CRL エラーの可能性があるため、CRL なしで再試行
-    verify_google_id_token_without_crl(credential)
+    # CRL関連エラーの場合のみ、CRLなしで再試行
+    if crl_related_error?(e)
+      Rails.logger.info "CRL-related error detected, retrying without CRL check"
+      verify_google_id_token_without_crl(credential)
+    else
+      # 有効期限切れやオーディエンス不一致などの場合はnilを返す
+      Rails.logger.warn "Non-CRL verification error, authentication failed"
+      nil
+    end
   rescue OpenSSL::SSL::SSLError => e
     # 開発環境での CRL 検証エラーを回避
     Rails.logger.warn "SSL error during Google token verification: #{e.message}"
     verify_google_id_token_without_crl(credential)
+  end
+
+  def crl_related_error?(error)
+    # CRL関連のエラーメッセージパターンをチェック
+    error.message.match?(/CRL|certificate revocation|revocation check/i)
   end
 
   def verify_google_id_token_without_crl(credential)
