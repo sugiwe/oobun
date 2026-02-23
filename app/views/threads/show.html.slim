@@ -52,23 +52,37 @@
           = link_to "投稿する", new_thread_post_path(@thread.slug), class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
           = button_to "今回はパス", thread_skip_path(@thread.slug), method: :post, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700", data: { turbo_confirm: "本当にスキップしますか？次のメンバーにターンが移ります。" }
 
-  / 投稿一覧
+  / 投稿一覧（カード型グリッド）
   - if @posts.empty?
     .text-center.py-12.text-gray-400
       p まだ投稿がありません
   - else
-    .flex.flex-col.gap-6
+    .grid.grid-cols-1.md:grid-cols-2.gap-6
       - @posts.each do |post|
-        .flex.gap-4
-          .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-            - if post.user.avatar_url.present?
-              img.w-full.h-full.object-cover src=post.user.avatar_url alt=post.user.display_name
-          .flex-1
-            = link_to thread_post_path(@thread.slug, post), class: "block group" do
-              h3.text-base.font-medium.text-gray-900.group-hover:underline.mb-1 = post.title
-              .flex.items-baseline.gap-2.mb-2
-                span.text-xs.text-gray-500 = "@#{post.user.username}"
+        = link_to thread_post_path(@thread.slug, post), class: "block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group" do
+          / サムネイル画像
+          .aspect-[16/9].bg-gray-100.flex.items-center.justify-center.overflow-hidden
+            - if post.thumbnail.attached?
+              = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
+            - else
+              .text-gray-300.text-4xl 📮
+
+          / カード本文
+          .p-5.flex.flex-col.gap-3
+            / タイトル
+            h3.text-lg.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-2 = post.title
+
+            / 著者・日付
+            .flex.items-center.gap-2
+              .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+                - if post.user.avatar_url.present?
+                  img.w-full.h-full.object-cover src=post.user.avatar_url alt=post.user.display_name
+              .flex.flex-col
+                span.text-xs.font-medium.text-gray-700 = post.user.display_name
                 span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
-              .text-sm.text-gray-600.whitespace-pre-wrap = truncate(post.body, length: 200, separator: "\n")
-              - if post.body.length > 200
-                span.text-xs.text-gray-400.mt-1.block 続きを読む →
+
+            / 本文プレビュー
+            .text-sm.text-gray-600.line-clamp-3.whitespace-pre-wrap = post.body
+
+            / 続きを読むリンク
+            span.text-xs.text-gray-400.group-hover:text-gray-600 続きを読む →
