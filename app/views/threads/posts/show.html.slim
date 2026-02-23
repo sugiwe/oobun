@@ -1,37 +1,45 @@
 - content_for :title, "#{@post.title} - #{@thread.title} - oobun"
 
-.max-w-2xl.mx-auto
-  .mb-6
+.max-w-3xl.mx-auto
+  .mb-8
     = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
 
-  article.border.border-gray-200.rounded-lg.p-8
-    header.mb-8
-      h1.text-2xl.font-semibold.text-gray-900.mb-4 = @post.title
+  / 便箋のような手紙エリア
+  article.bg-white.border.border-gray-200.rounded-lg.shadow-sm style="padding: 4rem"
+    / サムネイル画像（あれば）
+    - if @post.thumbnail.attached?
+      .mb-8
+        = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.title
+
+    / ヘッダー（タイトル・著者）
+    header.mb-12
+      h1.text-2xl.font-semibold.text-gray-900.mb-6 style="line-height: 1.5" = @post.title
       .flex.items-center.gap-3
-        .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+        .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
           - if @post.user.avatar_url.present?
             img.w-full.h-full.object-cover src=@post.user.avatar_url alt=@post.user.display_name
         .flex.flex-col
-          span.text-sm.font-medium = "@#{@post.user.username}"
-          span.text-xs.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
+          span.text-base.font-medium.text-gray-700 = @post.user.display_name
+          span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
 
-    .text-sm.text-gray-800.leading-relaxed.whitespace-pre-wrap = @post.body
+    / 本文（手紙の内容）
+    .text-base.text-gray-800.whitespace-pre-wrap style="line-height: 2.0" = @post.body
 
   / 前後ナビゲーション
-  .flex.items-center.justify-between.mt-8.pt-6.border-t.border-gray-200
+  .flex.items-center.justify-between.mt-12.pt-8.border-t.border-gray-200
     - if @prev_post
-      = link_to thread_post_path(@thread.slug, @prev_post), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700" do
-        span ←
+      = link_to thread_post_path(@thread.slug, @prev_post), class: "flex items-center gap-3 text-gray-600 hover:text-gray-900 transition-colors group" do
+        span.text-xl.group-hover:-translate-x-1.transition-transform ←
         .flex.flex-col.items-start
-          span.text-xs 前の投稿
-          span.font-medium = truncate(@prev_post.title, length: 30)
+          span.text-xs.text-gray-400 前の投稿
+          span.font-medium.text-sm = truncate(@prev_post.title, length: 30)
     - else
-      .w-32
+      .w-40
     - if @next_post
-      = link_to thread_post_path(@thread.slug, @next_post), class: "flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700" do
+      = link_to thread_post_path(@thread.slug, @next_post), class: "flex items-center gap-3 text-gray-600 hover:text-gray-900 transition-colors group" do
         .flex.flex-col.items-end
-          span.text-xs 次の投稿
-          span.font-medium = truncate(@next_post.title, length: 30)
-        span →
+          span.text-xs.text-gray-400 次の投稿
+          span.font-medium.text-sm = truncate(@next_post.title, length: 30)
+        span.text-xl.group-hover:translate-x-1.transition-transform →
     - else
-      .w-32
+      .w-40
