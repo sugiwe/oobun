@@ -61,7 +61,7 @@
       - @posts.each do |post|
         = link_to thread_post_path(@thread.slug, post), class: "block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group" do
           / サムネイル画像
-          .aspect-[16/9].bg-gray-100.flex.items-center.justify-center.overflow-hidden
+          .bg-gray-100.flex.items-center.justify-center.overflow-hidden style="aspect-ratio: 16/9"
             - if post.thumbnail.attached?
               = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
             - else
