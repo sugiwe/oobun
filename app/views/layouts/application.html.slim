@@ -18,12 +18,25 @@ html
     header.border-b.border-gray-200.bg-white
       nav.container.mx-auto.px-4.h-14.flex.items-center.justify-between
         = link_to "oobun", root_path, class: "text-lg font-semibold tracking-tight"
-        .flex.items-center.gap-4
-          - if logged_in?
-            = link_to "@#{current_user.username}", user_path(username: current_user.username), class: "text-sm text-gray-600 hover:text-gray-900"
-            = button_to "ログアウト", logout_path, method: :delete, class: "text-sm text-gray-500 hover:text-gray-700"
-          - else
-            = link_to "ログイン", login_path, class: "text-sm text-gray-600 hover:text-gray-900"
+        - if logged_in?
+          .relative data-controller="dropdown"
+            button.flex.items-center.gap-2.hover:opacity-80.transition-opacity data-action="click->dropdown#toggle"
+              .w-8.h-8.rounded-full.bg-gray-200.overflow-hidden.flex-shrink-0
+                - if current_user.avatar_url.present?
+                  img.w-full.h-full.object-cover src=current_user.avatar_url alt=current_user.display_name
+                - else
+                  .w-full.h-full.flex.items-center.justify-center.text-gray-400.text-xs = current_user.display_name[0]
+            / ドロップダウンメニュー
+            .absolute.right-0.mt-2.w-48.bg-white.rounded-lg.shadow-lg.border.border-gray-200.py-2.hidden data-dropdown-target="menu"
+              .px-4.py-2.border-b.border-gray-100
+                .text-sm.font-medium.text-gray-900 = current_user.display_name
+                .text-xs.text-gray-500 = "@#{current_user.username}"
+              = link_to user_path(username: current_user.username), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+                | マイページ
+              = button_to logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+                | ログアウト
+        - else
+          = link_to "ログイン", login_path, class: "text-sm text-gray-600 hover:text-gray-900 px-4 py-2"
 
     - if flash[:notice]
       .bg-green-50.border-b.border-green-200.px-4.py-3.text-sm.text-green-800
