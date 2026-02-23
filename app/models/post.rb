@@ -2,6 +2,7 @@ class Post < ApplicationRecord
   # Associations
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :user
+  has_one_attached :thumbnail
 
   # Validations
   validates :title, presence: true, length: { maximum: 100 }
