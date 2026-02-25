@@ -24,4 +24,18 @@ class ApplicationController < ActionController::Base
       redirect_to login_path, alert: "ログインしてください"
     end
   end
+
+  def can_view_thread?(thread)
+    # Phase 1: public のみ閲覧可能
+    return true if thread.visibility == "public"
+
+    # Phase 3 で追加予定の visibility:
+    # - url_only: URL を知っていれば誰でも閲覧可能
+    #   return true if thread.visibility == "url_only"
+    #
+    # - followers_only / paid: メンバーのみ閲覧可能
+    #   return true if logged_in? && thread.memberships.exists?(user: current_user)
+
+    false
+  end
 end

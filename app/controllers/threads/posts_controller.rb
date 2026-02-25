@@ -1,6 +1,7 @@
 class Threads::PostsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
   before_action :set_post, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_thread_visibility, only: [ :show ]
   before_action :require_membership, only: [ :new, :create ]
   before_action :require_my_turn, only: [ :new, :create ]
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
@@ -40,8 +41,17 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def destroy
-    @post.destroy!
+    ActiveRecord::Base.transaction do
+      @post.destroy!
+      last_post = @thread.posts.reorder(created_at: :desc).first
+      @thread.update!(
+        last_post_user_id: last_post&.user_id,
+        last_posted_at: last_post&.created_at
+      )
+    end
     redirect_to thread_path(@thread.slug), notice: "投稿を削除しました"
+  rescue
+    redirect_to thread_post_path(@thread.slug, @post), alert: "投稿の削除に失敗しました"
   end
 
   private
@@ -57,7 +67,7 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def require_post_owner
-    unless @post.user == current_user
+    unless @post.editable_by?(current_user)
       redirect_to thread_post_path(@thread.slug, @post), alert: "自分の投稿のみ操作できます"
     end
   end
