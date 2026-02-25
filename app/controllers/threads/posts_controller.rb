@@ -1,8 +1,9 @@
 class Threads::PostsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
-  before_action :set_post, only: [ :show ]
+  before_action :set_post, only: [ :show, :edit, :update, :destroy ]
   before_action :require_membership, only: [ :new, :create ]
   before_action :require_my_turn, only: [ :new, :create ]
+  before_action :require_post_owner, only: [ :edit, :update, :destroy ]
 
   def show
     @prev_post = @post.prev
@@ -17,14 +18,34 @@ class Threads::PostsController < Threads::ApplicationController
     @post = @thread.posts.build(post_params.merge(user: current_user))
 
     if @post.save
-      @thread.update!(
-        last_post_user_id: current_user.id,
-        last_posted_at: @post.created_at
-      )
+      @thread.update_last_post_metadata!
       redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def edit
+  end
+
+  def update
+    @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
+
+    if @post.update(post_params)
+      redirect_to thread_post_path(@thread.slug, @post), notice: "投稿を更新しました"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    ActiveRecord::Base.transaction do
+      @post.destroy!
+      @thread.update_last_post_metadata!(excluded_post_id: @post.id)
+    end
+    redirect_to thread_path(@thread.slug), notice: "投稿を削除しました"
+  rescue ActiveRecord::ActiveRecordError
+    redirect_to thread_post_path(@thread.slug, @post), alert: "投稿の削除に失敗しました"
   end
 
   private
@@ -37,5 +58,11 @@ class Threads::PostsController < Threads::ApplicationController
 
   def post_params
     params.require(:post).permit(:title, :body, :thumbnail)
+  end
+
+  def require_post_owner
+    unless @post.editable_by?(current_user)
+      redirect_to thread_post_path(@thread.slug, @post), alert: "自分の投稿のみ操作できます"
+    end
   end
 end

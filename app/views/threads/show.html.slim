@@ -21,10 +21,14 @@
               span ×
           span ·
           = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "hover:text-gray-600 underline"
-      / 招待・購読ボタン
+      / 招待・購読・編集・削除ボタン
       .flex.flex-col.gap-2.items-end
-        / 招待ボタン（メンバーのみ）
+        / メンバー向けボタン
         - if is_member
+          .flex.gap-2
+            = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+            = button_to "削除", thread_path(@thread.slug), method: :delete, data: { turbo_confirm: "このスレッドを削除しますか？すべての投稿も削除されます。この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+          / 招待ボタン
           div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
             button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
               | 招待URLを発行
@@ -33,7 +37,7 @@
               button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
                 | コピー
         / 購読ボタン（非メンバー＆ログインユーザー）
-        - if logged_in? && !is_member
+        - elsif logged_in?
           - if is_subscribing
             = button_to "購読中", thread_subscription_path(@thread.slug), method: :delete, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700"
           - else

@@ -25,6 +25,29 @@ class CorrespondenceThread < ApplicationRecord
     current_turn_user == user
   end
 
+  # メンバーかどうか
+  def member?(user)
+    return false unless user
+    memberships.exists?(user: user)
+  end
+
+  # メンバーによって編集可能
+  def editable_by?(user)
+    member?(user)
+  end
+
+  # 最終投稿メタデータを更新
+  def update_last_post_metadata!(excluded_post_id: nil)
+    scope = posts
+    scope = scope.where.not(id: excluded_post_id) if excluded_post_id
+    last_post = scope.reorder(created_at: :desc).first
+
+    update!(
+      last_post_user_id: last_post&.user_id,
+      last_posted_at: last_post&.created_at
+    )
+  end
+
   # Scopes
   scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
 

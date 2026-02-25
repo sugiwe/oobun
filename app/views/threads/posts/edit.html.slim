@@ -1,0 +1,49 @@
+- content_for :title, "投稿を編集 - #{@thread.title} - coconikki"
+
+.max-w-2xl.mx-auto
+  .mb-6
+    = link_to "← #{@thread.title}", thread_post_path(@thread.slug, @post), class: "text-sm text-gray-500 hover:text-gray-700"
+
+  h1.text-xl.font-semibold.mb-6 投稿を編集
+
+  = form_with model: [@thread, @post], url: thread_post_path(@thread.slug, @post), method: :patch do |f|
+    .flex.flex-col.gap-5
+
+      .flex.flex-col.gap-1
+        = f.label :title, "タイトル（必須）", class: "text-sm font-medium text-gray-700"
+        = f.text_field :title,
+            placeholder: "投稿のタイトルを入力してください",
+            autofocus: true,
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+
+      .flex.flex-col.gap-1
+        = f.label :thumbnail, "サムネイル画像（任意）", class: "text-sm font-medium text-gray-700"
+        - if @post.thumbnail.attached?
+          .mb-2
+            = image_tag @post.thumbnail, class: "w-32 h-32 object-cover rounded-md border border-gray-200"
+            p.text-xs.text-gray-400.mt-1 現在の画像
+          .mb-2
+            = f.check_box :remove_thumbnail, class: "mr-2"
+            = f.label :remove_thumbnail, "サムネイル画像を削除", class: "text-sm text-gray-600"
+        = f.file_field :thumbnail,
+            accept: "image/*",
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 新しい画像をアップロードすると置き換わります
+
+      .flex.flex-col.gap-1
+        = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
+        = f.text_area :body,
+            rows: 14,
+            placeholder: "ここに文章を書いてください（10文字以上）",
+            class: "border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+      - if @post.errors.any?
+        ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+          - @post.errors.full_messages.each do |msg|
+            li = msg
+
+      .flex.justify-between.items-center
+        .text-xs.text-gray-400 本文：10〜10,000文字
+        .flex.gap-3
+          = link_to "キャンセル", thread_post_path(@thread.slug, @post), class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+          = f.submit "更新する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
