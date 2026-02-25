@@ -32,6 +32,8 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def update
+    @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
+
     if @post.update(post_params)
       redirect_to thread_post_path(@thread.slug, @post), notice: "投稿を更新しました"
     else

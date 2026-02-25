@@ -22,6 +22,9 @@
           .mb-2
             = image_tag @post.thumbnail, class: "w-32 h-32 object-cover rounded-md border border-gray-200"
             p.text-xs.text-gray-400.mt-1 現在の画像
+          .mb-2
+            = f.check_box :remove_thumbnail, class: "mr-2"
+            = f.label :remove_thumbnail, "サムネイル画像を削除", class: "text-sm text-gray-600"
         = f.file_field :thumbnail,
             accept: "image/*",
             class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
