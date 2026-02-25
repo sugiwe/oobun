@@ -49,7 +49,7 @@ class Threads::PostsController < Threads::ApplicationController
       )
     end
     redirect_to thread_path(@thread.slug), notice: "投稿を削除しました"
-  rescue
+  rescue ActiveRecord::ActiveRecordError
     redirect_to thread_post_path(@thread.slug, @post), alert: "投稿の削除に失敗しました"
   end
 
