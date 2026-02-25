@@ -1,7 +1,6 @@
 class Threads::PostsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
   before_action :set_post, only: [ :show, :edit, :update, :destroy ]
-  before_action :require_thread_visibility, only: [ :show ]
   before_action :require_membership, only: [ :new, :create ]
   before_action :require_my_turn, only: [ :new, :create ]
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
@@ -43,7 +42,7 @@ class Threads::PostsController < Threads::ApplicationController
   def destroy
     ActiveRecord::Base.transaction do
       @post.destroy!
-      last_post = @thread.posts.reorder(created_at: :desc).first
+      last_post = @thread.posts.where.not(id: @post.id).reorder(created_at: :desc).first
       @thread.update!(
         last_post_user_id: last_post&.user_id,
         last_posted_at: last_post&.created_at

@@ -20,10 +20,4 @@ class Threads::ApplicationController < ApplicationController
       redirect_to thread_path(@thread.slug), alert: "今はあなたのターンではありません"
     end
   end
-
-  def require_thread_visibility
-    unless can_view_thread?(@thread)
-      redirect_to root_path, alert: "アクセス権限がありません"
-    end
-  end
 end

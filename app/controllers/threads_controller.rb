@@ -17,11 +17,6 @@ class ThreadsController < ApplicationController
   end
 
   def show
-    unless can_view_thread?(@thread)
-      redirect_to root_path, alert: "アクセス権限がありません"
-      return
-    end
-
     @posts = @thread.posts.includes(:user).reorder(created_at: :desc)
     @members = @thread.memberships.includes(:user).order(:position)
 
