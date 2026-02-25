@@ -25,6 +25,17 @@ class CorrespondenceThread < ApplicationRecord
     current_turn_user == user
   end
 
+  # メンバーかどうか
+  def member?(user)
+    return false unless user
+    memberships.exists?(user: user)
+  end
+
+  # メンバーによって編集可能
+  def editable_by?(user)
+    member?(user)
+  end
+
   # Scopes
   scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
 

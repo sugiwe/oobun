@@ -1,7 +1,7 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show ]
-  before_action :set_thread, only: [ :show, :edit, :update ]
-  before_action :require_membership, only: [ :edit, :update ]
+  before_action :set_thread, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_membership, only: [ :edit, :update, :destroy ]
 
   def index
     base_query = CorrespondenceThread.includes(:users, :memberships)
@@ -57,6 +57,11 @@ class ThreadsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @thread.destroy!
+    redirect_to root_path, notice: "スレッドを削除しました"
   end
 
   private

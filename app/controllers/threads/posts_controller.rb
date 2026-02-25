@@ -1,8 +1,9 @@
 class Threads::PostsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
-  before_action :set_post, only: [ :show ]
+  before_action :set_post, only: [ :show, :edit, :update, :destroy ]
   before_action :require_membership, only: [ :new, :create ]
   before_action :require_my_turn, only: [ :new, :create ]
+  before_action :require_post_owner, only: [ :edit, :update, :destroy ]
 
   def show
     @prev_post = @post.prev
@@ -27,6 +28,22 @@ class Threads::PostsController < Threads::ApplicationController
     end
   end
 
+  def edit
+  end
+
+  def update
+    if @post.update(post_params)
+      redirect_to thread_post_path(@thread.slug, @post), notice: "投稿を更新しました"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @post.destroy!
+    redirect_to thread_path(@thread.slug), notice: "投稿を削除しました"
+  end
+
   private
 
   def set_post
@@ -37,5 +54,11 @@ class Threads::PostsController < Threads::ApplicationController
 
   def post_params
     params.require(:post).permit(:title, :body, :thumbnail)
+  end
+
+  def require_post_owner
+    unless @post.user == current_user
+      redirect_to thread_post_path(@thread.slug, @post), alert: "自分の投稿のみ操作できます"
+    end
   end
 end

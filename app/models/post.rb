@@ -19,4 +19,10 @@ class Post < ApplicationRecord
   def next
     thread.posts.where("created_at > ?", created_at).reorder(created_at: :asc).first
   end
+
+  # 編集可能かどうか（作成者のみ）
+  def editable_by?(user)
+    return false unless user
+    self.user_id == user.id
+  end
 end
