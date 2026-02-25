@@ -57,6 +57,8 @@ class ThreadsController < ApplicationController
   def destroy
     @thread.destroy!
     redirect_to root_path, notice: "スレッドを削除しました"
+  rescue ActiveRecord::ActiveRecordError
+    redirect_to thread_path(@thread.slug), alert: "スレッドの削除に失敗しました"
   end
 
   private

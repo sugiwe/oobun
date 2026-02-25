@@ -22,7 +22,7 @@ Rails.application.routes.draw do
   post "/invite/:token", to: "threads/invitations#accept", as: :accept_invitation
 
   # Thread リソース（path: '' でプレフィックスなし）
-  resources :threads, path: "", param: :slug do
+  resources :threads, path: "", param: :slug, except: [ :index ] do
     # 招待発行（POST /:slug/invitation）
     resource :invitation, only: [ :create ], controller: "threads/invitations"
     # ネストされたリソース
