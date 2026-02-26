@@ -14,9 +14,12 @@ class UsersController < ApplicationController
   end
 
   def update
-    @user.avatar.purge if params[:user][:remove_avatar] == "1"
+    # 新しいアバターがアップロードされていない場合のみ削除チェックを処理
+    should_remove_avatar = params.dig(:user, :remove_avatar) == "1" &&
+                           user_params[:avatar].blank?
 
     if @user.update(user_params)
+      @user.avatar.purge if should_remove_avatar
       redirect_to user_path(@user.username), notice: "プロフィールを更新しました"
     else
       render :edit, status: :unprocessable_entity
