@@ -5,10 +5,7 @@
   .border-b.border-gray-200.pb-6.mb-8
     .flex.items-start.gap-4
       .w-16.h-16.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-        - if @user.avatar.attached?
-          = image_tag @user.avatar, class: "w-full h-full object-cover", alt: @user.display_name
-        - elsif @user.avatar_url.present?
-          img.w-full.h-full.object-cover src=@user.avatar_url alt=@user.display_name
+        = render "shared/avatar", user: @user
       .flex-1
         .flex.items-start.justify-between.gap-4.mb-2
           div

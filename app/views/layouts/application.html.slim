@@ -26,12 +26,7 @@ html
       div class="fixed bottom-0 left-0 z-50 p-4" data={"controller" => "dropdown"}
         button class="flex items-center gap-2 hover:opacity-80 transition-opacity" data={"action" => "click->dropdown#toggle"}
           div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shrink-0 border-2 border-white shadow-lg"
-            - if current_user.avatar.attached?
-              = image_tag current_user.avatar, class: "w-full h-full object-cover", alt: current_user.display_name
-            - elsif current_user.avatar_url.present?
-              img.w-full.h-full.object-cover src=current_user.avatar_url alt=current_user.display_name
-            - else
-              div class="w-full h-full flex items-center justify-center text-gray-400 text-sm" = current_user.display_name[0]
+            = render "shared/avatar", user: current_user, show_fallback: true
         / ドロップダウンメニュー（上に表示）
         div class="absolute w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden left-2.5 bottom-[calc(100%-4px)]" data={"dropdown-target" => "menu"}
           div class="px-4 py-2 border-b border-gray-100"
