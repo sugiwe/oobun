@@ -16,7 +16,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :google_uid, uniqueness: true, allow_nil: true
   validates :bio, length: { maximum: 5000 }, allow_blank: true
-  validates :avatar, content_type: [ "image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp" ],
+  validates :avatar, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                      size: { less_than: 5.megabytes }
 
   # Google OAuth ログイン用クラスメソッド
