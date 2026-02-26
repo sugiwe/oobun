@@ -25,13 +25,14 @@
         = f.file_field :avatar,
             accept: "image/*",
             class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-        p.text-xs.text-gray-400 新しい画像をアップロードすると置き換わります
+        p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下
 
       .flex.flex-col.gap-1
         = f.label :display_name, "表示名（必須）", class: "text-sm font-medium text-gray-700"
         = f.text_field :display_name,
             placeholder: "表示名を入力してください",
             class: "border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 最大50文字
 
       .flex.flex-col.gap-1
         = f.label :username, "アカウント名（必須）", class: "text-sm font-medium text-gray-700"
