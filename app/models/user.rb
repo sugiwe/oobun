@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_threads, through: :subscriptions, source: :thread
   has_many :skips, dependent: :destroy
+  has_one_attached :avatar
 
   # Validations
   validates :username, presence: true, uniqueness: true,
@@ -14,14 +15,20 @@ class User < ApplicationRecord
   validates :display_name, presence: true
   validates :email, presence: true, uniqueness: true
   validates :google_uid, uniqueness: true, allow_nil: true
+  validates :bio, length: { maximum: 5000 }, allow_blank: true
 
   # Google OAuth ログイン用クラスメソッド
   def self.find_or_initialize_from_google(payload)
     find_or_initialize_by(google_uid: payload["sub"]).tap do |user|
-      user.email        = payload["email"]
-      user.display_name = payload["name"]
-      user.avatar_url   = payload["picture"]
-      # username は新規ユーザーの場合のみ未設定のまま（別画面で設定）
+      # email は常に最新の情報に更新
+      user.email = payload["email"]
+
+      # 新規ユーザーの場合のみ Google の情報を設定
+      if user.new_record?
+        user.display_name = payload["name"]
+        user.avatar_url   = payload["picture"]
+        # username は別画面で設定
+      end
     end
   end
 end

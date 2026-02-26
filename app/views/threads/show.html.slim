@@ -79,7 +79,9 @@
             / 著者・日付
             .flex.items-center.gap-2
               .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-                - if post.user.avatar_url.present?
+                - if post.user.avatar.attached?
+                  = image_tag post.user.avatar, class: "w-full h-full object-cover", alt: post.user.display_name
+                - elsif post.user.avatar_url.present?
                   img.w-full.h-full.object-cover src=post.user.avatar_url alt=post.user.display_name
               .flex.flex-col
                 span.text-xs.font-medium.text-gray-700 = post.user.display_name

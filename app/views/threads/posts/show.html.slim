@@ -35,7 +35,9 @@
             = button_to "削除", thread_post_path(@thread.slug, @post), method: :delete, data: { turbo_confirm: "この投稿を削除しますか？この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
       .flex.items-center.gap-3
         .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-          - if @post.user.avatar_url.present?
+          - if @post.user.avatar.attached?
+            = image_tag @post.user.avatar, class: "w-full h-full object-cover", alt: @post.user.display_name
+          - elsif @post.user.avatar_url.present?
             img.w-full.h-full.object-cover src=@post.user.avatar_url alt=@post.user.display_name
         .flex.flex-col
           span.text-base.font-medium.text-gray-700 = @post.user.display_name

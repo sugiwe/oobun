@@ -12,7 +12,9 @@ Rails.application.routes.draw do
   post "/username",     to: "usernames#create", as: :username
 
   # ユーザーページ（最優先でマッチさせる）
-  get "/@:username", to: "users#show", as: :user
+  get  "/@:username",      to: "users#show",   as: :user
+  get  "/@:username/edit", to: "users#edit",   as: :edit_user
+  patch "/@:username",     to: "users#update"
 
   # トップページ
   root "threads#index"
