@@ -86,5 +86,5 @@
                   .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
                     = render "shared/avatar", user: post.user
                   span.text-xs.text-gray-500 = post.user.display_name
-                  span.text-xs.text-gray-400 · #{post.created_at.strftime("%Y/%m/%d")}
+                  span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
                 span.text-xs.text-gray-400.group-hover:text-gray-600.md:ml-auto 続きを読む →
