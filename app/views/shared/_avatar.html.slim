@@ -1,0 +1,12 @@
+/ アバター表示の共通パーシャル
+/ 引数:
+/   user: 表示するユーザー（必須）
+/   show_fallback: アバターがない場合にイニシャルを表示するか（デフォルト: false）
+
+- if user.avatar.attached?
+  = image_tag user.avatar, class: "w-full h-full object-cover", alt: user.display_name
+- elsif user.avatar_url.present?
+  img.w-full.h-full.object-cover src=user.avatar_url alt=user.display_name
+- elsif show_fallback
+  .w-full.h-full.flex.items-center.justify-center.text-gray-400.text-sm
+    = user.display_name[0]

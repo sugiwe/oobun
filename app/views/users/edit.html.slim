@@ -1,0 +1,59 @@
+- content_for :title, "プロフィールを編集 - coconikki"
+
+.max-w-2xl.mx-auto
+  .mb-6
+    = link_to "← マイページ", user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700"
+
+  h1.text-xl.font-semibold.mb-6 プロフィールを編集
+
+  = form_with model: @user, url: user_path(@user.username), method: :patch do |f|
+    .flex.flex-col.gap-5
+
+      .flex.flex-col.gap-1
+        = f.label :avatar, "アバター画像（任意）", class: "text-sm font-medium text-gray-700"
+        - if @user.avatar.attached?
+          .mb-2
+            = image_tag @user.avatar, class: "w-32 h-32 object-cover rounded-full border border-gray-200"
+            p.text-xs.text-gray-400.mt-1 現在の画像
+          .mb-2
+            = f.check_box :remove_avatar, class: "mr-2"
+            = f.label :remove_avatar, "アバター画像を削除", class: "text-sm text-gray-600"
+        - elsif @user.avatar_url.present?
+          .mb-2
+            img.w-32.h-32.object-cover.rounded-full.border.border-gray-200 src=@user.avatar_url alt=@user.display_name
+            p.text-xs.text-gray-400.mt-1 Google アカウントの画像
+        = f.file_field :avatar,
+            accept: "image/*",
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下
+
+      .flex.flex-col.gap-1
+        = f.label :display_name, "表示名（必須）", class: "text-sm font-medium text-gray-700"
+        = f.text_field :display_name,
+            placeholder: "表示名を入力してください",
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 最大50文字
+
+      .flex.flex-col.gap-1
+        = f.label :username, "アカウント名（必須）", class: "text-sm font-medium text-gray-700"
+        = f.text_field :username,
+            placeholder: "アカウント名を入力してください",
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 英数字、ハイフン、アンダースコアのみ（3〜20文字）
+
+      .flex.flex-col.gap-1
+        = f.label :bio, "自己紹介（任意）", class: "text-sm font-medium text-gray-700"
+        = f.text_area :bio,
+            rows: 6,
+            placeholder: "自己紹介を入力してください",
+            class: "border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+        p.text-xs.text-gray-400 最大5,000文字
+
+      - if @user.errors.any?
+        ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+          - @user.errors.full_messages.each do |msg|
+            li = msg
+
+      .flex.justify-end.gap-3
+        = link_to "キャンセル", user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+        = f.submit "更新する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"

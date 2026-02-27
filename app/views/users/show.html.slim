@@ -3,13 +3,18 @@
 .max-w-4xl.mx-auto
   / ユーザー情報
   .border-b.border-gray-200.pb-6.mb-8
-    .flex.items-center.gap-4
+    .flex.items-start.gap-4
       .w-16.h-16.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-        - if @user.avatar_url.present?
-          img.w-full.h-full.object-cover src=@user.avatar_url alt=@user.display_name
+        = render "shared/avatar", user: @user
       .flex-1
-        h1.text-2xl.font-semibold = @user.display_name
-        p.text-gray-500.text-sm = "@#{@user.username}"
+        .flex.items-start.justify-between.gap-4.mb-2
+          div
+            h1.text-2xl.font-semibold = @user.display_name
+            p.text-gray-500.text-sm = "@#{@user.username}"
+          - if logged_in? && @user == current_user
+            = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+        - if @user.bio.present?
+          p.text-gray-700.text-sm.mt-3.whitespace-pre-wrap = @user.bio
 
   / 参加中のスレッド
   .mb-8
