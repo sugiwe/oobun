@@ -24,6 +24,13 @@
         = f.text_area :description, rows: 3, placeholder: "このスレッドについて",
             class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
 
+      .flex.flex-col.gap-1
+        = f.label :thumbnail, "カバーアート（任意）", class: "text-sm font-medium text-gray-700"
+        = f.file_field :thumbnail,
+            accept: "image/*",
+            class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下。正方形推奨
+
       - if @thread.errors.any?
         ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
           - @thread.errors.full_messages.each do |msg|
