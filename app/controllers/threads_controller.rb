@@ -47,7 +47,12 @@ class ThreadsController < ApplicationController
   end
 
   def update
+    # 新しいカバーアートがアップロードされていない場合のみ削除チェックを処理
+    should_remove_thumbnail = params.dig(:thread, :remove_thumbnail) == "1" &&
+                              thread_params[:thumbnail].blank?
+
     if @thread.update(thread_params)
+      @thread.thumbnail.purge if should_remove_thumbnail
       redirect_to thread_path(@thread.slug), notice: "スレッドを更新しました"
     else
       render :edit, status: :unprocessable_entity
