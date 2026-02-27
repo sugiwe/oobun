@@ -59,6 +59,7 @@ class CorrespondenceThread < ApplicationRecord
   has_many :subscribers, through: :subscriptions, source: :user
   has_many :skips, foreign_key: :thread_id, dependent: :destroy
   has_many :invitations, foreign_key: :thread_id, dependent: :destroy
+  has_one_attached :thumbnail
 
   # Validations
   validates :title, presence: true
@@ -67,6 +68,8 @@ class CorrespondenceThread < ApplicationRecord
     length: { in: 3..50 }
   validates :visibility, presence: true, inclusion: { in: %w[public url_only followers_only paid] }
   validates :turn_based, inclusion: { in: [ true, false ] }
+  validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
+                        size: { less_than: 5.megabytes }
   validate :slug_not_reserved
 
   # Reserved slugs
