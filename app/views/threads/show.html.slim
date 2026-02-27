@@ -56,36 +56,35 @@
           = link_to "投稿する", new_thread_post_path(@thread.slug), class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
           = button_to "今回はパス", thread_skip_path(@thread.slug), method: :post, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700", data: { turbo_confirm: "本当にスキップしますか？次のメンバーにターンが移ります。" }
 
-  / 投稿一覧（カード型グリッド）
+  / 投稿一覧（タイムラインレイアウト）
   - if @posts.empty?
     .text-center.py-12.text-gray-400
       p まだ投稿がありません
   - else
-    .grid.grid-cols-1.md:grid-cols-2.gap-6
+    .flex.flex-col.gap-4
       - @posts.each do |post|
-        = link_to thread_post_path(@thread.slug, post), class: "block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group" do
-          / サムネイル画像
-          .bg-gray-100.flex.items-center.justify-center.overflow-hidden.aspect-video
-            - if post.thumbnail.attached?
-              = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
-            - else
-              .text-gray-300.text-4xl 📮
+        a.block.border.border-gray-200.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group href=thread_post_path(@thread.slug, post)
+          .flex.flex-col.md:flex-row
+            / 左：サムネイル画像（3:2比率、240x160px）
+            .bg-gray-100.flex.items-center.justify-center.overflow-hidden.md:w-60.md:h-40.md:flex-shrink-0.rounded style="aspect-ratio: 3/2;"
+              - if post.thumbnail.attached?
+                = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
+              - else
+                .text-gray-300.text-2xl 📮
 
-          / カード本文
-          .p-5.flex.flex-col.gap-3
-            / タイトル
-            h3.text-lg.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-2 = post.title
+            / 右：コンテンツ
+            .p-6.flex.flex-col.gap-2.flex-1.min-w-0
+              / タイトル
+              h3.text-base.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-1 = post.title
 
-            / 著者・日付
-            .flex.items-center.gap-2
-              .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-                = render "shared/avatar", user: post.user
-              .flex.flex-col
-                span.text-xs.font-medium.text-gray-700 = post.user.display_name
-                span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d %H:%M")
+              / 本文プレビュー（改行を削除して2行表示）
+              .text-sm.text-gray-600.line-clamp-2 = post.body.gsub(/\s+/, ' ')
 
-            / 本文プレビュー
-            .text-sm.text-gray-600.line-clamp-3.whitespace-pre-wrap = post.body
-
-            / 続きを読むリンク
-            span.text-xs.text-gray-400.group-hover:text-gray-600 続きを読む →
+              / 著者・日付
+              .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
+                .flex.items-center.gap-2
+                  .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+                    = render "shared/avatar", user: post.user
+                  span.text-xs.text-gray-500 = post.user.display_name
+                  span.text-xs.text-gray-400 · #{post.created_at.strftime("%Y/%m/%d")}
+                span.text-xs.text-gray-400.group-hover:text-gray-600.md:ml-auto 続きを読む →
