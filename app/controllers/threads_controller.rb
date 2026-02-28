@@ -1,19 +1,26 @@
 class ThreadsController < ApplicationController
-  skip_before_action :require_login, only: [ :index, :show ]
+  skip_before_action :require_login, only: [ :index, :show, :browse ]
   before_action :set_thread, only: [ :show, :edit, :update, :destroy ]
   before_action :require_membership, only: [ :edit, :update, :destroy ]
 
   def index
-    base_query = CorrespondenceThread.includes(:users, :memberships)
+    if logged_in?
+      # パーソナライズドフィード（ログイン時）
+      build_personalized_feed
+    else
+      # ランディングページ（ログアウト時）
+      @threads = CorrespondenceThread.includes(:users, :memberships)
                                      .where(visibility: "public")
                                      .recent_order
-
-    if logged_in?
-      @subscribed_threads = current_user.subscribed_threads.merge(base_query)
-      @other_threads = base_query.where.not(id: @subscribed_threads)
-    else
-      @threads = base_query
+                                     .limit(6)
     end
+  end
+
+  def browse
+    # 全スレッド一覧ページ
+    @threads = CorrespondenceThread.includes(:users, :memberships)
+                                   .where(visibility: "public")
+                                   .recent_order
   end
 
   def show
@@ -67,6 +74,14 @@ class ThreadsController < ApplicationController
   end
 
   private
+
+  def build_personalized_feed
+    feed_data = current_user.personalized_feed_data
+    @my_turn_posts = feed_data[:my_turn_posts]
+    @participated_threads = feed_data[:participated_threads]
+    @followed_threads = feed_data[:followed_threads]
+    @recent_posts = feed_data[:recent_posts]
+  end
 
   def set_thread
     @thread = CorrespondenceThread.find_by!(slug: params[:slug])

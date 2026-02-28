@@ -22,8 +22,11 @@ Rails.application.routes.draw do
   get  "/@:username/edit", to: "users#edit",   as: :edit_user
   patch "/@:username",     to: "users#update"
 
-  # トップページ
+  # トップページ（パーソナライズドフィード）
   root "threads#index"
+
+  # 全スレッド一覧（ブラウズページ）
+  get "/threads", to: "threads#browse", as: :browse_threads
 
   # 招待URL（トークンベース、スレッドURLとは独立）
   get  "/invite/:token", to: "threads/invitations#show",  as: :invitation

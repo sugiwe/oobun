@@ -1,0 +1,19 @@
+- content_for :title, "すべてのスレッド - coconikki"
+
+.flex.flex-col.gap-6
+  .flex.items-center.justify-between
+    h1.text-xl.font-semibold すべてのスレッド
+    - if logged_in?
+      = link_to "新しいスレッド", new_thread_path, class: "text-sm bg-gray-900 text-white rounded-md px-4 py-2 hover:bg-gray-700"
+
+  - if @threads.empty?
+    .text-center.py-16.text-gray-400
+      p.text-lg まだスレッドがありません
+      - if logged_in?
+        p.text-sm.mt-2
+          | 最初のスレッドを
+          = link_to "作成する", new_thread_path, class: "underline"
+          | ？
+  - else
+    .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
+      = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
