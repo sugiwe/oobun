@@ -43,6 +43,14 @@
     / 本文（手紙の内容）
     .text-base.text-gray-800.whitespace-pre-wrap.leading-loose = @post.body
 
+    / 返事を書くボタン（自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
+    - is_latest_post = @post.id == @thread.posts.maximum(:id)
+    - if logged_in? && @thread.my_turn?(current_user) && is_latest_post
+      .mt-12.pt-8.border-t.border-gray-200.text-center
+        = link_to new_thread_post_path(@thread.slug), class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
+          span ✍️
+          span 返事を書く
+
     / 次の投稿（チラ見せ）
     - if @next_post
       .mt-12
