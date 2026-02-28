@@ -1,19 +1,26 @@
 class ThreadsController < ApplicationController
-  skip_before_action :require_login, only: [ :index, :show ]
+  skip_before_action :require_login, only: [ :index, :show, :browse ]
   before_action :set_thread, only: [ :show, :edit, :update, :destroy ]
   before_action :require_membership, only: [ :edit, :update, :destroy ]
 
   def index
-    base_query = CorrespondenceThread.includes(:users, :memberships)
+    if logged_in?
+      # パーソナライズドフィード（ログイン時）
+      build_personalized_feed
+    else
+      # ランディングページ（ログアウト時）
+      @threads = CorrespondenceThread.includes(:users, :memberships)
                                      .where(visibility: "public")
                                      .recent_order
-
-    if logged_in?
-      @subscribed_threads = current_user.subscribed_threads.merge(base_query)
-      @other_threads = base_query.where.not(id: @subscribed_threads)
-    else
-      @threads = base_query
+                                     .limit(6)
     end
+  end
+
+  def browse
+    # 全スレッド一覧ページ
+    @threads = CorrespondenceThread.includes(:users, :memberships)
+                                   .where(visibility: "public")
+                                   .recent_order
   end
 
   def show
@@ -67,6 +74,44 @@ class ThreadsController < ApplicationController
   end
 
   private
+
+  def build_personalized_feed
+    # 1. 自分のターンのスレッド → 相手の最後の投稿を取得
+    my_turn_threads = current_user.correspondence_threads
+                                   .where(turn_based: true, visibility: "public")
+                                   .select { |t| t.my_turn?(current_user) }
+
+    # 各スレッドの最後の投稿を取得（相手からの投稿）
+    my_turn_thread_ids = my_turn_threads.map(&:id)
+    @my_turn_posts = Post.includes(:user, :thread)
+                         .where(thread_id: my_turn_thread_ids)
+                         .group_by(&:thread_id)
+                         .map { |thread_id, posts| posts.max_by(&:created_at) }
+                         .compact
+                         .sort_by(&:created_at)
+                         .reverse
+
+    # 2. 参加中のスレッド
+    @participated_threads = current_user.correspondence_threads
+                                        .includes(:users, :memberships)
+                                        .where(visibility: "public")
+                                        .recent_order
+
+    # 3. フォロー中のスレッド（参加中を除く）
+    participated_ids = @participated_threads.pluck(:id)
+    @followed_threads = current_user.subscribed_threads
+                                    .includes(:users, :memberships)
+                                    .where(visibility: "public")
+                                    .where.not(id: participated_ids)
+                                    .recent_order
+
+    # 4. フォロー中スレッドの新着投稿（10件）
+    followed_thread_ids = current_user.subscribed_threads.pluck(:id)
+    @recent_posts = Post.includes(:user, :thread)
+                        .where(thread_id: followed_thread_ids)
+                        .reorder(created_at: :desc)
+                        .limit(10)
+  end
 
   def set_thread
     @thread = CorrespondenceThread.find_by!(slug: params[:slug])
