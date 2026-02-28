@@ -1,0 +1,78 @@
+- content_for :title, "プライバシーポリシー - coconikki"
+
+.max-w-3xl.mx-auto
+  article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
+    h1.text-2xl.font-semibold.mb-8 プライバシーポリシー
+
+    .prose.prose-sm.text-gray-700
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 1. 収集する情報
+        p coconikki（以下「本サービス」といいます）では、以下の情報を収集します。
+
+        h3.text-base.font-medium.mt-4.mb-2 (1) Google OAuth認証により取得する情報
+        ul.list-disc.list-inside.space-y-1
+          li メールアドレス
+          li 氏名
+          li プロフィール画像
+
+        h3.text-base.font-medium.mt-4.mb-2 (2) ユーザーが入力する情報
+        ul.list-disc.list-inside.space-y-1
+          li ユーザー名（username）
+          li 表示名（display_name）
+          li 自己紹介（bio）
+          li 投稿内容（本文、画像）
+
+        h3.text-base.font-medium.mt-4.mb-2 (3) 自動的に収集される情報
+        ul.list-disc.list-inside.space-y-1
+          li IPアドレス
+          li Cookie情報
+          li アクセスログ
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 2. 情報の利用目的
+        p 収集した情報は、以下の目的で利用します。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li 本サービスの提供・運営
+          li ユーザー認証
+          li お問い合わせへの対応
+          li 利用規約違反への対応
+          li サービスの改善・分析
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 3. 第三者提供
+        p
+          | 本サービスは、認証にGoogle OAuthを利用しています。Googleのプライバシーポリシーについては、
+          = link_to "Googleプライバシーポリシー", "https://policies.google.com/privacy", class: "text-blue-600 hover:underline", target: "_blank", rel: "noopener noreferrer"
+          | をご確認ください。
+        p.mt-2 上記を除き、法令に基づく場合を除いて、ユーザーの同意なく第三者に個人情報を提供することはありません。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 4. Cookie
+        p 本サービスは、ユーザーの利便性向上のためにCookieを使用しています。Cookieの使用を望まない場合は、ブラウザの設定で無効化することができますが、一部機能が利用できなくなる場合があります。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 5. ユーザーの権利
+        p ユーザーは、自身の個人情報について、以下の権利を有します。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li 個人情報の開示請求
+          li 個人情報の訂正・削除
+          li アカウントの削除
+        p.mt-2 これらの権利を行使する場合は、お問い合わせページよりご連絡ください。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 6. セキュリティ
+        p 本サービスは、個人情報の保護のため、適切な安全管理措置を講じています。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 7. プライバシーポリシーの変更
+        p 本プライバシーポリシーは、法令の変更や本サービスの機能変更等に応じて、予告なく変更することがあります。変更後のプライバシーポリシーは、本サービス上に掲載された時点で効力を生じるものとします。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 8. お問い合わせ
+        p
+          | 本プライバシーポリシーに関するお問い合わせは、
+          = link_to "お問い合わせページ", contact_path, class: "text-blue-600 hover:underline"
+          | よりご連絡ください。
+
+      .mt-12.text-sm.text-gray-500
+        p 最終更新日: 2026年2月28日
