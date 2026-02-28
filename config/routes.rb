@@ -11,6 +11,12 @@ Rails.application.routes.draw do
   get  "/username/new", to: "usernames#new",    as: :new_username
   post "/username",     to: "usernames#create", as: :username
 
+  # 法務・サポートページ
+  get "/about",   to: "pages#about",   as: :about
+  get "/terms",   to: "pages#terms",   as: :terms
+  get "/privacy", to: "pages#privacy", as: :privacy
+  get "/contact", to: "pages#contact", as: :contact
+
   # ユーザーページ（最優先でマッチさせる）
   get  "/@:username",      to: "users#show",   as: :user
   get  "/@:username/edit", to: "users#edit",   as: :edit_user
