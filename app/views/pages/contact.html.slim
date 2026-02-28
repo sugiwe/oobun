@@ -1,0 +1,37 @@
+- content_for :title, "お問い合わせ - coconikki"
+
+.max-w-3xl.mx-auto
+  article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
+    h1.text-2xl.font-semibold.mb-8 お問い合わせ
+
+    .prose.prose-sm.text-gray-700
+      section.mb-8
+        p coconikki に関するお問い合わせは、以下のメールアドレスまでご連絡ください。
+
+        .bg-gray-50.border.border-gray-200.rounded-lg.p-6.mt-6.text-center
+          p.text-sm.text-gray-500.mb-2 お問い合わせ先
+          p.text-lg.font-medium.text-gray-900
+            a href="mailto:support@coconikki.example.com" class="text-blue-600 hover:underline"
+              | support@coconikki.example.com
+
+      section.mb-8.mt-12
+        h2.text-lg.font-semibold.mb-3 お問い合わせの際のお願い
+        ul.list-disc.list-inside.space-y-2
+          li お問い合わせ内容によっては、回答にお時間をいただく場合があります
+          li 内容によっては回答できない場合がありますので、あらかじめご了承ください
+          li サービスに関する機能改善のご提案なども歓迎します
+
+      section.mb-8.mt-12
+        h2.text-lg.font-semibold.mb-3 よくあるお問い合わせ
+
+        .mt-4
+          h3.text-base.font-medium.mb-2 Q. アカウントを削除したい
+          p.text-sm.text-gray-600.ml-4 A. ログイン後、マイページの「編集」ボタンから「アカウントを削除」を選択してください。削除したアカウントは復元できませんのでご注意ください。
+
+        .mt-6
+          h3.text-base.font-medium.mb-2 Q. 投稿を削除したい
+          p.text-sm.text-gray-600.ml-4 A. 自分の投稿の詳細ページから「削除」ボタンで削除できます。削除した投稿は復元できません。
+
+        .mt-6
+          h3.text-base.font-medium.mb-2 Q. 不適切なコンテンツを見つけた
+          p.text-sm.text-gray-600.ml-4 A. 上記のメールアドレスまで、該当のスレッドまたは投稿のURLと内容をお知らせください。迅速に対応いたします。
