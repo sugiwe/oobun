@@ -76,41 +76,11 @@ class ThreadsController < ApplicationController
   private
 
   def build_personalized_feed
-    # 1. 自分のターンのスレッド → 相手の最後の投稿を取得
-    my_turn_threads = current_user.correspondence_threads
-                                   .where(turn_based: true, visibility: "public")
-                                   .select { |t| t.my_turn?(current_user) }
-
-    # 各スレッドの最後の投稿を取得（相手からの投稿）
-    my_turn_thread_ids = my_turn_threads.map(&:id)
-    @my_turn_posts = Post.includes(:user, :thread)
-                         .where(thread_id: my_turn_thread_ids)
-                         .group_by(&:thread_id)
-                         .map { |thread_id, posts| posts.max_by(&:created_at) }
-                         .compact
-                         .sort_by(&:created_at)
-                         .reverse
-
-    # 2. 参加中のスレッド
-    @participated_threads = current_user.correspondence_threads
-                                        .includes(:users, :memberships)
-                                        .where(visibility: "public")
-                                        .recent_order
-
-    # 3. フォロー中のスレッド（参加中を除く）
-    participated_ids = @participated_threads.pluck(:id)
-    @followed_threads = current_user.subscribed_threads
-                                    .includes(:users, :memberships)
-                                    .where(visibility: "public")
-                                    .where.not(id: participated_ids)
-                                    .recent_order
-
-    # 4. フォロー中スレッドの新着投稿（10件）
-    followed_thread_ids = current_user.subscribed_threads.pluck(:id)
-    @recent_posts = Post.includes(:user, :thread)
-                        .where(thread_id: followed_thread_ids)
-                        .reorder(created_at: :desc)
-                        .limit(10)
+    feed_data = current_user.personalized_feed_data
+    @my_turn_posts = feed_data[:my_turn_posts]
+    @participated_threads = feed_data[:participated_threads]
+    @followed_threads = feed_data[:followed_threads]
+    @recent_posts = feed_data[:recent_posts]
   end
 
   def set_thread

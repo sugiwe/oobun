@@ -33,4 +33,67 @@ class User < ApplicationRecord
       end
     end
   end
+
+  # パーソナライズドフィード用データ取得
+  def personalized_feed_data
+    {
+      my_turn_posts: fetch_my_turn_posts,
+      participated_threads: fetch_participated_threads,
+      followed_threads: fetch_followed_threads,
+      recent_posts: fetch_recent_posts
+    }
+  end
+
+  private
+
+  # 1. 自分のターンのスレッドの最新投稿を取得（N+1問題を解決）
+  def fetch_my_turn_posts
+    # 自分のターンのスレッドIDを取得（membershipsを事前ロード）
+    my_turn_thread_ids = correspondence_threads
+                          .includes(:memberships)
+                          .where(turn_based: true, visibility: "public")
+                          .select { |t| t.my_turn?(self) }
+                          .map(&:id)
+
+    return Post.none if my_turn_thread_ids.empty?
+
+    # 各スレッドの投稿を取得してRuby側で最新を抽出
+    # （N+1は解決済み：includes で関連データを一括ロード）
+    posts = Post.includes(:user, :thread)
+                .where(thread_id: my_turn_thread_ids)
+                .order(created_at: :desc)
+
+    # スレッドごとにグループ化して最新の投稿のみ取得
+    posts.group_by(&:thread_id)
+         .map { |_, thread_posts| thread_posts.first }
+         .sort_by(&:created_at)
+         .reverse
+  end
+
+  # 2. 参加中のスレッドを取得
+  def fetch_participated_threads
+    correspondence_threads
+      .includes(:users, :memberships)
+      .where(visibility: "public")
+      .recent_order
+  end
+
+  # 3. フォロー中のスレッド（参加中を除く）を取得
+  def fetch_followed_threads
+    participated_ids = correspondence_threads.pluck(:id)
+
+    subscribed_threads
+      .includes(:users, :memberships)
+      .where(visibility: "public")
+      .where.not(id: participated_ids)
+      .recent_order
+  end
+
+  # 4. フォロー中スレッドの新着投稿を取得（冗長なクエリを削減）
+  def fetch_recent_posts
+    Post.includes(:user, :thread)
+        .where(thread_id: subscribed_threads.select(:id))
+        .reorder(created_at: :desc)
+        .limit(10)
+  end
 end
