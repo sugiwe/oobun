@@ -59,9 +59,10 @@ class User < ApplicationRecord
 
     # 各スレッドの投稿を取得してRuby側で最新を抽出
     # （N+1は解決済み：includes で関連データを一括ロード）
+    # default_scope を上書きするため reorder を使用
     posts = Post.includes(:user, :thread)
                 .where(thread_id: my_turn_thread_ids)
-                .order(created_at: :desc)
+                .reorder(created_at: :desc)
 
     # スレッドごとにグループ化して最新の投稿のみ取得
     posts.group_by(&:thread_id)
