@@ -9,39 +9,51 @@
 
   / スレッドヘッダー
   .border-b.border-gray-200.pb-6
-    .flex.items-start.justify-between.gap-4
-      .flex-1
+    .flex.flex-col.md:flex-row.items-start.gap-6
+      / 左：カバーアート（正方形）
+      .flex-shrink-0.w-full.md:w-60
+        .w-full.md:w-60.h-60.bg-gray-100.rounded-lg.overflow-hidden.flex.items-center.justify-center
+          - if @thread.thumbnail.attached?
+            = image_tag @thread.thumbnail, class: "w-full h-full object-cover", alt: @thread.title
+          - else
+            .text-gray-300.text-6xl 📮
+
+      / 右：スレッド情報
+      .flex-1.min-w-0.w-full
         h1.text-2xl.font-semibold = @thread.title
         - if @thread.description.present?
           p.text-gray-500.text-sm.mt-2 = @thread.description
-        .flex.items-center.gap-2.mt-3.text-xs.text-gray-400
-          - @members.each_with_index do |m, i|
-            span = "@#{m.user.username}"
-            - unless i == @members.size - 1
-              span ×
-          span ·
-          = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "hover:text-gray-600 underline"
-      / 招待・購読・編集・削除ボタン
-      .flex.flex-col.gap-2.items-end
-        / メンバー向けボタン
+
+        / 参加者（アバター付き）
+        .flex.items-center.gap-3.mt-4
+          - @members.each do |m|
+            .flex.items-center.gap-1.5
+              .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+                = render "shared/avatar", user: m.user
+              span.text-sm.text-gray-600 = "@#{m.user.username}"
+          span.text-xs.text-gray-400 ·
+          = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "text-xs text-gray-400 hover:text-gray-600 underline"
+
+        / 管理ボタン（メンバー向け）
         - if is_member
-          .flex.gap-2
+          .flex.flex-wrap.items-center.gap-2.mt-4
             = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = button_to "削除", thread_path(@thread.slug), method: :delete, data: { turbo_confirm: "このスレッドを削除しますか？すべての投稿も削除されます。この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
-          / 招待ボタン
-          div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
-            button class="text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700" data={"action" => "click->invite#generate", "invite-target" => "button"}
-              | 招待URLを発行
-            div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
-              input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
-              button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
-                | コピー
+            / 招待ボタン
+            div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
+              button class="text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1" data={"action" => "click->invite#generate", "invite-target" => "button"}
+                | 招待URLを発行
+              div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
+                input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
+                button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
+                  | コピー
         / 購読ボタン（非メンバー＆ログインユーザー）
         - elsif logged_in?
-          - if is_subscribing
-            = button_to "購読中", thread_subscription_path(@thread.slug), method: :delete, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700"
-          - else
-            = button_to "購読する", thread_subscription_path(@thread.slug), method: :post, class: "text-sm bg-gray-900 text-white rounded-md px-3 py-1.5 hover:bg-gray-700"
+          .mt-4
+            - if is_subscribing
+              = button_to "購読中", thread_subscription_path(@thread.slug), method: :delete, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700"
+            - else
+              = button_to "購読する", thread_subscription_path(@thread.slug), method: :post, class: "text-sm bg-gray-900 text-white rounded-md px-3 py-1.5 hover:bg-gray-700"
 
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member
