@@ -24,7 +24,7 @@ class Post < ApplicationRecord
     thread.posts.unscope(where: :status)
           .where(status: "published")
           .where("created_at < ?", created_at)
-          .order(created_at: :desc)
+          .reorder(created_at: :desc)
           .first
   end
 
@@ -32,7 +32,7 @@ class Post < ApplicationRecord
     thread.posts.unscope(where: :status)
           .where(status: "published")
           .where("created_at > ?", created_at)
-          .order(created_at: :asc)
+          .reorder(created_at: :asc)
           .first
   end
 
