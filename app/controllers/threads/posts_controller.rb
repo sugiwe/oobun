@@ -4,6 +4,7 @@ class Threads::PostsController < Threads::ApplicationController
   before_action :require_membership, only: [ :new, :create, :edit, :update ]
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
   before_action :require_my_turn, only: [ :new, :create, :publish ]
+  before_action :require_my_turn_for_draft, only: [ :edit, :update ]
 
   def show
     # 下書きは本人のみ閲覧可能
@@ -110,6 +111,13 @@ class Threads::PostsController < Threads::ApplicationController
   def require_post_owner
     unless @post.editable_by?(current_user)
       redirect_to thread_path(@thread.slug), alert: "自分の投稿のみ操作できます"
+    end
+  end
+
+  def require_my_turn_for_draft
+    return unless @post.draft?
+    unless @thread.my_turn?(current_user)
+      redirect_to thread_path(@thread.slug), alert: "今はあなたのターンではありません"
     end
   end
 end
