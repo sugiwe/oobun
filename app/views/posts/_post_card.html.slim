@@ -1,17 +1,20 @@
 / 投稿カード（ホーム・スレッド詳細で共通利用）
-a.block.border.border-gray-200.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group href=thread_post_path(post.thread.slug, post)
+a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group class="#{post.draft? ? 'border-amber-200 bg-amber-50/30' : 'border-gray-200'}" href=thread_post_path(post.thread.slug, post)
   .flex.flex-col.md:flex-row
     / 左：サムネイル画像（3:2比率、240x160px）
     .bg-gray-100.flex.items-center.justify-center.overflow-hidden.md:w-60.md:h-40.md:flex-shrink-0.rounded style="aspect-ratio: 3/2;"
       - if post.thumbnail.attached?
         = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
       - else
-        .text-gray-300.text-2xl 📮
+        .text-gray-300.text-2xl = post.draft? ? "✍️" : "📮"
 
     / 右：コンテンツ
     .p-6.flex.flex-col.gap-2.flex-1.min-w-0
       / タイトル
-      h3.text-base.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-1 = post.title
+      .flex.items-center.gap-2
+        h3.text-base.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-1.flex-1 = post.title
+        - if post.draft?
+          span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
 
       / 本文プレビュー（改行を削除して2行表示）
       .text-sm.text-gray-600.line-clamp-2 = post.body.squish

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_045401) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_022729) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,13 +72,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_26_045401) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "published_at"
+    t.string "status", default: "published", null: false
     t.bigint "thread_id", null: false
     t.string "title", default: "", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["published_at"], name: "index_posts_on_published_at"
+    t.index ["status"], name: "index_posts_on_status"
     t.index ["thread_id", "created_at"], name: "index_posts_on_thread_id_and_created_at"
+    t.index ["thread_id", "status"], name: "index_posts_on_thread_id_and_status"
     t.index ["thread_id"], name: "index_posts_on_thread_id"
+    t.index ["user_id", "thread_id"], name: "index_posts_on_user_thread_draft_uniqueness", unique: true, where: "((status)::text = 'draft'::text)"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 

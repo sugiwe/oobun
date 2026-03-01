@@ -2,7 +2,9 @@ class User < ApplicationRecord
   # Associations
   has_many :memberships, dependent: :destroy
   has_many :correspondence_threads, through: :memberships, source: :thread
-  has_many :posts, dependent: :destroy
+  has_many :posts, -> { unscope(where: :status) }, dependent: :destroy
+  has_many :published_posts, -> { published_posts }, class_name: "Post"
+  has_many :draft_posts, -> { draft_posts }, class_name: "Post"
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_threads, through: :subscriptions, source: :thread
   has_many :skips, dependent: :destroy
@@ -57,10 +59,12 @@ class User < ApplicationRecord
 
     return Post.none if my_turn_thread_ids.empty?
 
-    # 各スレッドの投稿を取得してRuby側で最新を抽出
+    # 各スレッドの公開済み投稿を取得してRuby側で最新を抽出
     # （N+1は解決済み：includes で関連データを一括ロード）
     # default_scope を上書きするため reorder を使用
-    posts = Post.includes(:user, :thread)
+    posts = Post.unscope(where: :status)
+                .where(status: "published")
+                .includes(:user, :thread)
                 .where(thread_id: my_turn_thread_ids)
                 .reorder(created_at: :desc)
 
@@ -92,7 +96,9 @@ class User < ApplicationRecord
 
   # 4. フォロー中スレッドの新着投稿を取得（冗長なクエリを削減）
   def fetch_recent_posts
-    Post.includes(:user, :thread)
+    Post.unscope(where: :status)
+        .where(status: "published")
+        .includes(:user, :thread)
         .where(thread_id: subscribed_threads.select(:id))
         .reorder(created_at: :desc)
         .limit(10)

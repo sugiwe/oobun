@@ -24,7 +24,7 @@ class ThreadsController < ApplicationController
   end
 
   def show
-    @posts = @thread.posts.includes(:user).reorder(created_at: :desc)
+    @posts = @thread.visible_posts_for(current_user).includes(:user).reorder(created_at: :desc)
     @members = @thread.memberships.includes(:user).order(:position)
 
     respond_to do |format|
