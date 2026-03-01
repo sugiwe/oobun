@@ -1,8 +1,8 @@
 - content_for :title, "#{@post.title} - #{@thread.title} - coconikki"
-- content_for :back_link do
-  = link_to "←", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700", title: @thread.title
 
 .max-w-3xl.mx-auto
+  .mb-6
+    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
   / 下書きバナー
   - if @post.draft?
     .bg-amber-50.border.border-amber-200.rounded-lg.p-4.mb-6.flex.items-center.gap-3
