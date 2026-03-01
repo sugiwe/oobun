@@ -45,8 +45,8 @@
 
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member
-    - has_draft = @thread.has_draft_for?(current_user)
-    - draft = @thread.draft_for(current_user) if has_draft
+    - draft = @thread.draft_for(current_user)
+    - has_draft = draft.present?
     .flex.items-center.justify-between.bg-gray-50.rounded-lg.px-4.py-3
       .text-sm
         - if my_turn
