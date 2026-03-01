@@ -3,7 +3,7 @@ class Threads::PostsController < Threads::ApplicationController
   before_action :set_post, only: [ :show, :edit, :update, :destroy, :publish ]
   before_action :require_membership, only: [ :new, :create, :edit, :update ]
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
-  before_action :require_my_turn, only: [ :publish ]
+  before_action :require_my_turn, only: [ :new, :create, :publish ]
 
   def show
     # 下書きは本人のみ閲覧可能
