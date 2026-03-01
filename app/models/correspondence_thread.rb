@@ -36,9 +36,19 @@ class CorrespondenceThread < ApplicationRecord
     member?(user)
   end
 
-  # 最終投稿メタデータを更新
+  # 特定ユーザーの下書きを取得
+  def draft_for(user)
+    posts.unscope(where: :status).draft_posts.find_by(user: user)
+  end
+
+  # 特定ユーザーの下書きが存在するか
+  def has_draft_for?(user)
+    draft_for(user).present?
+  end
+
+  # 最終投稿メタデータを更新（公開済み投稿のみ）
   def update_last_post_metadata!(excluded_post_id: nil)
-    scope = posts
+    scope = posts.unscope(where: :status).where(status: "published")
     scope = scope.where.not(id: excluded_post_id) if excluded_post_id
     last_post = scope.reorder(created_at: :desc).first
 
@@ -54,7 +64,9 @@ class CorrespondenceThread < ApplicationRecord
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy
   has_many :users, through: :memberships
-  has_many :posts, foreign_key: :thread_id, dependent: :destroy
+  has_many :posts, -> { unscope(where: :status) }, foreign_key: :thread_id, dependent: :destroy
+  has_many :published_posts, -> { published_posts }, class_name: "Post", foreign_key: :thread_id
+  has_many :draft_posts, -> { draft_posts }, class_name: "Post", foreign_key: :thread_id
   has_many :subscriptions, foreign_key: :thread_id, dependent: :destroy
   has_many :subscribers, through: :subscriptions, source: :user
   has_many :skips, foreign_key: :thread_id, dependent: :destroy
