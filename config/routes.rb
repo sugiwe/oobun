@@ -37,7 +37,11 @@ Rails.application.routes.draw do
     # 招待発行（POST /:slug/invitation）
     resource :invitation, only: [ :create ], controller: "threads/invitations"
     # ネストされたリソース
-    resources :posts, except: [ :index ], controller: "threads/posts"
+    resources :posts, except: [ :index ], controller: "threads/posts" do
+      member do
+        post :publish  # 下書きを公開
+      end
+    end
     resource :skip,         only: [ :create ], controller: "threads/skips"
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
   end
