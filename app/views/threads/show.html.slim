@@ -52,13 +52,13 @@
         - if my_turn
           span.font-medium.text-gray-900 あなたのターンです
           - if has_draft
-            span.text-xs.text-gray-500.ml-2 💾 下書きあり
+            span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
         - elsif turn_user
           span.text-gray-500 = "@#{turn_user.username} のターンです"
           - if has_draft
-            span.text-xs.text-gray-500.ml-2 💾 下書きあり
+            span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
         - elsif has_draft
-          span.text-gray-500 💾 下書きあり
+          span.text-gray-500 ✍️ 下書きあり
       - if my_turn
         .flex.items-center.gap-2
           - if has_draft

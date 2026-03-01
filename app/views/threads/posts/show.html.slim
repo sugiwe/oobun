@@ -3,8 +3,16 @@
   = link_to "←", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700", title: @thread.title
 
 .max-w-3xl.mx-auto
+  / 下書きバナー
+  - if @post.draft?
+    .bg-amber-50.border.border-amber-200.rounded-lg.p-4.mb-6.flex.items-center.gap-3
+      .text-2xl ✍️
+      .flex-1
+        .text-sm.font-semibold.text-amber-900 下書き
+        .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
+
   / 今回の投稿（メイン）
-  article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-8
