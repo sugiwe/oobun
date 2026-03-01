@@ -46,6 +46,16 @@ class CorrespondenceThread < ApplicationRecord
     draft_for(user).present?
   end
 
+  # 公開済み投稿＋特定ユーザーの下書きを取得（表示用）
+  def visible_posts_for(user = nil)
+    if user
+      posts.unscope(where: :status)
+           .where("status = 'published' OR (status = 'draft' AND user_id = ?)", user.id)
+    else
+      published_posts
+    end
+  end
+
   # 最終投稿メタデータを更新（公開済み投稿のみ）
   def update_last_post_metadata!(excluded_post_id: nil)
     scope = posts.unscope(where: :status).where(status: "published")
