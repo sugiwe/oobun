@@ -24,7 +24,7 @@ class Threads::PostsController < Threads::ApplicationController
                          .find_or_initialize_by(user: current_user)
 
     # 前回の投稿（最新の公開済み投稿）を取得
-    @prev_post = @thread.posts.published.includes(:user).order(created_at: :desc).first
+    @prev_post = @thread.posts.published.includes(:user).reorder(created_at: :desc).first
   end
 
   def create
