@@ -15,9 +15,6 @@ footer.mt-16.py-12.bg-gray-50
               = link_to "ホーム", root_path, class: "text-sm text-gray-600 hover:text-gray-900"
             li
               = link_to "coconikkiについて", about_path, class: "text-sm text-gray-600 hover:text-gray-900"
-            - if logged_in?
-              li
-                = link_to "新しいスレッド", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900"
 
           ul.space-y-2
             li

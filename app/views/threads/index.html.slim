@@ -4,11 +4,6 @@
   / ログイン時: パーソナライズドフィード
   .flex.flex-col.gap-8
 
-    / ヘッダー
-    .flex.items-center.justify-between
-      h1.text-xl.font-semibold ホーム
-      = link_to "新しいスレッド", new_thread_path, class: "text-sm bg-gray-900 text-white rounded-md px-4 py-2 hover:bg-gray-700"
-
     / 1. 返事を書こう（相手からの最後の投稿）
     - if @my_turn_posts.present?
       section
