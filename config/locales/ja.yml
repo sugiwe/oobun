@@ -1,0 +1,37 @@
+ja:
+  # ActiveRecordモデル名・属性・バリデーションメッセージの翻訳
+  activerecord:
+    models:
+      thread: "交換日記"
+      post: "投稿"
+      user: "ユーザー"
+      membership: "メンバーシップ"
+      subscription: "購読"
+    attributes:
+      thread:
+        title: "タイトル"
+        description: "説明"
+        slug: "URL"
+        thumbnail: "カバーアート"
+      post:
+        title: "タイトル"
+        body: "本文"
+        thumbnail: "画像"
+      user:
+        username: "ユーザー名"
+        display_name: "表示名"
+        bio: "自己紹介"
+      membership:
+        user_id: "ユーザー"
+      subscription:
+        user_id: "ユーザー"
+    errors:
+      models:
+        membership:
+          attributes:
+            user_id:
+              taken: "はすでにこの交換日記のメンバーです"
+        subscription:
+          attributes:
+            user_id:
+              taken: "はすでにこの交換日記を購読しています"

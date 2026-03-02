@@ -1,14 +1,14 @@
-- content_for :title, "すべてのスレッド - coconikki"
+- content_for :title, "すべての交換日記 - coconikki"
 
 .flex.flex-col.gap-6
-  h1.text-xl.font-semibold すべてのスレッド
+  h1.text-xl.font-semibold すべての交換日記
 
   - if @threads.empty?
     .text-center.py-16.text-gray-400
-      p.text-lg まだスレッドがありません
+      p.text-lg まだ交換日記がありません
       - if logged_in?
         p.text-sm.mt-2
-          | 最初のスレッドを
+          | 最初の交換日記を
           = link_to "作成する", new_thread_path, class: "underline"
           | ？
   - else

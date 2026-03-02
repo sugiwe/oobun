@@ -16,21 +16,21 @@
         - if @user.bio.present?
           p.text-gray-700.text-sm.mt-3.whitespace-pre-wrap = @user.bio
 
-  / 参加中のスレッド
+  / 参加中の交換日記
   .mb-8
     .flex.items-center.justify-between.mb-4
-      h2.text-lg.font-semibold 参加中のスレッド
+      h2.text-lg.font-semibold 参加中の交換日記
       - if logged_in? && @user == current_user && @threads.present?
-        = link_to "新しいスレッド", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
+        = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
 
     - if @threads.empty?
       - if logged_in? && @user == current_user
         .text-center.py-12
-          p.text-gray-400.mb-4 まだスレッドに参加していません
-          = link_to "最初のスレッドを作成する", new_thread_path, class: "inline-block bg-gray-900 text-white rounded-md px-6 py-3 hover:bg-gray-700 font-medium"
+          p.text-gray-400.mb-4 まだ交換日記に参加していません
+          = link_to "最初の交換日記を作成する", new_thread_path, class: "inline-block bg-gray-900 text-white rounded-md px-6 py-3 hover:bg-gray-700 font-medium"
       - else
         .text-center.py-12.text-gray-400
-          p まだスレッドに参加していません
+          p まだ交換日記に参加していません
     - else
       .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
         = render partial: "threads/thread", collection: @threads, locals: { highlight: false }

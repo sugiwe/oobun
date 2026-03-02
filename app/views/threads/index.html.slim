@@ -12,44 +12,44 @@
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @my_turn_posts, as: :post
 
-    / 2. フォロー中スレッドの新着投稿
+    / 2. フォロー中交換日記の新着投稿
     - if @recent_posts.present?
       section
         h2.text-base.font-semibold.text-gray-900.mb-3
-          | 📬 フォロー中スレッドの新着投稿
+          | 📬 フォロー中交換日記の新着投稿
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
 
-    / 3. 参加中のスレッド
+    / 3. 参加中の交換日記
     - if @participated_threads.present?
       section
         h2.text-base.font-semibold.text-gray-900.mb-3
-          | ✍️ 参加中のスレッド
+          | ✍️ 参加中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @participated_threads, locals: { highlight: false }
 
-    / 4. フォロー中のスレッド（参加中を除く）
+    / 4. フォロー中の交換日記（参加中を除く）
     - if @followed_threads.present?
       section
         h2.text-base.font-semibold.text-gray-900.mb-3
-          | 👀 フォロー中のスレッド
+          | 👀 フォロー中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @followed_threads, locals: { highlight: false }
 
-    / 5. すべてのスレッドを見る
+    / 5. すべての交換日記を見る
     section.text-center.py-8
       = link_to browse_threads_path, class: "inline-block text-sm text-gray-700 hover:text-gray-900 font-medium border border-gray-300 rounded-md px-6 py-3 hover:bg-gray-50 transition-colors" do
-        | 🌐 他のスレッドを探す
+        | 🌐 他の交換日記を探す
 
     / 空の状態（何もフォロー・参加していない場合）
     - if @my_turn_posts.empty? && @recent_posts.empty? && @participated_threads.empty? && @followed_threads.empty?
       .text-center.py-16.text-gray-400
-        p.text-lg スレッドがまだありません
+        p.text-lg 交換日記がまだありません
         p.text-sm.mt-2
-          | 最初のスレッドを
+          | 最初の交換日記を
           = link_to "作成", new_thread_path, class: "underline text-blue-600"
           | するか、
-          = link_to "他のスレッドを探してみましょう", browse_threads_path, class: "underline text-blue-600"
+          = link_to "他の交換日記を探してみましょう", browse_threads_path, class: "underline text-blue-600"
 
 - else
   / ログアウト時: ランディングページ
@@ -80,11 +80,11 @@
         h3.font-semibold.mb-2 RSSフィード対応
         p.text-sm.text-gray-600 お気に入りのRSSリーダーで新着購読可能
 
-    / 最近のスレッド（6件まで）
+    / 最近の交換日記（6件まで）
     - if @threads.present?
       section
-        h2.text-lg.font-semibold.text-gray-900.mb-4 最近のスレッド
+        h2.text-lg.font-semibold.text-gray-900.mb-4 最近の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
         .text-center.mt-6
-          = link_to "すべてのスレッドを見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"
+          = link_to "すべての交換日記を見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"

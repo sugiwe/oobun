@@ -17,7 +17,7 @@ class ThreadsController < ApplicationController
   end
 
   def browse
-    # 全スレッド一覧ページ
+    # 全交換日記一覧ページ
     @threads = CorrespondenceThread.includes(:users, :memberships)
                                    .where(visibility: "public")
                                    .recent_order
@@ -45,7 +45,7 @@ class ThreadsController < ApplicationController
       @thread.memberships.create!(user: current_user, position: 1, role: "writer")
     end
 
-    redirect_to thread_path(@thread.slug), notice: "スレッドを作成しました"
+    redirect_to thread_path(@thread.slug), notice: "交換日記を作成しました"
   rescue ActiveRecord::RecordInvalid
     render :new, status: :unprocessable_entity
   end
@@ -60,7 +60,7 @@ class ThreadsController < ApplicationController
 
     if @thread.update(thread_params)
       @thread.thumbnail.purge if should_remove_thumbnail
-      redirect_to thread_path(@thread.slug), notice: "スレッドを更新しました"
+      redirect_to thread_path(@thread.slug), notice: "交換日記を更新しました"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -68,9 +68,9 @@ class ThreadsController < ApplicationController
 
   def destroy
     @thread.destroy!
-    redirect_to root_path, notice: "スレッドを削除しました"
+    redirect_to root_path, notice: "交換日記を削除しました"
   rescue ActiveRecord::ActiveRecordError
-    redirect_to thread_path(@thread.slug), alert: "スレッドの削除に失敗しました"
+    redirect_to thread_path(@thread.slug), alert: "交換日記の削除に失敗しました"
   end
 
   private
@@ -86,7 +86,7 @@ class ThreadsController < ApplicationController
   def set_thread
     @thread = CorrespondenceThread.find_by!(slug: params[:slug])
   rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "スレッドが見つかりません"
+    redirect_to root_path, alert: "交換日記が見つかりません"
   end
 
   def require_membership
