@@ -33,11 +33,6 @@ h1.text-xl.font-semibold.mb-6 投稿する
             / 本文（スクロール可能）
             .text-sm.text-gray-700.whitespace-pre-wrap.leading-relaxed.max-h-96.overflow-y-auto = @prev_post.body
 
-            / 全文を読むリンク
-            .mt-4.pt-4.border-t.border-gray-100
-              = link_to thread_post_path(@thread.slug, @prev_post), class: "text-sm text-blue-600 hover:underline" do
-                | 全文を読む →
-
     / 右: 投稿フォーム
     .w-full.md:flex-1.md:min-w-0
       = render "form", form_url: (@post.persisted? ? thread_post_path(@thread.slug, @post) : thread_posts_path(@thread.slug)), form_method: (@post.persisted? ? :patch : :post)
