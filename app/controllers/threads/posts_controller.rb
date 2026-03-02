@@ -23,11 +23,7 @@ class Threads::PostsController < Threads::ApplicationController
                          .draft_posts
                          .find_or_initialize_by(user: current_user)
 
-    # 前回の投稿（最新の公開済み投稿）を取得
-    @prev_post = @thread.posts.published
-                        .includes(:user, thumbnail_attachment: :blob)
-                        .reorder(created_at: :desc)
-                        .first
+    set_prev_post
   end
 
   def create
@@ -48,10 +44,12 @@ class Threads::PostsController < Threads::ApplicationController
       if @post.update(post_params.merge(status: "draft"))
         redirect_to thread_path(@thread.slug), notice: "下書きを保存しました"
       else
+        set_prev_post
         render :new, status: :unprocessable_entity
       end
     end
   rescue ActiveRecord::RecordInvalid
+    set_prev_post
     render :new, status: :unprocessable_entity
   end
 
@@ -125,5 +123,13 @@ class Threads::PostsController < Threads::ApplicationController
     unless @thread.my_turn?(current_user)
       redirect_to thread_path(@thread.slug), alert: "今はあなたのターンではありません"
     end
+  end
+
+  def set_prev_post
+    # 前回の投稿（最新の公開済み投稿）を取得
+    @prev_post = @thread.posts.published
+                        .includes(:user, thumbnail_attachment: :blob)
+                        .reorder(created_at: :desc)
+                        .first
   end
 end
