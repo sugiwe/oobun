@@ -4,7 +4,7 @@
   .mb-6
     = link_to "← マイページ", user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700"
 
-  h1.text-xl.font-semibold.mb-6 プロフィールを編集
+  h1.text-xl.mb-6 プロフィールを編集
 
   = form_with model: @user, url: user_path(@user.username), method: :patch do |f|
     .flex.flex-col.gap-5

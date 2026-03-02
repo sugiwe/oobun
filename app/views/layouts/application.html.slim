@@ -18,7 +18,7 @@ html
     header.bg-white
       nav.h-14.flex.items-center
         .px-4.flex.items-center.gap-3
-          = link_to "coconikki", root_path, class: "text-lg font-semibold tracking-tight"
+          = link_to "coconikki", root_path, class: "text-xl tracking-wide"
           = yield :back_link
 
     / ユーザーアイコン（左下固定）
@@ -47,7 +47,7 @@ html
       .bg-red-50.border-b.border-red-200.px-4.py-3.text-sm.text-red-800
         .container.mx-auto = flash[:alert]
 
-    main.max-w-4xl.mx-auto.px-4.py-8
+    main class="#{content_for?(:main_width) ? yield(:main_width) : 'max-w-4xl'} mx-auto px-4 py-8"
       = yield
 
     = render "layouts/footer"

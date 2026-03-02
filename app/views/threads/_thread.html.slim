@@ -1,4 +1,4 @@
-/ スレッドカード（3段グリッドレイアウト用）
+/ 交換日記カード（3段グリッドレイアウト用）
 - highlight_class = highlight ? "ring-2 ring-blue-400" : ""
 = link_to thread_path(thread.slug), class: "block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group #{highlight_class}" do
   / カバーアート（正方形）
@@ -11,11 +11,11 @@
   / カード本文
   .p-4.flex.flex-col.gap-2
     / タイトル
-    h3.text-base.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-2 = thread.title
+    h3.text-base.mb-1.text-gray-900.group-hover:line-clamp-2 = thread.title
 
     / 説明
     - if thread.description.present?
-      p.text-sm.text-gray-600.line-clamp-2 = thread.description
+      p.text-sm.text-gray-500.line-clamp-2 = thread.description
 
     / メタ情報（メンバー・最終投稿）
     .flex.items-center.gap-2.text-xs.text-gray-400.mt-auto

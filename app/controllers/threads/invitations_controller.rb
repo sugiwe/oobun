@@ -5,7 +5,7 @@ class Threads::InvitationsController < Threads::ApplicationController
   before_action :set_invitation, only: [ :show, :accept ]
 
   # POST /:thread_slug/invitation
-  # スレッドメンバーが招待URLを発行する
+  # 交換日記メンバーが招待URLを発行する
   def create
     invitation = @thread.invitations.create!(invited_by: current_user)
     url = invitation_url(invitation.token)
@@ -36,12 +36,12 @@ class Threads::InvitationsController < Threads::ApplicationController
     end
 
     if @invitation.thread.memberships.exists?(user: current_user)
-      redirect_to thread_path(@invitation.thread.slug), notice: "すでにこのスレッドのメンバーです"
+      redirect_to thread_path(@invitation.thread.slug), notice: "すでにこの交換日記のメンバーです"
       return
     end
 
     if @invitation.accept!(current_user)
-      redirect_to thread_path(@invitation.thread.slug), notice: "スレッドに参加しました！"
+      redirect_to thread_path(@invitation.thread.slug), notice: "交換日記に参加しました！"
     else
       redirect_to invitation_path(@invitation.token), alert: "参加に失敗しました"
     end

@@ -2,69 +2,64 @@
 
 - if logged_in?
   / ログイン時: パーソナライズドフィード
-  .flex.flex-col.gap-8
-
-    / ヘッダー
-    .flex.items-center.justify-between
-      h1.text-xl.font-semibold ホーム
-      = link_to "新しいスレッド", new_thread_path, class: "text-sm bg-gray-900 text-white rounded-md px-4 py-2 hover:bg-gray-700"
+  .flex.flex-col.gap-16
 
     / 1. 返事を書こう（相手からの最後の投稿）
     - if @my_turn_posts.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
+        h2.text-xl.text-gray-900.mb-4
           | 📬 あなたに届きました
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @my_turn_posts, as: :post
 
-    / 2. フォロー中スレッドの新着投稿
+    / 2. フォロー中交換日記の新着投稿
     - if @recent_posts.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
-          | 📬 フォロー中スレッドの新着投稿
+        h2.text-xl.text-gray-900.mb-4
+          | 📬 フォロー中交換日記の新着投稿
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
 
-    / 3. 参加中のスレッド
+    / 3. 参加中の交換日記
     - if @participated_threads.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
-          | ✍️ 参加中のスレッド
+        h2.text-xl.text-gray-900.mb-4
+          | ✍️ 参加中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @participated_threads, locals: { highlight: false }
 
-    / 4. フォロー中のスレッド（参加中を除く）
+    / 4. フォロー中の交換日記（参加中を除く）
     - if @followed_threads.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
-          | 👀 フォロー中のスレッド
+        h2.text-xl.text-gray-900.mb-4
+          | 👀 フォロー中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @followed_threads, locals: { highlight: false }
 
-    / 5. すべてのスレッドを見る
+    / 5. すべての交換日記を見る
     section.text-center.py-8
       = link_to browse_threads_path, class: "inline-block text-sm text-gray-700 hover:text-gray-900 font-medium border border-gray-300 rounded-md px-6 py-3 hover:bg-gray-50 transition-colors" do
-        | 🌐 他のスレッドを探す
+        | 🌐 他の交換日記を探す
 
     / 空の状態（何もフォロー・参加していない場合）
     - if @my_turn_posts.empty? && @recent_posts.empty? && @participated_threads.empty? && @followed_threads.empty?
       .text-center.py-16.text-gray-400
-        p.text-lg スレッドがまだありません
+        p.text-lg 交換日記がまだありません
         p.text-sm.mt-2
-          | 最初のスレッドを
+          | 最初の交換日記を
           = link_to "作成", new_thread_path, class: "underline text-blue-600"
           | するか、
-          = link_to "他のスレッドを探してみましょう", browse_threads_path, class: "underline text-blue-600"
+          = link_to "他の交換日記を探してみましょう", browse_threads_path, class: "underline text-blue-600"
 
 - else
   / ログアウト時: ランディングページ
   .flex.flex-col.gap-8
 
     / ヒーローセクション
-    .bg-white.border.border-gray-200.rounded-lg.p-8.md:p-12.text-center
-      h1.text-3xl.md:text-4xl.font-bold.text-gray-900.mb-4
+    .bg-white.border.border-gray-200.rounded-lg.p-8.md:px-8.py-20.text-center
+      h1.text-3xl.tracking-wide.md:text-4xl.text-gray-900.mb-8
         | coconikki
-      p.text-lg.text-gray-600.mb-6
+      p.text-base.text-gray-600.mb-6
         | 誰でも読める、公開交換日記サービス
       .flex.gap-4.justify-center.flex-wrap
         = link_to "ログイン / はじめる", login_path, class: "bg-gray-900 text-white rounded-md px-6 py-3 hover:bg-gray-700 font-medium"
@@ -73,23 +68,23 @@
     / 特徴紹介（簡潔版）
     .grid.md:grid-cols-3.gap-6
       .bg-white.border.border-gray-200.rounded-lg.p-6.text-center
-        .text-3xl.mb-3 📮
-        h3.font-semibold.mb-2 交代制の投稿
+        .text-3xl.mb-4 📮
+        h3.mb-4 交代制の投稿
         p.text-sm.text-gray-600 メンバーが順番に投稿していく「ターン制」を採用
       .bg-white.border.border-gray-200.rounded-lg.p-6.text-center
-        .text-3xl.mb-3 🌐
-        h3.font-semibold.mb-2 誰でも読める
+        .text-3xl.mb-4 🌐
+        h3.mb-4 誰でも読める
         p.text-sm.text-gray-600 すべての投稿は公開され、読み物として楽しめます
       .bg-white.border.border-gray-200.rounded-lg.p-6.text-center
-        .text-3xl.mb-3 📬
-        h3.font-semibold.mb-2 RSSフィード対応
+        .text-3xl.mb-4 📬
+        h3.mb-4 RSSフィード対応
         p.text-sm.text-gray-600 お気に入りのRSSリーダーで新着購読可能
 
-    / 最近のスレッド（6件まで）
+    / 最近の交換日記（6件まで）
     - if @threads.present?
       section
-        h2.text-lg.font-semibold.text-gray-900.mb-4 最近のスレッド
+        h2.text-xl.text-gray-900.mb-4 最近の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
         .text-center.mt-6
-          = link_to "すべてのスレッドを見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"
+          = link_to "すべての交換日記を見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"

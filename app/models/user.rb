@@ -48,9 +48,9 @@ class User < ApplicationRecord
 
   private
 
-  # 1. 自分のターンのスレッドの最新投稿を取得（N+1問題を解決）
+  # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
   def fetch_my_turn_posts
-    # 自分のターンのスレッドIDを取得（membershipsを事前ロード）
+    # 自分のターンの交換日記IDを取得（membershipsを事前ロード）
     my_turn_thread_ids = correspondence_threads
                           .includes(:memberships)
                           .where(turn_based: true, visibility: "public")
@@ -59,7 +59,7 @@ class User < ApplicationRecord
 
     return Post.none if my_turn_thread_ids.empty?
 
-    # 各スレッドの公開済み投稿を取得してRuby側で最新を抽出
+    # 各交換日記の公開済み投稿を取得してRuby側で最新を抽出
     # （N+1は解決済み：includes で関連データを一括ロード）
     # default_scope を上書きするため reorder を使用
     posts = Post.unscope(where: :status)
@@ -68,14 +68,14 @@ class User < ApplicationRecord
                 .where(thread_id: my_turn_thread_ids)
                 .reorder(created_at: :desc)
 
-    # スレッドごとにグループ化して最新の投稿のみ取得
+    # 交換日記ごとにグループ化して最新の投稿のみ取得
     posts.group_by(&:thread_id)
          .map { |_, thread_posts| thread_posts.first }
          .sort_by(&:created_at)
          .reverse
   end
 
-  # 2. 参加中のスレッドを取得
+  # 2. 参加中の交換日記を取得
   def fetch_participated_threads
     correspondence_threads
       .includes(:users, :memberships)
@@ -83,7 +83,7 @@ class User < ApplicationRecord
       .recent_order
   end
 
-  # 3. フォロー中のスレッド（参加中を除く）を取得
+  # 3. フォロー中の交換日記（参加中を除く）を取得
   def fetch_followed_threads
     participated_ids = correspondence_threads.pluck(:id)
 
@@ -94,7 +94,7 @@ class User < ApplicationRecord
       .recent_order
   end
 
-  # 4. フォロー中スレッドの新着投稿を取得（冗長なクエリを削減）
+  # 4. フォロー中交換日記の新着投稿を取得（冗長なクエリを削減）
   def fetch_recent_posts
     Post.unscope(where: :status)
         .where(status: "published")
