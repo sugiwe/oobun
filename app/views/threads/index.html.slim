@@ -2,12 +2,12 @@
 
 - if logged_in?
   / ログイン時: パーソナライズドフィード
-  .flex.flex-col.gap-8
+  .flex.flex-col.gap-16
 
     / 1. 返事を書こう（相手からの最後の投稿）
     - if @my_turn_posts.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
+        h2.text-xl.text-gray-900.mb-4
           | 📬 あなたに届きました
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @my_turn_posts, as: :post
@@ -15,7 +15,7 @@
     / 2. フォロー中交換日記の新着投稿
     - if @recent_posts.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
+        h2.text-xl.text-gray-900.mb-4
           | 📬 フォロー中交換日記の新着投稿
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
@@ -23,7 +23,7 @@
     / 3. 参加中の交換日記
     - if @participated_threads.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
+        h2.text-xl.text-gray-900.mb-4
           | ✍️ 参加中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @participated_threads, locals: { highlight: false }
@@ -31,7 +31,7 @@
     / 4. フォロー中の交換日記（参加中を除く）
     - if @followed_threads.present?
       section
-        h2.text-base.font-semibold.text-gray-900.mb-3
+        h2.text-xl.text-gray-900.mb-4
           | 👀 フォロー中の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @followed_threads, locals: { highlight: false }
@@ -83,7 +83,7 @@
     / 最近の交換日記（6件まで）
     - if @threads.present?
       section
-        h2.text-lg.font-semibold.text-gray-900.mb-4 最近の交換日記
+        h2.text-xl.text-gray-900.mb-4 最近の交換日記
         .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
           = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
         .text-center.mt-6
