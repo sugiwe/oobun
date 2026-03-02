@@ -9,7 +9,7 @@
       .flex-1
         .flex.items-start.justify-between.gap-4.mb-2
           div
-            h1.text-2xl.font-semibold = @user.display_name
+            h1.text-2xl = @user.display_name
             p.text-gray-500.text-sm = "@#{@user.username}"
           - if logged_in? && @user == current_user
             = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
@@ -19,7 +19,7 @@
   / 参加中の交換日記
   .mb-8
     .flex.items-center.justify-between.mb-4
-      h2.text-lg.font-semibold 参加中の交換日記
+      h2.text-lg ✍️ 参加中の交換日記
       - if logged_in? && @user == current_user && @threads.present?
         = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
 

@@ -20,7 +20,7 @@
 
       / 右：交換日記情報
       .flex-1.min-w-0.w-full
-        h1.text-2xl.font-semibold = @thread.title
+        h1.text-2xl.mb-4 = @thread.title
         - if @thread.description.present?
           p.text-gray-500.text-sm.mt-2 = @thread.description
 

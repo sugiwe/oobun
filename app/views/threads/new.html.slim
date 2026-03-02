@@ -1,7 +1,7 @@
 - content_for :title, "新しい交換日記 - coconikki"
 
 .max-w-lg.mx-auto
-  h1.text-xl.font-semibold.mb-6 新しい交換日記を作成
+  h1.text-xl.mb-6 新しい交換日記を作成
 
   = form_with model: @thread, url: threads_path, method: :post do |f|
     .flex.flex-col.gap-5

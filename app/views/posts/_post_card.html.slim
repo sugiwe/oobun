@@ -12,12 +12,12 @@ a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.grou
     .p-6.flex.flex-col.gap-2.flex-1.min-w-0
       / タイトル
       .flex.items-center.gap-2
-        h3.text-base.font-semibold.text-gray-900.group-hover:text-gray-700.line-clamp-1.flex-1 = post.title
+        h3.text-base.mb-1.text-gray-900.group-hover:line-clamp-1.flex-1 = post.title
         - if post.draft?
           span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
 
       / 本文プレビュー（改行を削除して2行表示）
-      .text-sm.text-gray-600.line-clamp-2 = post.body.squish
+      .text-sm.text-gray-500.line-clamp-2 = post.body.squish
 
       / 著者・日付
       .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
@@ -26,4 +26,4 @@ a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.grou
             = render "shared/avatar", user: post.user
           span.text-xs.text-gray-500 = post.user.display_name
           span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
-        span.text-xs.text-gray-400.group-hover:text-gray-600.md:ml-auto 続きを読む →
+        span.text-xs.text-gray-400.group-hover:text-gray-700.md:ml-auto →

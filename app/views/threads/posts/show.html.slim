@@ -15,28 +15,28 @@
   article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
-      .mb-8
+      .mb-12
         = link_to thread_post_path(@thread.slug, @prev_post), class: "block bg-white border border-gray-200 rounded-lg p-4 opacity-70 hover:opacity-100 transition-opacity group" do
           .flex.items-start.gap-3
             - if @prev_post.thumbnail.attached?
-              .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
+              .w-15.h-15.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
                 = image_tag @prev_post.thumbnail, class: "w-full h-full object-cover", alt: @prev_post.title
             - else
-              .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
+              .w-15.h-15.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
             .flex-1.min-w-0
-              .text-xs.text-gray-400.mb-1 前回の投稿
-              .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.title
-              .text-sm.text-gray-500.line-clamp-1 = truncate(@prev_post.body, length: 80)
+              .text-xs.text-gray-500.mb-1 前回の投稿
+              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.title
+              .text-xs.text-gray-500.line-clamp-1 = truncate(@prev_post.body, length: 80)
 
     / サムネイル画像（あれば）
     - if @post.thumbnail.attached?
-      .mb-8
+      .mb-12
         = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.title
 
     / ヘッダー（タイトル・著者）
     header.mb-12
-      .flex.items-start.justify-between.gap-4.mb-6
-        h1.text-2xl.font-semibold.text-gray-900.leading-9.flex-1 = @post.title
+      .flex.items-start.justify-between.gap-4.mb-8
+        h1.text-2xl.text-gray-900.leading-9.flex-1 = @post.title
         - if logged_in? && @post.editable_by?(current_user)
           .flex.gap-2
             = link_to "編集", edit_thread_post_path(@thread.slug, @post), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
@@ -64,11 +64,11 @@
         = link_to thread_post_path(@thread.slug, @next_post), class: "block bg-white border border-gray-200 rounded-lg p-4 opacity-70 hover:opacity-100 transition-opacity group" do
           .flex.items-start.gap-3
             - if @next_post.thumbnail.attached?
-              .w-12.h-12.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
+              .w-15.h-15.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
                 = image_tag @next_post.thumbnail, class: "w-full h-full object-cover", alt: @next_post.title
             - else
-              .w-12.h-12.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
+              .w-15.h-15.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
             .flex-1.min-w-0
-              .text-xs.text-gray-400.mb-1 次の投稿
-              .text-base.font-semibold.text-gray-700.group-hover:text-gray-900.truncate = @next_post.title
+              .text-xs.text-gray-500.mb-1 次の投稿
+              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.title
               .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
