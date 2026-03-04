@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :require_login, only: [ :new, :create ]
+  skip_before_action :require_login, only: [ :new, :create, :dev_login ]
   skip_before_action :verify_authenticity_token, only: [ :create ]
 
   def new
@@ -34,6 +34,23 @@ class SessionsController < ApplicationController
   def destroy
     session.delete(:user_id)
     redirect_to root_path, notice: "ログアウトしました"
+  end
+
+  # 開発環境専用：テストユーザーで即座にログイン
+  def dev_login
+    unless Rails.env.development?
+      head :forbidden
+      return
+    end
+
+    user = User.find_by(username: params[:username])
+    unless user
+      redirect_to login_path, alert: "テストユーザーが見つかりません"
+      return
+    end
+
+    session[:user_id] = user.id
+    redirect_to root_path, notice: "#{user.display_name} としてログインしました"
   end
 
   private
