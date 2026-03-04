@@ -16,7 +16,7 @@ h1.text-xl.mb-6 投稿する
           / ヘッダー（著者・日付）
           .flex.items-center.gap-3.mb-6
             .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-              = render "shared/avatar", user: @prev_post.user
+              = render "shared/avatar", user: @prev_post.user, show_fallback: true
             .flex.flex-col
               span.text-sm.font-medium.text-gray-700 = @prev_post.user.display_name
               span.text-xs.text-gray-400 = @prev_post.created_at.strftime("%Y年%m月%d日")

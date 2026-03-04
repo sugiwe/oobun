@@ -87,18 +87,20 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: oobun_production
-    username: oobun
-    password: <%= ENV["OOBUN_DATABASE_PASSWORD"] %>
+    database: coconikki_production
+    username: coconikki
+    password: <%= ENV["COCONIKKI_DATABASE_PASSWORD"] %>
+    host: <%= ENV["DB_HOST"] %>
+    port: 5432
   cache:
     <<: *primary_production
-    database: oobun_production_cache
+    database: coconikki_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: oobun_production_queue
+    database: coconikki_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: oobun_production_cable
+    database: coconikki_production_cable
     migrations_paths: db/cable_migrate

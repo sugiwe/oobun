@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   post "/session", to: "sessions#create",  as: :session
   delete "/session", to: "sessions#destroy", as: :logout
 
+  # 開発環境専用：簡易ログイン
+  if Rails.env.development?
+    post "/dev_login/:username", to: "sessions#dev_login", as: :dev_login
+  end
+
   # username 設定（新規ユーザーの Google ログイン後）
   get  "/username/new", to: "usernames#new",    as: :new_username
   post "/username",     to: "usernames#create", as: :username

@@ -5,9 +5,18 @@
     h1.text-2xl.font-semibold.mb-2 coconikki にログイン
     p.text-gray-500.text-sm Google アカウントでログインしてください
 
-  .flex.flex-col.items-center.gap-4
+  .flex.flex-col.items-center.gap-4 data={"controller" => "google-signin", "client-id" => GOOGLE_CLIENT_ID, "login-uri" => session_url}
     / Google One Tap（自動ポップアップ）
-    #g_id_onload data={"client_id" => GOOGLE_CLIENT_ID, "login_uri" => session_url, "auto_prompt" => "true", "itp_support" => "true"}
+    #g_id_onload
 
     / Sign In With Google ボタン
-    .g_id_signin data={"type" => "standard", "size" => "large", "text" => "signin_with", "shape" => "rectangular", "logo_alignment" => "left", "width" => "280"}
+    .g_id_signin
+
+  / 開発環境専用：テストユーザーログイン
+  - if Rails.env.development?
+    .w-full.max-w-md.mt-12.pt-8.border-t.border-gray-200
+      p.text-center.text-xs.text-gray-400.mb-4 開発環境専用：テストユーザー
+      .grid.grid-cols-2.gap-2
+        - %w[alice bob charlie diana eve].each do |username|
+          = button_to dev_login_path(username), method: :post, class: "text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors" do
+            = username.capitalize

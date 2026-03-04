@@ -5,7 +5,7 @@
   .border-b.border-gray-200.pb-6.mb-8
     .flex.items-start.gap-4
       .w-16.h-16.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-        = render "shared/avatar", user: @user
+        = render "shared/avatar", user: @user, show_fallback: true
       .flex-1
         .flex.items-start.justify-between.gap-4.mb-2
           div
