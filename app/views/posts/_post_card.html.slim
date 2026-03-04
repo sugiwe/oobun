@@ -23,7 +23,7 @@ a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.grou
       .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
         .flex.items-center.gap-2
           .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-            = render "shared/avatar", user: post.user
+            = render "shared/avatar", user: post.user, show_fallback: true
           span.text-xs.text-gray-500 = post.user.display_name
           span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
         span.text-xs.text-gray-400.group-hover:text-gray-700.md:ml-auto →
