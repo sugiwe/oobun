@@ -20,6 +20,12 @@ class SessionsController < ApplicationController
       return
     end
 
+    # ベータ版：メールアドレス許可リストチェック（開発環境ではスキップ）
+    unless Rails.env.development? || email_allowed?(payload["email"])
+      redirect_to login_path, alert: "現在ベータ版のため、招待されたユーザーのみログインできます。"
+      return
+    end
+
     user = User.find_or_initialize_from_google(payload)
 
     if user.new_record? || user.username.blank?
@@ -55,6 +61,16 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  def email_allowed?(email)
+    # 環境変数 ALLOWED_EMAILS が設定されていない場合は全て許可
+    allowed_emails_env = ENV["ALLOWED_EMAILS"]
+    return true if allowed_emails_env.blank?
+
+    # カンマ区切りのメールアドレスリストをチェック
+    allowed_emails = allowed_emails_env.split(",").map(&:strip)
+    allowed_emails.include?(email)
+  end
 
   def valid_google_csrf_token?
     cookies["g_csrf_token"].present? &&
