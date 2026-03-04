@@ -1,16 +1,16 @@
 # Name of your application. Used to uniquely configure containers.
-service: oobun
+service: coconikki
 
 # Name of the container image (use your-user/app-name on external registries).
-image: oobun
+image: coconikki
 
 # Deploy to these servers.
 servers:
   web:
-    - 192.168.0.1
+    - 220.158.23.115
   # job:
   #   hosts:
-  #     - 192.168.0.1
+  #     - 220.158.23.115
   #   cmd: bin/jobs
 
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
@@ -20,19 +20,26 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# proxy:
-#   ssl: true
-#   host: app.example.com
+# Full SSL設定: kamal-proxyがLet's Encryptで自動的にSSL証明書を取得
+# CloudflareのSSL/TLS暗号化モードは「Full」に設定すること
+proxy:
+  ssl: true
+  host: coconikki.com
+  app_port: 80
+  healthcheck:
+    path: /up
+    interval: 20
+    timeout: 180
 
 # Where you keep your container images.
+# ローカルでビルドしてVPSに直接送信する場合はlocalhostのまま
+# Docker Hub等を使う場合はコメントを外して設定してください
 registry:
   # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
   server: localhost:5555
 
-  # Needed for authenticated registries.
-  # username: your-user
-
-  # Always use an access token rather than real password when possible.
+  # Docker Hub等の外部レジストリを使う場合
+  # username: your-docker-username
   # password:
   #   - KAMAL_REGISTRY_PASSWORD
 
@@ -40,6 +47,9 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - COCONIKKI_DATABASE_PASSWORD
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -51,12 +61,12 @@ env:
     # Set number of cores available to the application on each server (default: 1).
     # WEB_CONCURRENCY: 2
 
-    # Match this to any external database server to configure Active Record correctly
-    # Use oobun-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
+    # PostgreSQL接続設定（VPS上でPostgreSQLを直接稼働させる場合）
+    # Dockerコンテナからホストに接続するため、VPSのIPアドレスを指定
+    DB_HOST: 220.158.23.115
 
-    # Log everything from Rails
-    # RAILS_LOG_LEVEL: debug
+    # Log everything from Rails (本番環境では info または warn 推奨)
+    RAILS_LOG_LEVEL: info
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
@@ -69,7 +79,7 @@ aliases:
 # Use a persistent storage volume for sqlite database files and local Active Storage files.
 # Recommended to change this to a mounted volume path that is backed up off server.
 volumes:
-  - "oobun_storage:/rails/storage"
+  - "coconikki_storage:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
@@ -91,8 +101,10 @@ builder:
   #   - RAILS_MASTER_KEY
 
 # Use a different ssh user than root
-# ssh:
-#   user: app
+ssh:
+  user: deploy
+  keys:
+    - ~/.ssh/coconikki_vps
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:
