@@ -2,6 +2,8 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
+    this.retries = 0
+    this.maxRetries = 50 // 5秒待ってもロードされなければ諦める (50 * 100ms = 5000ms)
     // Google Sign-In ライブラリがロードされるまで待つ
     this.initializeGoogleSignIn()
   }
@@ -31,7 +33,12 @@ export default class extends Controller {
       }
     } else {
       // ライブラリがまだロードされていない場合は少し待って再試行
-      setTimeout(() => this.initializeGoogleSignIn(), 100)
+      if (this.retries < this.maxRetries) {
+        this.retries++
+        setTimeout(() => this.initializeGoogleSignIn(), 100)
+      } else {
+        console.error('Google Sign-In library failed to load after 5 seconds.')
+      }
     }
   }
 

@@ -1,6 +1,5 @@
 class SessionsController < ApplicationController
   skip_before_action :require_login, only: [ :new, :create, :dev_login ]
-  skip_before_action :verify_authenticity_token, only: [ :create ]
 
   def new
     redirect_to root_path if logged_in?
@@ -8,8 +7,9 @@ class SessionsController < ApplicationController
 
   def create
     # Google の CSRF トークン検証（ダブルサブミットクッキーパターン）
-    # 本番環境のみ検証（開発環境ではスキップ）
-    if Rails.env.production? && !valid_google_csrf_token?
+    # Rails標準のauthenticity_tokenに加えて、Googleが推奨するg_csrf_tokenも検証
+    # ただし、g_csrf_tokenは本番環境でのみGoogleが設定するため、開発環境ではスキップ
+    if !Rails.env.development? && !valid_google_csrf_token?
       redirect_to login_path, alert: "不正なリクエストです"
       return
     end
@@ -83,7 +83,7 @@ class SessionsController < ApplicationController
 
   def crl_related_error?(error)
     # CRL関連のエラーメッセージパターンをチェック
-    error.message.match?(/CRL|certificate revocation|revocation check/i)
+    error.message.match?(/CRL|certificate revocation|revocation check|Token not verified as issued by Google/i)
   end
 
   def verify_google_id_token_without_crl(credential)
