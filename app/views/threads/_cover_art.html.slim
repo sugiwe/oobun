@@ -1,0 +1,45 @@
+/ 交換日記のカバーアート表示（共通パーシャル）
+/ 使い方: = render "threads/cover_art", thread: @thread
+/ オプション: size_class（デフォルトは空）でコンテナサイズを指定可能
+
+- size_class ||= ""
+.bg-gray-100.flex.items-center.justify-center.overflow-hidden.aspect-square class=size_class
+  - if thread.thumbnail.attached?
+    = image_tag thread.thumbnail, class: "w-full h-full object-cover", alt: thread.title
+  - else
+    / 参加メンバーのアイコンを表示（1〜4人、各30%サイズ）
+    - members = thread.users.first(4)
+    - case members.size
+    - when 1
+      / 1人：中央配置
+      .w-full.h-full.flex.items-center.justify-center
+        .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+          = render "shared/avatar", user: members[0], show_fallback: true
+    - when 2
+      / 2人：上下中央で横並び
+      .w-full.h-full.flex.items-center.justify-center.gap-2
+        - members.each do |user|
+          .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+            = render "shared/avatar", user: user, show_fallback: true
+    - when 3
+      / 3人：上に1人、下に2人
+      .w-full.h-full.flex.flex-col.items-center.justify-center.gap-2
+        .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+          = render "shared/avatar", user: members[0], show_fallback: true
+        .flex.gap-2.w-full.justify-center
+          - members[1..2].each do |user|
+            .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+              = render "shared/avatar", user: user, show_fallback: true
+    - when 4
+      / 4人：上に2人、下に2人
+      .w-full.h-full.flex.flex-col.items-center.justify-center.gap-2
+        .flex.gap-2.w-full.justify-center
+          - members[0..1].each do |user|
+            .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+              = render "shared/avatar", user: user, show_fallback: true
+        .flex.gap-2.w-full.justify-center
+          - members[2..3].each do |user|
+            .aspect-square.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white style="width: 30%"
+              = render "shared/avatar", user: user, show_fallback: true
+    - else
+      .text-gray-300.text-5xl 📮

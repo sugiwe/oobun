@@ -2,36 +2,7 @@
 - highlight_class = highlight ? "ring-2 ring-blue-400" : ""
 = link_to thread_path(thread.slug), class: "block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group #{highlight_class}" do
   / カバーアート（正方形）
-  .bg-gray-100.flex.items-center.justify-center.overflow-hidden.aspect-square
-    - if thread.thumbnail.attached?
-      = image_tag thread.thumbnail, class: "w-full h-full object-cover", alt: thread.title
-    - else
-      / 参加メンバーのアイコンを表示（1〜4人）
-      - members = thread.users.first(4)
-      - case members.size
-      - when 1
-        .w-full.h-full.p-8
-          .w-full.h-full.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white
-            = render "shared/avatar", user: members[0], show_fallback: true
-      - when 2
-        .w-full.h-full.flex.gap-2.p-4
-          - members.each do |user|
-            .flex-1.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white
-              = render "shared/avatar", user: user, show_fallback: true
-      - when 3
-        .w-full.h-full.grid.grid-cols-2.grid-rows-2.gap-2.p-4
-          .col-span-2.rounded-full.overflow-hidden.bg-gray-200.border-2.border-white
-            = render "shared/avatar", user: members[0], show_fallback: true
-          - members[1..2].each do |user|
-            .rounded-full.overflow-hidden.bg-gray-200.border-2.border-white
-              = render "shared/avatar", user: user, show_fallback: true
-      - when 4
-        .w-full.h-full.grid.grid-cols-2.gap-2.p-4
-          - members.each do |user|
-            .rounded-full.overflow-hidden.bg-gray-200.border-2.border-white
-              = render "shared/avatar", user: user, show_fallback: true
-      - else
-        .text-gray-300.text-5xl 📮
+  = render "threads/cover_art", thread: thread
 
   / カード本文
   .p-4.flex.flex-col.gap-2
