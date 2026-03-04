@@ -33,6 +33,16 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Ignore Kamal secrets (contains sensitive credentials)
+/.kamal/secrets
+/.kamal/hooks/*
+
+# Ignore local Docker volumes and data
+/data
+
+# Ignore other sensitive files
+/.env.production
+/.env.local
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
