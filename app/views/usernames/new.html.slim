@@ -4,10 +4,12 @@
   .w-full.max-w-sm
     .text-center.mb-8
       h1.text-2xl.font-semibold.mb-2 ユーザー名を設定してください
-      p.text-gray-500.text-sm
-        | @username 形式で表示されます。
-        br
+      p.text-gray-500.text-sm.mb-3
+        | ユーザー名はマイページのURLとして使用されます（例: coconikki.com/@username）
+      p.text-gray-400.text-xs
         | 英数字・ハイフン・アンダースコアで 3〜20 文字
+        br
+        | ※ 後からいつでも変更できます
 
     = form_with url: username_path, method: :post do |f|
       .flex.flex-col.gap-4
