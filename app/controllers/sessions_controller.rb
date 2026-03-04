@@ -8,7 +8,8 @@ class SessionsController < ApplicationController
 
   def create
     # Google の CSRF トークン検証（ダブルサブミットクッキーパターン）
-    unless valid_google_csrf_token?
+    # 本番環境のみ検証（開発環境ではスキップ）
+    if Rails.env.production? && !valid_google_csrf_token?
       redirect_to login_path, alert: "不正なリクエストです"
       return
     end

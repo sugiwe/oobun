@@ -48,6 +48,16 @@ export default class extends Controller {
     csrfInput.value = csrfToken
     form.appendChild(csrfInput)
 
+    // Google の CSRF トークンを取得（クッキーから）
+    const gCsrfToken = this.getCookie('g_csrf_token')
+    if (gCsrfToken) {
+      const gCsrfInput = document.createElement('input')
+      gCsrfInput.type = 'hidden'
+      gCsrfInput.name = 'g_csrf_token'
+      gCsrfInput.value = gCsrfToken
+      form.appendChild(gCsrfInput)
+    }
+
     const credentialInput = document.createElement('input')
     credentialInput.type = 'hidden'
     credentialInput.name = 'credential'
@@ -56,5 +66,12 @@ export default class extends Controller {
 
     document.body.appendChild(form)
     form.submit()
+  }
+
+  getCookie(name) {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop().split(';').shift()
+    return null
   }
 }
