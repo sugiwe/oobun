@@ -7,7 +7,10 @@ image: coconikki
 # Deploy to these servers.
 servers:
   web:
-    - 220.158.23.115
+    hosts:
+      - 220.158.23.115
+    options:
+      add-host: "host.docker.internal:host-gateway"
   # job:
   #   hosts:
   #     - 220.158.23.115
@@ -62,8 +65,9 @@ env:
     # WEB_CONCURRENCY: 2
 
     # PostgreSQL接続設定（VPS上でPostgreSQLを直接稼働させる場合）
-    # Dockerコンテナからホストに接続するため、VPSのIPアドレスを指定
-    DB_HOST: 220.158.23.115
+    # Dockerコンテナからホストに接続するため、host.docker.internalを使用
+    # Linuxの場合は、--add-host=host.docker.internal:host-gateway が必要
+    DB_HOST: host.docker.internal
 
     # Log everything from Rails (本番環境では info または warn 推奨)
     RAILS_LOG_LEVEL: info
