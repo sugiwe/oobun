@@ -1,6 +1,13 @@
 class SessionsController < ApplicationController
   skip_before_action :require_login, only: [ :new, :create, :dev_login ]
 
+  # ベータ版：ログイン許可メールアドレスリスト（起動時に一度だけ読み込み）
+  ALLOWED_EMAILS_SET =
+    if ENV["ALLOWED_EMAILS"].present?
+      ENV["ALLOWED_EMAILS"].split(",").map(&:strip).to_set
+    end
+  private_constant :ALLOWED_EMAILS_SET
+
   def new
     redirect_to root_path if logged_in?
   end
@@ -17,6 +24,12 @@ class SessionsController < ApplicationController
     payload = verify_google_id_token(params[:credential])
     unless payload
       redirect_to login_path, alert: "Google 認証に失敗しました"
+      return
+    end
+
+    # ベータ版：メールアドレス許可リストチェック（開発環境ではスキップ）
+    unless Rails.env.development? || email_allowed?(payload["email"])
+      redirect_to login_path, alert: "現在ベータ版のため、招待されたユーザーのみログインできます。"
       return
     end
 
@@ -55,6 +68,14 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  def email_allowed?(email)
+    # ALLOWED_EMAILS_SET が未設定の場合は全て許可
+    return true if ALLOWED_EMAILS_SET.nil?
+
+    # Set の include? は O(1) で高速
+    ALLOWED_EMAILS_SET.include?(email)
+  end
 
   def valid_google_csrf_token?
     cookies["g_csrf_token"].present? &&
