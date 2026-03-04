@@ -15,11 +15,13 @@ class SessionsController < ApplicationController
   def create
     # Google の CSRF トークン検証（ダブルサブミットクッキーパターン）
     # Rails標準のauthenticity_tokenに加えて、Googleが推奨するg_csrf_tokenも検証
-    # ただし、g_csrf_tokenは本番環境でのみGoogleが設定するため、開発環境ではスキップ
-    if !Rails.env.development? && !valid_google_csrf_token?
-      redirect_to login_path, alert: "不正なリクエストです"
-      return
-    end
+    # ただし、Google Sign-In JavaScript ライブラリ使用時はg_csrf_tokenが設定されないため
+    # 現時点ではRails標準のCSRF保護のみに依存
+    # TODO: 将来的にサーバーサイドOAuthフローに移行時に有効化
+    # if !Rails.env.development? && !valid_google_csrf_token?
+    #   redirect_to login_path, alert: "不正なリクエストです"
+    #   return
+    # end
 
     payload = verify_google_id_token(params[:credential])
     unless payload
