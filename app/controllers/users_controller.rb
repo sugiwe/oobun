@@ -10,10 +10,10 @@ class UsersController < ApplicationController
                          .includes(:users, :memberships)
 
     @threads = if logged_in? && @user == current_user
-                 threads_scope.recent_order
-               else
-                 threads_scope.public_threads.recent_order
-               end
+      threads_scope.recent_order
+    else
+      threads_scope.public_threads.recent_order
+    end
   end
 
   def edit
