@@ -10,7 +10,7 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:co
     # スレッドのサムネイル画像（チャンネル画像）
     if @thread.thumbnail.attached?
       xml.image do
-        xml.url url_for(@thread.thumbnail)
+        xml.url rails_blob_url(@thread.thumbnail)
         xml.title @thread.title
         xml.link thread_url(@thread.slug)
       end
@@ -35,7 +35,7 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:co
 
         # 投稿のサムネイル画像（enclosure）
         if post.thumbnail.attached?
-          xml.enclosure url: url_for(post.thumbnail),
+          xml.enclosure url: rails_blob_url(post.thumbnail),
                         type: post.thumbnail.content_type,
                         length: post.thumbnail.byte_size
         end
