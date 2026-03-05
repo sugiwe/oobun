@@ -1,5 +1,5 @@
 xml.instruct! :xml, version: "1.0"
-xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:content" => "http://purl.org/rss/1.0/modules/content/", "xmlns:media" => "http://search.yahoo.com/mrss/" do
+xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:content" => "http://purl.org/rss/1.0/modules/content/", "xmlns:itunes" => "http://www.itunes.com/dtds/podcast-1.0.dtd" do
   xml.channel do
     xml.title @thread.title
     xml.description @thread.description.presence || "#{@thread.users.map { |u| "@#{u.username}" }.join(" × ")} による文通"
@@ -16,8 +16,8 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:co
         xml.link thread_url(@thread.slug)
       end
 
-      # Media RSS によるチャンネル画像（より広くサポートされている）
-      xml.tag! "media:thumbnail", url: rails_blob_url(@thread.thumbnail)
+      # iTunes RSS拡張によるカバーアート（モダンなRSSリーダーで広くサポートされている）
+      xml.tag! "itunes:image", href: rails_blob_url(@thread.thumbnail)
     end
 
     @posts.limit(10).each do |post|
@@ -37,14 +37,11 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:co
         xml.guid thread_post_url(@thread.slug, post), isPermaLink: "true"
         xml.author "#{post.user.display_name} (@#{post.user.username})"
 
-        # 投稿のサムネイル画像（enclosure + Media RSS）
+        # 投稿のサムネイル画像（enclosure）
         if post.thumbnail.attached?
           xml.enclosure url: rails_blob_url(post.thumbnail),
                         type: post.thumbnail.content_type,
                         length: post.thumbnail.byte_size
-          xml.tag! "media:content", url: rails_blob_url(post.thumbnail),
-                   type: post.thumbnail.content_type,
-                   medium: "image"
         end
       end
     end
