@@ -54,7 +54,7 @@ class User < ApplicationRecord
     # 参加中のスレッドは非公開でも表示
     my_turn_thread_ids = correspondence_threads
                           .includes(:memberships)
-                          .where(turn_based: true, visibility: "public")
+                          .where(turn_based: true)
                           .select { |t| t.my_turn?(self) }
                           .map(&:id)
 
@@ -80,7 +80,6 @@ class User < ApplicationRecord
   def fetch_participated_threads
     correspondence_threads
       .includes(:users, :memberships)
-      .where(visibility: "public")
       .recent_order
   end
 
@@ -89,9 +88,8 @@ class User < ApplicationRecord
     participated_ids = correspondence_threads.pluck(:id)
 
     subscribed_threads
-      .published_threads
+      .public_threads
       .includes(:users, :memberships)
-      .where(visibility: "public")
       .where.not(id: participated_ids)
       .recent_order
   end
@@ -101,7 +99,7 @@ class User < ApplicationRecord
     Post.unscope(where: :status)
         .where(status: "published")
         .includes(:user, :thread)
-        .where(thread_id: subscribed_threads.published_threads.select(:id))
+        .where(thread_id: subscribed_threads.public_threads.select(:id))
         .reorder(created_at: :desc)
         .limit(10)
   end

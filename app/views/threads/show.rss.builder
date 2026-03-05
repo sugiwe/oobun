@@ -1,12 +1,12 @@
 xml.instruct! :xml, version: "1.0"
 xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:content" => "http://purl.org/rss/1.0/modules/content/", "xmlns:itunes" => "http://www.itunes.com/dtds/podcast-1.0.dtd", "xmlns:media" => "http://search.yahoo.com/mrss/" do
   xml.channel do
-    # 非公開時はタイトルとdescriptionを変更
-    if @thread.published?
+    # 閲覧権限に応じた表示
+    if @thread.viewable_by?(current_user)
       xml.title @thread.title
       xml.description @thread.description.presence || "#{@thread.users.map { |u| "@#{u.username}" }.join(" × ")} による文通"
     else
-      xml.title "【非公開中】#{@thread.title}"
+      xml.title "【非公開中】"
       xml.description "このフィードは現在非公開になっています。"
     end
     xml.link thread_url(@thread.slug)
@@ -26,8 +26,8 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:co
       xml.tag! "itunes:image", href: rails_blob_url(@thread.thumbnail)
     end
 
-    # 公開時のみ投稿を表示
-    if @thread.published?
+    # 閲覧可能な場合のみ投稿を表示
+    if @thread.viewable_by?(current_user)
       @posts.limit(10).each do |post|
         xml.item do
           xml.title post.title

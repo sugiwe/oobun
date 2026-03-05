@@ -9,7 +9,7 @@
     / タイトルと非公開バッジ
     .flex.items-start.gap-2.mb-1
       h3.text-base.text-gray-900.group-hover:line-clamp-2.flex-1 = thread.title
-      - unless thread.published?
+      - if thread.draft?
         span.text-base.flex-shrink-0 🔒
 
     / 説明

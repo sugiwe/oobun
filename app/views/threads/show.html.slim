@@ -19,7 +19,7 @@
         / 公開状態バッジ（メンバー向け）
         - if is_member
           .mb-3
-            - if @thread.published?
+            - if @thread.free? || @thread.paid?
               span.inline-flex.items-center.gap-1.text-xs.bg-green-100.text-green-800.rounded.px-2.py-1
                 | 🌐 公開中
             - else
@@ -46,7 +46,7 @@
             = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = button_to "削除", thread_path(@thread.slug), method: :delete, data: { turbo_confirm: "この交換日記を削除しますか？すべての投稿も削除されます。この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
             / 公開/非公開切り替えボタン
-            - if @thread.published?
+            - if @thread.free? || @thread.paid?
               = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             - else
               = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-green-600 hover:text-green-900 border border-green-300 rounded px-2 py-1"
