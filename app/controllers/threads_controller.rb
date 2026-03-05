@@ -72,7 +72,7 @@ class ThreadsController < ApplicationController
   def destroy
     @thread.destroy!
     redirect_to root_path, notice: "交換日記を削除しました"
-  rescue ActiveRecord::ActiveRecordError
+  rescue ActiveRecord::RecordInvalid
     redirect_to thread_path(@thread.slug), alert: "交換日記の削除に失敗しました"
   end
 
@@ -80,7 +80,7 @@ class ThreadsController < ApplicationController
     @thread.toggle_published!
     status = @thread.published? ? "公開" : "非公開"
     redirect_to thread_path(@thread.slug), notice: "交換日記を#{status}にしました"
-  rescue ActiveRecord::ActiveRecordError
+  rescue ActiveRecord::RecordInvalid
     redirect_to thread_path(@thread.slug), alert: "公開状態の変更に失敗しました"
   end
 

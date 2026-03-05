@@ -51,8 +51,8 @@ class User < ApplicationRecord
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
   def fetch_my_turn_posts
     # 自分のターンの交換日記IDを取得（membershipsを事前ロード）
+    # 参加中のスレッドは非公開でも表示
     my_turn_thread_ids = correspondence_threads
-                          .published_threads
                           .includes(:memberships)
                           .where(turn_based: true, visibility: "public")
                           .select { |t| t.my_turn?(self) }
