@@ -68,8 +68,25 @@ class CorrespondenceThread < ApplicationRecord
     )
   end
 
+  # 公開/非公開を切り替え
+  def toggle_published!
+    if published?
+      update!(published: false)
+    else
+      attrs = { published: true }
+      attrs[:published_at] = Time.current unless published_at
+      update!(attrs)
+    end
+  end
+
+  # 閲覧可能かどうか
+  def viewable_by?(user)
+    published? || member?(user)
+  end
+
   # Scopes
   scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
+  scope :published_threads, -> { where(published: true) }
 
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy

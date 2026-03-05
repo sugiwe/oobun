@@ -1,7 +1,8 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
-  before_action :set_thread, only: [ :show, :edit, :update, :destroy ]
-  before_action :require_membership, only: [ :edit, :update, :destroy ]
+  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published ]
+  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published ]
+  before_action :require_viewable, only: [ :show ]
 
   def index
     if logged_in?
@@ -9,7 +10,8 @@ class ThreadsController < ApplicationController
       build_personalized_feed
     else
       # ランディングページ（ログアウト時）
-      @threads = CorrespondenceThread.includes(:users, :memberships)
+      @threads = CorrespondenceThread.published_threads
+                                     .includes(:users, :memberships)
                                      .where(visibility: "public")
                                      .recent_order
                                      .limit(6)
@@ -18,7 +20,8 @@ class ThreadsController < ApplicationController
 
   def browse
     # 全交換日記一覧ページ
-    @threads = CorrespondenceThread.includes(:users, :memberships)
+    @threads = CorrespondenceThread.published_threads
+                                   .includes(:users, :memberships)
                                    .where(visibility: "public")
                                    .recent_order
   end
@@ -73,6 +76,14 @@ class ThreadsController < ApplicationController
     redirect_to thread_path(@thread.slug), alert: "交換日記の削除に失敗しました"
   end
 
+  def toggle_published
+    @thread.toggle_published!
+    status = @thread.published? ? "公開" : "非公開"
+    redirect_to thread_path(@thread.slug), notice: "交換日記を#{status}にしました"
+  rescue ActiveRecord::ActiveRecordError
+    redirect_to thread_path(@thread.slug), alert: "公開状態の変更に失敗しました"
+  end
+
   private
 
   def build_personalized_feed
@@ -92,6 +103,12 @@ class ThreadsController < ApplicationController
   def require_membership
     unless @thread.memberships.exists?(user: current_user)
       redirect_to thread_path(@thread.slug), alert: "権限がありません"
+    end
+  end
+
+  def require_viewable
+    unless @thread.viewable_by?(current_user)
+      redirect_to root_path, alert: "この交換日記は非公開です"
     end
   end
 

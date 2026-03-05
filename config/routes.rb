@@ -41,6 +41,10 @@ Rails.application.routes.draw do
   resources :threads, path: "", param: :slug, except: [ :index ] do
     # 招待発行（POST /:slug/invitation）
     resource :invitation, only: [ :create ], controller: "threads/invitations"
+    # 公開/非公開切り替え
+    member do
+      patch :toggle_published
+    end
     # ネストされたリソース
     resources :posts, except: [ :index ], controller: "threads/posts" do
       member do
