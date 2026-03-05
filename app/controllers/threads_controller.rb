@@ -2,7 +2,7 @@ class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
   before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published ]
   before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published ]
-  before_action :require_viewable, only: [ :show ]
+  before_action :require_viewable, only: [ :show ], unless: :rss_request?
 
   def index
     if logged_in?
@@ -110,6 +110,10 @@ class ThreadsController < ApplicationController
     unless @thread.viewable_by?(current_user)
       redirect_to root_path, alert: "この交換日記は非公開です"
     end
+  end
+
+  def rss_request?
+    request.format.rss?
   end
 
   def thread_params
