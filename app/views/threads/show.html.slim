@@ -16,6 +16,16 @@
 
       / 右：交換日記情報
       .flex-1.min-w-0.w-full
+        / 公開状態バッジ（メンバー向け）
+        - if is_member
+          .mb-3
+            - if @thread.published?
+              span.inline-flex.items-center.gap-1.text-xs.bg-green-100.text-green-800.rounded.px-2.py-1
+                | 🌐 公開中
+            - else
+              span.inline-flex.items-center.gap-1.text-xs.bg-red-50.text-gray-700.rounded.px-2.py-1
+                | 🔒 非公開
+
         h1.text-2xl.mb-4 = @thread.title
         - if @thread.description.present?
           p.text-gray-500.text-sm.mt-2 = @thread.description
@@ -32,16 +42,7 @@
 
         / 管理ボタン（メンバー向け）
         - if is_member
-          / 公開状態バッジ
-          .mt-4
-            - if @thread.published?
-              span.inline-flex.items-center.gap-1.text-xs.bg-green-100.text-green-800.rounded.px-2.py-1
-                | 🌐 公開中
-            - else
-              span.inline-flex.items-center.gap-1.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-1
-                | 🔒 非公開
-
-          .flex.flex-wrap.items-center.gap-2.mt-2
+          .flex.flex-wrap.items-center.gap-2.mt-4
             = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = button_to "削除", thread_path(@thread.slug), method: :delete, data: { turbo_confirm: "この交換日記を削除しますか？すべての投稿も削除されます。この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
             / 公開/非公開切り替えボタン

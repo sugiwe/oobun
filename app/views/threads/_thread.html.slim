@@ -7,10 +7,10 @@
   / カード本文
   .p-4.flex.flex-col.gap-2
     / タイトルと非公開バッジ
-    .flex.items-center.gap-2.mb-1
+    .flex.items-start.gap-2.mb-1
       h3.text-base.text-gray-900.group-hover:line-clamp-2.flex-1 = thread.title
       - unless thread.published?
-        span.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-0.5.flex-shrink-0 🔒 非公開
+        span.text-base.flex-shrink-0 🔒
 
     / 説明
     - if thread.description.present?
