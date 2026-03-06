@@ -23,11 +23,15 @@ class ConvertToPublicationRangeEnum < ActiveRecord::Migration[8.1]
     add_column :threads, :visibility, :string, default: "public", null: false
 
     # データを戻す
+    # draft → url_only (以前のモデルで有効な非公開値)
+    # free → public
+    # paid → paid
     execute <<-SQL
       UPDATE threads
       SET visibility = CASE
-        WHEN status IN ('free', 'paid') THEN 'public'
-        ELSE 'private'
+        WHEN status = 'paid' THEN 'paid'
+        WHEN status = 'free' THEN 'public'
+        ELSE 'url_only'
       END
     SQL
 
