@@ -12,5 +12,4 @@
           = link_to "作成する", new_thread_path, class: "underline"
           | ？
   - else
-    .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
-      = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
+    = render "threads/thread_grid", threads: @threads

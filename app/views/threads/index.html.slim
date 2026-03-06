@@ -25,16 +25,14 @@
       section
         h2.text-xl.text-gray-900.mb-4
           | ✍️ 参加中の交換日記
-        .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
-          = render partial: "threads/thread", collection: @participated_threads, locals: { highlight: false }
+        = render "threads/thread_grid", threads: @participated_threads
 
     / 4. フォロー中の交換日記（参加中を除く）
     - if @followed_threads.present?
       section
         h2.text-xl.text-gray-900.mb-4
           | 👀 フォロー中の交換日記
-        .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
-          = render partial: "threads/thread", collection: @followed_threads, locals: { highlight: false }
+        = render "threads/thread_grid", threads: @followed_threads
 
     / 5. すべての交換日記を見る
     section.text-center.py-8
@@ -84,7 +82,6 @@
     - if @threads.present?
       section
         h2.text-xl.text-gray-900.mb-4 最近の交換日記
-        .grid.grid-cols-1.md:grid-cols-2.lg:grid-cols-3.gap-6
-          = render partial: "threads/thread", collection: @threads, locals: { highlight: false }
+        = render "threads/thread_grid", threads: @threads
         .text-center.mt-6
           = link_to "すべての交換日記を見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"

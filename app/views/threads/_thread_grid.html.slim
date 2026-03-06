@@ -1,0 +1,4 @@
+/ 交換日記グリッド表示（共通コンポーネント）
+/ threads: 表示する交換日記のコレクション
+.grid.grid-cols-2.md:grid-cols-2.lg:grid-cols-3.gap-3.md:gap-6
+  = render partial: "threads/thread", collection: threads, locals: { highlight: false }

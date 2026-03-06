@@ -5,10 +5,10 @@
   = render "threads/cover_art", thread: thread
 
   / カード本文
-  .p-4.flex.flex-col.gap-2
+  .p-4.flex.flex-col.gap-1
     / タイトルと非公開バッジ
     .flex.items-start.gap-2.mb-1
-      h3.text-base.text-gray-900.group-hover:line-clamp-2.flex-1 = thread.title
+      h3.text-base.text-gray-900.line-clamp-2.flex-1 = thread.title
       - if thread.draft?
         span.text-base.flex-shrink-0 🔒
 
@@ -16,11 +16,6 @@
     - if thread.description.present?
       p.text-sm.text-gray-500.line-clamp-2 = thread.description
 
-    / メタ情報（メンバー・最終投稿）
-    .flex.items-center.gap-2.text-xs.text-gray-400.mt-auto
-      span
-        = thread.users.map { |u| "@#{u.username}" }.join(" × ")
-      - if thread.last_posted_at
-        span ·
-        span
-          = time_ago_in_words(thread.last_posted_at) + "前"
+    / メタ情報（メンバー）
+    .text-xs.text-gray-400.mt-auto
+      = thread.users.map { |u| "@#{u.username}" }.join(" × ")
