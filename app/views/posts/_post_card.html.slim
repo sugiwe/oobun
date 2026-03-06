@@ -12,7 +12,7 @@ a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.grou
     .p-4.md:p-6.flex.flex-col.gap-1.md:gap-2.flex-1.min-w-0
       / タイトル
       .flex.items-center.gap-2
-        h3.text-base.mb-1.text-gray-900.group-hover:line-clamp-1.flex-1 = post.title
+        h3.text-base.mb-1.text-gray-900.line-clamp-2.md:line-clamp-1.flex-1 = post.title
         - if post.draft?
           span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
 
