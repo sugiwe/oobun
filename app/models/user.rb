@@ -20,6 +20,16 @@ class User < ApplicationRecord
   validates :bio, length: { maximum: 5000 }, allow_blank: true
   validates :avatar, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                      size: { less_than: 5.megabytes }
+  validate :check_storage_limit_for_avatar, if: -> { avatar.attached? && avatar.changed? }
+
+  def check_storage_limit_for_avatar
+    return unless avatar.attached?
+
+    new_file_size = avatar.blob.byte_size
+    unless can_upload?(new_file_size)
+      errors.add(:avatar, "ストレージ容量の上限（#{MAX_STORAGE_PER_USER / 1.megabyte}MB）を超えています")
+    end
+  end
 
   # Google OAuth ログイン用クラスメソッド
   def self.find_or_initialize_from_google(payload)
@@ -44,6 +54,57 @@ class User < ApplicationRecord
       followed_threads: fetch_followed_threads,
       recent_posts: fetch_recent_posts
     }
+  end
+
+  # 使用制限チェック
+  MAX_THREADS_PER_USER = 10
+  MAX_STORAGE_PER_USER = 100.megabytes
+  MAX_POSTS_PER_HOUR = 10  # 下書き・公開含む（新規作成のみカウント、更新は除外）
+  MAX_POSTS_PER_DAY = 50   # 下書き・公開含む（新規作成のみカウント、更新は除外）
+
+  def can_join_thread?
+    correspondence_threads.count < MAX_THREADS_PER_USER
+  end
+
+  def threads_remaining
+    MAX_THREADS_PER_USER - correspondence_threads.count
+  end
+
+  def storage_used
+    # ユーザーのアバター + 投稿のサムネイル画像の合計サイズ
+    total = 0
+    total += avatar.blob.byte_size if avatar.attached?
+    posts.unscope(where: :status).with_attached_thumbnail.each do |post|
+      total += post.thumbnail.blob.byte_size if post.thumbnail.attached?
+    end
+    total
+  end
+
+  def storage_remaining
+    MAX_STORAGE_PER_USER - storage_used
+  end
+
+  def can_upload?(file_size)
+    storage_used + file_size <= MAX_STORAGE_PER_USER
+  end
+
+  def post_rate_limit_exceeded?
+    posts_in_last_hour >= MAX_POSTS_PER_HOUR || posts_today >= MAX_POSTS_PER_DAY
+  end
+
+  def posts_in_last_hour
+    # 下書き・公開問わず、すべての投稿をカウント
+    posts.unscope(where: :status)
+         .where("created_at > ?", 1.hour.ago)
+         .count
+  end
+
+  def posts_today
+    # 日本時間の0時から現在まで、下書き・公開問わずカウント
+    today_start = Time.current.in_time_zone("Tokyo").beginning_of_day
+    posts.unscope(where: :status)
+         .where("created_at >= ?", today_start)
+         .count
   end
 
   private

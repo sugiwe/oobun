@@ -11,6 +11,19 @@ class Post < ApplicationRecord
   validates :title, presence: true, length: { maximum: 100 }, if: :published?
   validates :title, length: { maximum: 100 }, allow_blank: true, if: :draft?
   validates :body, presence: true, length: { in: 10..10_000 }
+  validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
+                        size: { less_than: 5.megabytes }
+  validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
+
+  def check_user_storage_limit
+    return unless thumbnail.attached?
+    return unless user
+
+    new_file_size = thumbnail.blob.byte_size
+    unless user.can_upload?(new_file_size)
+      errors.add(:thumbnail, "ストレージ容量の上限（#{User::MAX_STORAGE_PER_USER / 1.megabyte}MB）を超えています")
+    end
+  end
 
   # Scopes
   scope :published_posts, -> { where(status: "published").order(created_at: :asc) }
