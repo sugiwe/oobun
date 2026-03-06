@@ -16,6 +16,52 @@
         - if @user.bio.present?
           p.text-gray-700.text-sm.mt-3.whitespace-pre-wrap = @user.bio
 
+  / 使用状況ダッシュボード（自分のページのみ表示）
+  - if logged_in? && @user == current_user
+    details.bg-gray-50.border.border-gray-200.rounded-lg.mb-8 data-controller="usage-stats"
+      summary.cursor-pointer.px-6.py-4.hover:bg-gray-100.rounded-lg 📊 使用状況
+      .px-6.pb-6.pt-2
+        .grid.grid-cols-1.md:grid-cols-2.gap-4
+          / ストレージ
+          = render "users/usage_stat", \
+            icon: "💾", \
+            title: "ストレージ", \
+            description: "#{(@user.storage_used.to_f / 1.megabyte).round(1)} MB / #{User::MAX_STORAGE_PER_USER / 1.megabyte} MB", \
+            current_value: @user.storage_used, \
+            max_value: User::MAX_STORAGE_PER_USER, \
+            bar_color_normal: "bg-blue-500", \
+            remaining_text: "残り #{(@user.storage_remaining.to_f / 1.megabyte).round(1)} MB"
+
+          / 投稿制限（1時間）
+          = render "users/usage_stat", \
+            icon: "⏱️", \
+            title: "投稿制限（1時間）", \
+            description: "#{@user.posts_in_last_hour} / #{User::MAX_POSTS_PER_HOUR}投稿", \
+            current_value: @user.posts_in_last_hour, \
+            max_value: User::MAX_POSTS_PER_HOUR, \
+            bar_color_normal: "bg-green-500", \
+            remaining_text: "残り #{User::MAX_POSTS_PER_HOUR - @user.posts_in_last_hour}投稿"
+
+          / 投稿制限（今日）
+          = render "users/usage_stat", \
+            icon: "📅", \
+            title: "投稿制限（今日）", \
+            description: "#{@user.posts_today} / #{User::MAX_POSTS_PER_DAY}投稿", \
+            current_value: @user.posts_today, \
+            max_value: User::MAX_POSTS_PER_DAY, \
+            bar_color_normal: "bg-green-500", \
+            remaining_text: "残り #{User::MAX_POSTS_PER_DAY - @user.posts_today}投稿"
+
+          / 交換日記制限
+          = render "users/usage_stat", \
+            icon: "📚", \
+            title: "参加中の交換日記", \
+            description: "#{@user.correspondence_threads.count} / #{User::MAX_THREADS_PER_USER}個", \
+            current_value: @user.correspondence_threads.count, \
+            max_value: User::MAX_THREADS_PER_USER, \
+            bar_color_normal: "bg-purple-500", \
+            remaining_text: "残り #{@user.threads_remaining}個"
+
   / 参加中の交換日記
   .mb-8
     .flex.items-center.justify-between.mb-4
