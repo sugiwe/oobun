@@ -74,9 +74,10 @@ class User < ApplicationRecord
     # ユーザーのアバター + 投稿のサムネイル画像の合計サイズ
     total = 0
     total += avatar.blob.byte_size if avatar.attached?
-    posts.unscope(where: :status).with_attached_thumbnail.each do |post|
-      total += post.thumbnail.blob.byte_size if post.thumbnail.attached?
-    end
+    # データベースレベルでSUMを計算してN+1問題を回避
+    total += posts.unscope(where: :status)
+                  .joins(thumbnail_attachment: :blob)
+                  .sum("active_storage_blobs.byte_size")
     total
   end
 
