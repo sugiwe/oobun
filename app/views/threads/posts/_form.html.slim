@@ -45,7 +45,7 @@
           / 既存の下書きを編集中
           = f.submit "下書き更新", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き更新"
           - if @thread.my_turn?(current_user)
-            = button_to "投稿する", publish_thread_post_path(@thread.slug, @post), method: :post, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer"
+            = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { turbo_method: :post }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
         - else
           / 新規投稿フォーム
           = f.submit "下書き保存", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き保存"
