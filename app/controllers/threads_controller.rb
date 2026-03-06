@@ -39,6 +39,11 @@ class ThreadsController < ApplicationController
   end
 
   def create
+    unless current_user.can_join_thread?
+      redirect_to new_thread_path, alert: "参加できる交換日記の上限（#{User::MAX_THREADS_PER_USER}個）に達しています。他の交換日記を削除してから作成してください。"
+      return
+    end
+
     @thread = CorrespondenceThread.new(thread_params)
 
     ActiveRecord::Base.transaction do

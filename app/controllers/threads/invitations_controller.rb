@@ -40,6 +40,11 @@ class Threads::InvitationsController < Threads::ApplicationController
       return
     end
 
+    unless current_user.can_join_thread?
+      redirect_to root_path, alert: "参加できる交換日記の上限（#{User::MAX_THREADS_PER_USER}個）に達しています。他の交換日記から退出してから参加してください。"
+      return
+    end
+
     if @invitation.accept!(current_user)
       redirect_to thread_path(@invitation.thread.slug), notice: "交換日記に参加しました！"
     else
