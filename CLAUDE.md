@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**重要: 日本語で返答してください。**
+
 ---
 
 ## プロジェクト概要
