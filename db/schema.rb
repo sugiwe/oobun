@@ -111,8 +111,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_122352) do
     t.text "description"
     t.integer "last_post_user_id"
     t.datetime "last_posted_at"
-    t.string "publication_range", default: "private", null: false
     t.string "slug", null: false
+    t.string "status", default: "draft", null: false
     t.string "title", null: false
     t.boolean "turn_based", default: true, null: false
     t.datetime "updated_at", null: false
