@@ -18,61 +18,61 @@
 
   / 使用状況ダッシュボード（自分のページのみ表示）
   - if logged_in? && @user == current_user
-    .bg-gray-50.border.border-gray-200.rounded-lg.p-6.mb-8
-      h2.text-lg.mb-4 📊 使用状況
+    details.bg-gray-50.border.border-gray-200.rounded-lg.mb-8 data-controller="usage-stats"
+      summary.cursor-pointer.px-6.py-4.hover:bg-gray-100.rounded-lg 📊 使用状況
+      .px-6.pb-6.pt-2
+        .grid.grid-cols-1.md:grid-cols-2.gap-4
+          / ストレージ
+          .bg-white.rounded-lg.p-4.border.border-gray-200
+            .flex.items-center.gap-2.mb-3
+              span.text-2xl 💾
+              .flex-1
+                p.text-sm.font-medium.text-gray-700 ストレージ
+                p.text-xs.text-gray-500 = "#{(@user.storage_used.to_f / 1.megabyte).round(1)} MB / #{User::MAX_STORAGE_PER_USER / 1.megabyte} MB"
+            - storage_percentage = (@user.storage_used.to_f / User::MAX_STORAGE_PER_USER * 100).round
+            .w-full.bg-gray-200.rounded-full.h-2.mb-2
+              - bar_color = storage_percentage >= 95 ? 'bg-red-500' : (storage_percentage >= 80 ? 'bg-yellow-500' : 'bg-blue-500')
+              .h-2.rounded-full class=bar_color style="width: #{[storage_percentage, 100].min}%"
+            p.text-xs.text-gray-600.text-right = "残り #{(@user.storage_remaining.to_f / 1.megabyte).round(1)} MB"
 
-      .grid.grid-cols-2.gap-4
-        / ストレージ
-        .bg-white.rounded-lg.p-4.border.border-gray-200
-          .flex.items-center.gap-2.mb-3
-            span.text-2xl 💾
-            .flex-1
-              p.text-sm.font-medium.text-gray-700 ストレージ
-              p.text-xs.text-gray-500 = "#{(@user.storage_used.to_f / 1.megabyte).round(1)} MB / #{User::MAX_STORAGE_PER_USER / 1.megabyte} MB"
-          - storage_percentage = (@user.storage_used.to_f / User::MAX_STORAGE_PER_USER * 100).round
-          .w-full.bg-gray-200.rounded-full.h-2.mb-2
-            - bar_color = storage_percentage >= 95 ? 'bg-red-500' : (storage_percentage >= 80 ? 'bg-yellow-500' : 'bg-blue-500')
-            .h-2.rounded-full class=bar_color style="width: #{[storage_percentage, 100].min}%"
-          p.text-xs.text-gray-600.text-right = "残り #{(@user.storage_remaining.to_f / 1.megabyte).round(1)} MB"
+          / 投稿制限（1時間）
+          .bg-white.rounded-lg.p-4.border.border-gray-200
+            .flex.items-center.gap-2.mb-3
+              span.text-2xl ⏱️
+              .flex-1
+                p.text-sm.font-medium.text-gray-700 投稿制限（1時間）
+                p.text-xs.text-gray-500 = "#{@user.posts_in_last_hour} / #{User::MAX_POSTS_PER_HOUR}投稿"
+            - hour_percentage = (@user.posts_in_last_hour.to_f / User::MAX_POSTS_PER_HOUR * 100).round
+            .w-full.bg-gray-200.rounded-full.h-2.mb-2
+              - bar_color = hour_percentage >= 95 ? 'bg-red-500' : (hour_percentage >= 80 ? 'bg-yellow-500' : 'bg-green-500')
+              .h-2.rounded-full class=bar_color style="width: #{[hour_percentage, 100].min}%"
+            p.text-xs.text-gray-600.text-right = "残り #{User::MAX_POSTS_PER_HOUR - @user.posts_in_last_hour}投稿"
 
-        / 投稿制限（1時間）
-        .bg-white.rounded-lg.p-4.border.border-gray-200
-          .flex.items-center.gap-2.mb-3
-            span.text-2xl ⏱️
-            .flex-1
-              p.text-sm.font-medium.text-gray-700 投稿制限（1時間）
-              p.text-xs.text-gray-500 = "#{@user.posts_in_last_hour} / #{User::MAX_POSTS_PER_HOUR}投稿"
-          - hour_percentage = (@user.posts_in_last_hour.to_f / User::MAX_POSTS_PER_HOUR * 100).round
-          .w-full.bg-gray-200.rounded-full.h-2.mb-2
-            - bar_color = hour_percentage >= 95 ? 'bg-red-500' : (hour_percentage >= 80 ? 'bg-yellow-500' : 'bg-green-500')
-            .h-2.rounded-full class=bar_color style="width: #{[hour_percentage, 100].min}%"
-          p.text-xs.text-gray-600.text-right = "残り #{User::MAX_POSTS_PER_HOUR - @user.posts_in_last_hour}投稿"
+          / 投稿制限（今日）
+          .bg-white.rounded-lg.p-4.border.border-gray-200
+            .flex.items-center.gap-2.mb-3
+              span.text-2xl 📅
+              .flex-1
+                p.text-sm.font-medium.text-gray-700 投稿制限（今日）
+                p.text-xs.text-gray-500 = "#{@user.posts_today} / #{User::MAX_POSTS_PER_DAY}投稿"
+            - day_percentage = (@user.posts_today.to_f / User::MAX_POSTS_PER_DAY * 100).round
+            .w-full.bg-gray-200.rounded-full.h-2.mb-2
+              - bar_color = day_percentage >= 95 ? 'bg-red-500' : (day_percentage >= 80 ? 'bg-yellow-500' : 'bg-green-500')
+              .h-2.rounded-full class=bar_color style="width: #{[day_percentage, 100].min}%"
+            p.text-xs.text-gray-600.text-right = "残り #{User::MAX_POSTS_PER_DAY - @user.posts_today}投稿"
 
-        / 投稿制限（今日）
-        .bg-white.rounded-lg.p-4.border.border-gray-200
-          .flex.items-center.gap-2.mb-3
-            span.text-2xl 📅
-            .flex-1
-              p.text-sm.font-medium.text-gray-700 投稿制限（今日）
-              p.text-xs.text-gray-500 = "#{@user.posts_today} / #{User::MAX_POSTS_PER_DAY}投稿"
-          - day_percentage = (@user.posts_today.to_f / User::MAX_POSTS_PER_DAY * 100).round
-          .w-full.bg-gray-200.rounded-full.h-2.mb-2
-            - bar_color = day_percentage >= 95 ? 'bg-red-500' : (day_percentage >= 80 ? 'bg-yellow-500' : 'bg-green-500')
-            .h-2.rounded-full class=bar_color style="width: #{[day_percentage, 100].min}%"
-          p.text-xs.text-gray-600.text-right = "残り #{User::MAX_POSTS_PER_DAY - @user.posts_today}投稿"
-
-        / 交換日記制限
-        .bg-white.rounded-lg.p-4.border.border-gray-200
-          .flex.items-center.gap-2.mb-3
-            span.text-2xl 📚
-            .flex-1
-              p.text-sm.font-medium.text-gray-700 参加中の交換日記
-              p.text-xs.text-gray-500 = "#{@user.correspondence_threads.count} / #{User::MAX_THREADS_PER_USER}個"
-          - thread_percentage = (@user.correspondence_threads.count.to_f / User::MAX_THREADS_PER_USER * 100).round
-          .w-full.bg-gray-200.rounded-full.h-2.mb-2
-            - bar_color = thread_percentage >= 95 ? 'bg-red-500' : (thread_percentage >= 80 ? 'bg-yellow-500' : 'bg-purple-500')
-            .h-2.rounded-full class=bar_color style="width: #{[thread_percentage, 100].min}%"
-          p.text-xs.text-gray-600.text-right = "残り #{@user.threads_remaining}個"
+          / 交換日記制限
+          .bg-white.rounded-lg.p-4.border.border-gray-200
+            .flex.items-center.gap-2.mb-3
+              span.text-2xl 📚
+              .flex-1
+                p.text-sm.font-medium.text-gray-700 参加中の交換日記
+                p.text-xs.text-gray-500 = "#{@user.correspondence_threads.count} / #{User::MAX_THREADS_PER_USER}個"
+            - thread_percentage = (@user.correspondence_threads.count.to_f / User::MAX_THREADS_PER_USER * 100).round
+            .w-full.bg-gray-200.rounded-full.h-2.mb-2
+              - bar_color = thread_percentage >= 95 ? 'bg-red-500' : (thread_percentage >= 80 ? 'bg-yellow-500' : 'bg-purple-500')
+              .h-2.rounded-full class=bar_color style="width: #{[thread_percentage, 100].min}%"
+            p.text-xs.text-gray-600.text-right = "残り #{@user.threads_remaining}個"
 
   / 参加中の交換日記
   .mb-8
