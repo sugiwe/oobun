@@ -51,9 +51,10 @@ class User < ApplicationRecord
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
   def fetch_my_turn_posts
     # 自分のターンの交換日記IDを取得（membershipsを事前ロード）
+    # 参加中のスレッドは非公開でも表示
     my_turn_thread_ids = correspondence_threads
                           .includes(:memberships)
-                          .where(turn_based: true, visibility: "public")
+                          .where(turn_based: true)
                           .select { |t| t.my_turn?(self) }
                           .map(&:id)
 
@@ -75,11 +76,10 @@ class User < ApplicationRecord
          .reverse
   end
 
-  # 2. 参加中の交換日記を取得
+  # 2. 参加中の交換日記を取得（非公開も含む）
   def fetch_participated_threads
     correspondence_threads
       .includes(:users, :memberships)
-      .where(visibility: "public")
       .recent_order
   end
 
@@ -88,8 +88,8 @@ class User < ApplicationRecord
     participated_ids = correspondence_threads.pluck(:id)
 
     subscribed_threads
+      .public_threads
       .includes(:users, :memberships)
-      .where(visibility: "public")
       .where.not(id: participated_ids)
       .recent_order
   end
@@ -99,7 +99,7 @@ class User < ApplicationRecord
     Post.unscope(where: :status)
         .where(status: "published")
         .includes(:user, :thread)
-        .where(thread_id: subscribed_threads.select(:id))
+        .where(thread_id: subscribed_threads.public_threads.select(:id))
         .reorder(created_at: :desc)
         .limit(10)
   end

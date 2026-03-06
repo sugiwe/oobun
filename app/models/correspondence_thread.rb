@@ -68,8 +68,32 @@ class CorrespondenceThread < ApplicationRecord
     )
   end
 
+  # status の enum 定義
+  enum :status, {
+    draft: "draft",  # 下書き（メンバーのみ）
+    free: "free",    # 無料公開
+    paid: "paid"     # 有料公開（Phase 3で実装予定）
+  }
+
+  # 公開/非公開を切り替え（draft ⇄ free）
+  def toggle_published!
+    if free? || paid?
+      draft!
+    else
+      free!
+    end
+  end
+
+  # 閲覧可能かどうか
+  def viewable_by?(user)
+    return true if member?(user)
+    free? || paid?
+    # Phase 3: paid の場合は user&.subscribed_to?(self) をチェック
+  end
+
   # Scopes
   scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
+  scope :public_threads, -> { where(status: [ "free", "paid" ]) }
 
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy
@@ -88,7 +112,7 @@ class CorrespondenceThread < ApplicationRecord
   validates :slug, presence: true, uniqueness: true,
     format: { with: /\A[a-z0-9-]+\z/, message: "英数字とハイフンのみ使用できます" },
     length: { in: 3..50 }
-  validates :visibility, presence: true, inclusion: { in: %w[public url_only followers_only paid] }
+  validates :status, presence: true, inclusion: { in: statuses.keys }
   validates :turn_based, inclusion: { in: [ true, false ] }
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }

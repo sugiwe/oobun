@@ -4,10 +4,16 @@ class UsersController < ApplicationController
   before_action :require_own_profile, only: [ :edit, :update ]
 
   def show
-    @threads = @user.correspondence_threads
-                    .where(visibility: "public")
-                    .includes(:users, :memberships)
-                    .recent_order
+    # ログインユーザーが自分のページを見る場合は非公開も表示
+    # 他人のページを見る場合は公開スレッドのみ表示
+    threads_scope = @user.correspondence_threads
+                         .includes(:users, :memberships)
+
+    @threads = if logged_in? && @user == current_user
+      threads_scope.recent_order
+    else
+      threads_scope.public_threads.recent_order
+    end
   end
 
   def edit

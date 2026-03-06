@@ -6,8 +6,11 @@
 
   / カード本文
   .p-4.flex.flex-col.gap-2
-    / タイトル
-    h3.text-base.mb-1.text-gray-900.group-hover:line-clamp-2 = thread.title
+    / タイトルと非公開バッジ
+    .flex.items-start.gap-2.mb-1
+      h3.text-base.text-gray-900.group-hover:line-clamp-2.flex-1 = thread.title
+      - if thread.draft?
+        span.text-base.flex-shrink-0 🔒
 
     / 説明
     - if thread.description.present?

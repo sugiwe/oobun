@@ -7,6 +7,12 @@ class Threads::PostsController < Threads::ApplicationController
   before_action :require_my_turn_for_draft, only: [ :edit, :update ]
 
   def show
+    # スレッドの閲覧権限チェック
+    unless @thread.viewable_by?(current_user)
+      redirect_to root_path, alert: "この交換日記は非公開です"
+      return
+    end
+
     # 下書きは本人のみ閲覧可能
     unless @post.published? || (@post.draft? && @post.editable_by?(current_user))
       redirect_to thread_path(@thread.slug), alert: "この投稿は閲覧できません"

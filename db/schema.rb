@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_022729) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_05_122352) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -112,10 +112,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_022729) do
     t.integer "last_post_user_id"
     t.datetime "last_posted_at"
     t.string "slug", null: false
+    t.string "status", default: "draft", null: false
     t.string "title", null: false
     t.boolean "turn_based", default: true, null: false
     t.datetime "updated_at", null: false
-    t.string "visibility", default: "public", null: false
     t.index ["last_posted_at"], name: "index_threads_on_last_posted_at"
     t.index ["slug"], name: "index_threads_on_slug", unique: true
   end
