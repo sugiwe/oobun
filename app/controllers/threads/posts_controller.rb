@@ -5,6 +5,7 @@ class Threads::PostsController < Threads::ApplicationController
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
   before_action :require_my_turn, only: [ :new, :create, :publish ]
   before_action :require_my_turn_for_draft, only: [ :edit, :update ]
+  before_action :check_post_rate_limit, only: [ :create ]
 
   def show
     # スレッドの閲覧権限チェック
@@ -28,6 +29,12 @@ class Threads::PostsController < Threads::ApplicationController
     @post = @thread.posts.unscope(where: :status)
                          .draft_posts
                          .find_or_initialize_by(user: current_user)
+
+    # 新規投稿の場合のみ投稿頻度制限チェック（既存下書きの編集は除外）
+    if @post.new_record? && current_user.post_rate_limit_exceeded?
+      redirect_to thread_path(@thread.slug), alert: "投稿が多すぎます。1時間あたり#{User::MAX_POSTS_PER_HOUR}投稿、1日あたり#{User::MAX_POSTS_PER_DAY}投稿まで可能です。しばらく待ってから投稿してください。"
+      return
+    end
 
     set_prev_post
   end
@@ -137,5 +144,15 @@ class Threads::PostsController < Threads::ApplicationController
                         .includes(:user, thumbnail_attachment: :blob)
                         .reorder(created_at: :desc)
                         .first
+  end
+
+  def check_post_rate_limit
+    # 新規投稿のみチェック（既存の下書きの場合はスキップ）
+    existing_draft = @thread.posts.unscope(where: :status)
+                            .find_by(user: current_user, status: "draft")
+
+    if existing_draft.nil? && current_user.post_rate_limit_exceeded?
+      redirect_to thread_path(@thread.slug), alert: "投稿が多すぎます。1時間あたり#{User::MAX_POSTS_PER_HOUR}投稿、1日あたり#{User::MAX_POSTS_PER_DAY}投稿まで可能です。しばらく待ってから投稿してください。"
+    end
   end
 end
