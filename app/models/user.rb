@@ -22,6 +22,9 @@ class User < ApplicationRecord
                      size: { less_than: 5.megabytes }
   validate :check_storage_limit_for_avatar, if: -> { avatar.attached? && avatar.changed? }
 
+  # アバターストレージ容量チェック
+  # NOTE: 複数同時アップロードによる競合状態で100MBを若干超過する可能性があるが、
+  # 1画像5MB制限により最大でも105MB程度に抑えられるため許容範囲とする
   def check_storage_limit_for_avatar
     return unless avatar.attached?
 

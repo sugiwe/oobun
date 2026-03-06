@@ -5,7 +5,8 @@ class Threads::PostsController < Threads::ApplicationController
   before_action :require_post_owner, only: [ :edit, :update, :destroy ]
   before_action :require_my_turn, only: [ :new, :create, :publish ]
   before_action :require_my_turn_for_draft, only: [ :edit, :update ]
-  before_action :check_post_rate_limit, only: [ :new, :create ]
+  before_action :check_post_rate_limit, only: [ :new ]
+  around_action :with_user_lock_for_new_post, only: [ :create ]
 
   def show
     # スレッドの閲覧権限チェック
@@ -144,13 +145,26 @@ class Threads::PostsController < Threads::ApplicationController
     # 新規投稿のみチェック（既存の下書きの場合はスキップ）
     is_new_post = !@thread.posts.unscope(where: :status).exists?(user: current_user, status: "draft")
 
+    if is_new_post && current_user.post_rate_limit_exceeded?
+      redirect_to thread_path(@thread.slug), alert: "投稿が多すぎます。1時間あたり#{User::MAX_POSTS_PER_HOUR}投稿、1日あたり#{User::MAX_POSTS_PER_DAY}投稿まで可能です。しばらく待ってから投稿してください。"
+    end
+  end
+
+  def with_user_lock_for_new_post
+    # 新規投稿の場合のみロック（既存下書きの更新はロック不要）
+    is_new_post = !@thread.posts.unscope(where: :status).exists?(user: current_user, status: "draft")
+
     if is_new_post
-      # 競合状態を防ぐためにユーザーレコードをロック
       current_user.with_lock do
+        # レート制限の最終チェック
         if current_user.post_rate_limit_exceeded?
           redirect_to thread_path(@thread.slug), alert: "投稿が多すぎます。1時間あたり#{User::MAX_POSTS_PER_HOUR}投稿、1日あたり#{User::MAX_POSTS_PER_DAY}投稿まで可能です。しばらく待ってから投稿してください。"
+          return
         end
+        yield
       end
+    else
+      yield
     end
   end
 end

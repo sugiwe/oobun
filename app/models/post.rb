@@ -15,6 +15,9 @@ class Post < ApplicationRecord
                         size: { less_than: 5.megabytes }
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
 
+  # ストレージ容量チェック
+  # NOTE: 複数同時アップロードによる競合状態で100MBを若干超過する可能性があるが、
+  # 1画像5MB制限により最大でも105MB程度に抑えられるため許容範囲とする
   def check_user_storage_limit
     return unless thumbnail.attached?
     return unless user
