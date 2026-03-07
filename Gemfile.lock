@@ -349,6 +349,7 @@ GEM
     ruby-vips (2.3.0)
       ffi (~> 1.12)
       logger
+    rubyzip (3.2.2)
     securerandom (0.4.1)
     signet (0.21.0)
       addressable (~> 2.8)
@@ -454,6 +455,7 @@ DEPENDENCIES
   rails (~> 8.1.2)
   rspec-rails (~> 7.1)
   rubocop-rails-omakase
+  rubyzip
   slim-rails
   solid_cable
   solid_cache

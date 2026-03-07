@@ -1,7 +1,7 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
-  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published ]
-  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published ]
+  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
+  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
   before_action :require_viewable, only: [ :show ]
 
   def index
@@ -87,6 +87,26 @@ class ThreadsController < ApplicationController
     redirect_to thread_path(@thread.slug), notice: "交換日記を#{state}にしました"
   rescue ActiveRecord::RecordInvalid
     redirect_to thread_path(@thread.slug), alert: "公開状態の変更に失敗しました"
+  end
+
+  def export
+    data = @thread.to_export_json
+    filename = "#{@thread.slug}_export_#{Date.today}.json"
+
+    send_data data.to_json,
+              filename: filename,
+              type: "application/json",
+              disposition: "attachment"
+  end
+
+  def export_with_images
+    zip_data = @thread.export_with_images_zip
+    filename = "#{@thread.slug}_export_with_images_#{Date.today}.zip"
+
+    send_data zip_data,
+              filename: filename,
+              type: "application/zip",
+              disposition: "attachment"
   end
 
   private
