@@ -3,6 +3,11 @@ require "zip"
 class CorrespondenceThread < ApplicationRecord
   self.table_name = "threads"
 
+  # 自動公開・自動削除の閾値
+  AUTO_PUBLISH_POSTS_THRESHOLD = 5    # 5投稿で自動公開
+  AUTO_PUBLISH_DAYS_THRESHOLD = 30    # 30日で自動公開
+  AUTO_DELETE_DAYS_THRESHOLD = 30     # 30日間投稿なしで自動削除
+
   # ルーティングヘルパーを :thread ベースで生成（thread_path, new_thread_path など）
   def self.model_name
     ActiveModel::Name.new(self, nil, "Thread")
@@ -91,6 +96,34 @@ class CorrespondenceThread < ApplicationRecord
     return true if member?(user)
     free? || paid?
     # Phase 3: paid の場合は user&.subscribed_to?(self) をチェック
+  end
+
+  # 自動公開（電気通信事業法対応）
+  def auto_publish!
+    return unless draft?
+
+    transaction do
+      free!
+      Rails.logger.info "Thread #{slug} auto-published: #{published_posts.count} posts, #{days_since_creation} days old"
+    end
+  end
+
+  # 自動公開すべきかチェック
+  def should_auto_publish?
+    return false unless draft?
+
+    # 条件1: 5投稿以上
+    return true if published_posts.count >= AUTO_PUBLISH_POSTS_THRESHOLD
+
+    # 条件2: 30日経過
+    return true if days_since_creation >= AUTO_PUBLISH_DAYS_THRESHOLD
+
+    false
+  end
+
+  # 作成からの経過日数
+  def days_since_creation
+    (Date.today - created_at.to_date).to_i
   end
 
   # エクスポート用JSON生成（メンバーのみ実行可能）

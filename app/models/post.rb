@@ -69,4 +69,17 @@ class Post < ApplicationRecord
     return false unless editable_by?(user)
     thread.my_turn?(user)
   end
+
+  # Callbacks
+  # 公開済み投稿が作成された時、スレッドの自動公開をチェック
+  after_create_commit :check_auto_publish_thread, if: -> { status == "published" }
+
+  private
+
+  def check_auto_publish_thread
+    return unless thread.draft?
+    return unless thread.published_posts.count >= CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD
+
+    thread.auto_publish!
+  end
 end

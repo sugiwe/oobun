@@ -68,6 +68,25 @@
             - else
               = button_to "購読する", thread_subscription_path(@thread.slug), method: :post, class: "text-sm bg-gray-900 text-white rounded-md px-3 py-1.5 hover:bg-gray-700"
 
+  / 自動公開・自動削除の警告バナー（非公開スレッドのメンバー向け）
+  - if @thread.draft? && is_member
+    .bg-yellow-50.border.border-yellow-200.rounded-lg.px-4.py-3.mb-6
+      .text-sm.text-yellow-800
+        p.font-medium この交換日記は現在非公開です
+        - posts_count = @thread.published_posts.count
+        - posts_remaining = [CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD - posts_count, 0].max
+        - days_remaining = [CorrespondenceThread::AUTO_PUBLISH_DAYS_THRESHOLD - @thread.days_since_creation, 0].max
+
+        - if posts_count == 0
+          p.mt-1.text-xs.text-red-700
+            | ⚠️ 作成から30日以内に投稿がない場合、自動的に削除されます（残り#{days_remaining}日）
+        - elsif posts_remaining > 0 && days_remaining > 0
+          p.mt-1.text-xs
+            | あと#{posts_remaining}投稿、または#{days_remaining}日で自動的に公開されます
+        - else
+          p.mt-1.text-xs.text-green-700
+            | 間もなく自動的に公開されます
+
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member
     - draft = @thread.draft_for(current_user)
