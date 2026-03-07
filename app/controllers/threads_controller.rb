@@ -91,7 +91,7 @@ class ThreadsController < ApplicationController
 
   def export
     data = @thread.to_export_json
-    filename = "#{@thread.slug}_export_#{Date.today}.json"
+    filename = "#{@thread.slug}_export_#{Time.current.strftime('%Y%m%d%H%M%S')}.json"
 
     send_data data.to_json,
               filename: filename,
@@ -101,7 +101,7 @@ class ThreadsController < ApplicationController
 
   def export_with_images
     zip_data = @thread.export_with_images_zip
-    filename = "#{@thread.slug}_export_with_images_#{Date.today}.zip"
+    filename = "#{@thread.slug}_export_with_images_#{Time.current.strftime('%Y%m%d%H%M%S')}.zip"
 
     send_data zip_data,
               filename: filename,

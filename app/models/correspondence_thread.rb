@@ -101,7 +101,7 @@ class CorrespondenceThread < ApplicationRecord
         status: status,
         turn_based: turn_based,
         created_at: created_at,
-        thumbnail_filename: thumbnail.attached? ? thumbnail.filename.to_s : nil
+        thumbnail_filename: thumbnail.attached? ? thumbnail.filename.sanitized : nil
       },
       members: users.map { |user|
         {
@@ -109,7 +109,7 @@ class CorrespondenceThread < ApplicationRecord
           display_name: user.display_name
         }
       },
-      posts: published_posts.order(created_at: :asc).map { |post|
+      posts: published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc).map { |post|
         {
           id: post.id,
           title: post.title,
@@ -117,7 +117,7 @@ class CorrespondenceThread < ApplicationRecord
           author_username: post.user.username,
           author_display_name: post.user.display_name,
           created_at: post.created_at,
-          thumbnail_filename: post.thumbnail.attached? ? post.thumbnail.filename.to_s : nil
+          thumbnail_filename: post.thumbnail.attached? ? post.thumbnail.filename.sanitized : nil
         }
       }
     }
@@ -134,14 +134,14 @@ class CorrespondenceThread < ApplicationRecord
 
       # 2. カバーアート追加
       if thumbnail.attached?
-        zip.put_next_entry("images/thread_thumbnail_#{thumbnail.filename}")
+        zip.put_next_entry("images/thread_thumbnail_#{thumbnail.filename.sanitized}")
         zip.write thumbnail.download
       end
 
-      # 3. 投稿画像追加
-      published_posts.each do |post|
+      # 3. 投稿画像追加（N+1クエリ対策: eager loading）
+      published_posts.includes(:user).with_attached_thumbnail.each do |post|
         if post.thumbnail.attached?
-          zip.put_next_entry("images/post_#{post.id}_#{post.thumbnail.filename}")
+          zip.put_next_entry("images/post_#{post.id}_#{post.thumbnail.filename.sanitized}")
           zip.write post.thumbnail.download
         end
       end
