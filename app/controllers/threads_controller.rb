@@ -108,8 +108,14 @@ class ThreadsController < ApplicationController
   end
 
   def export_with_images
+    Rails.logger.info "Export with images started for thread #{@thread.slug} by user #{current_user.id}"
+    start_time = Time.current
+
     zip_data = @thread.export_with_images_zip
     filename = "#{@thread.slug}_export_with_images_#{Time.current.strftime('%Y%m%d%H%M%S')}.zip"
+
+    duration = Time.current - start_time
+    Rails.logger.info "Export with images completed for thread #{@thread.slug}: #{zip_data.bytesize} bytes in #{duration.round(2)}s"
 
     send_data zip_data,
               filename: filename,
