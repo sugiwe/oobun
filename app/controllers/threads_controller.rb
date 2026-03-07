@@ -4,6 +4,11 @@ class ThreadsController < ApplicationController
   before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
   before_action :require_viewable, only: [ :show ]
 
+  # 画像付きエクスポートのレート制限（DoS対策）
+  rate_limit to: 3, within: 1.hour, only: :export_with_images, by: -> { current_user.id } do |_request, _options|
+    redirect_to thread_path(@thread.slug), alert: "画像付きエクスポートは1時間に3回までです。しばらくお待ちください。"
+  end
+
   def index
     if logged_in?
       # パーソナライズドフィード（ログイン時）
