@@ -1,3 +1,5 @@
+require "zip"
+
 class CorrespondenceThread < ApplicationRecord
   self.table_name = "threads"
 
@@ -89,6 +91,69 @@ class CorrespondenceThread < ApplicationRecord
     return true if member?(user)
     free? || paid?
     # Phase 3: paid の場合は user&.subscribed_to?(self) をチェック
+  end
+
+  # エクスポート用JSON生成（メンバーのみ実行可能）
+  def to_export_json(posts_with_includes: nil)
+    # postsが渡されていない場合は取得（重複クエリ対策）
+    posts_data = posts_with_includes || published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc)
+
+    {
+      thread: {
+        title: title,
+        slug: slug,
+        description: description,
+        status: status,
+        turn_based: turn_based,
+        created_at: created_at,
+        thumbnail_filename: thumbnail.attached? ? thumbnail.filename.sanitized : nil
+      },
+      members: users.map { |user|
+        {
+          username: user.username,
+          display_name: user.display_name
+        }
+      },
+      posts: posts_data.map { |post|
+        {
+          id: post.id,
+          title: post.title,
+          body: post.body,
+          author_username: post.user.username,
+          author_display_name: post.user.display_name,
+          created_at: post.created_at,
+          thumbnail_filename: post.thumbnail.attached? ? post.thumbnail.filename.sanitized : nil
+        }
+      }
+    }
+  end
+
+  # 画像付きZIPエクスポート（メンバーのみ実行可能）
+  def export_with_images_zip
+    # 投稿データを一度だけ取得（重複クエリ対策）
+    posts_with_includes = published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc).to_a
+
+    stringio = Zip::OutputStream.write_buffer do |zip|
+      # 1. JSON追加（取得済みのpostsデータを再利用）
+      zip.put_next_entry("#{slug}_data.json")
+      zip.write to_export_json(posts_with_includes: posts_with_includes).to_json
+
+      # 2. カバーアート追加
+      if thumbnail.attached?
+        zip.put_next_entry("images/thread_thumbnail_#{thumbnail.filename.sanitized}")
+        zip.write thumbnail.download
+      end
+
+      # 3. 投稿画像追加（既に取得済みのpostsデータを使用）
+      posts_with_includes.each do |post|
+        if post.thumbnail.attached?
+          zip.put_next_entry("images/post_#{post.id}_#{post.thumbnail.filename.sanitized}")
+          zip.write post.thumbnail.download
+        end
+      end
+    end
+
+    stringio.string
   end
 
   # Scopes

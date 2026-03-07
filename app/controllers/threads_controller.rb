@@ -1,8 +1,16 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
-  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published ]
-  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published ]
+  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
+  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
   before_action :require_viewable, only: [ :show ]
+
+  # 画像付きエクスポートのレート制限（DoS対策）
+  rate_limit to: 3, within: 1.hour, only: :export_with_images, by: -> { current_user.id }
+
+  # レート制限エラーハンドリング
+  rescue_from ActionController::TooManyRequests do |exception|
+    redirect_to thread_path(params[:slug]), alert: "画像付きエクスポートは1時間に3回までです。しばらくお待ちください。"
+  end
 
   def index
     if logged_in?
@@ -87,6 +95,32 @@ class ThreadsController < ApplicationController
     redirect_to thread_path(@thread.slug), notice: "交換日記を#{state}にしました"
   rescue ActiveRecord::RecordInvalid
     redirect_to thread_path(@thread.slug), alert: "公開状態の変更に失敗しました"
+  end
+
+  def export
+    data = @thread.to_export_json
+    filename = "#{@thread.slug}_export_#{Time.current.strftime('%Y%m%d%H%M%S')}.json"
+
+    send_data data.to_json,
+              filename: filename,
+              type: "application/json",
+              disposition: "attachment"
+  end
+
+  def export_with_images
+    Rails.logger.info "Export with images started for thread #{@thread.slug} by user #{current_user.id}"
+    start_time = Time.current
+
+    zip_data = @thread.export_with_images_zip
+    filename = "#{@thread.slug}_export_with_images_#{Time.current.strftime('%Y%m%d%H%M%S')}.zip"
+
+    duration = Time.current - start_time
+    Rails.logger.info "Export with images completed for thread #{@thread.slug}: #{zip_data.bytesize} bytes in #{duration.round(2)}s"
+
+    send_data zip_data,
+              filename: filename,
+              type: "application/zip",
+              disposition: "attachment"
   end
 
   private
