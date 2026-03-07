@@ -1,3 +1,5 @@
+require "zip"
+
 class CorrespondenceThread < ApplicationRecord
   self.table_name = "threads"
 
@@ -92,7 +94,10 @@ class CorrespondenceThread < ApplicationRecord
   end
 
   # エクスポート用JSON生成（メンバーのみ実行可能）
-  def to_export_json
+  def to_export_json(posts_with_includes: nil)
+    # postsが渡されていない場合は取得（重複クエリ対策）
+    posts_data = posts_with_includes || published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc)
+
     {
       thread: {
         title: title,
@@ -109,7 +114,7 @@ class CorrespondenceThread < ApplicationRecord
           display_name: user.display_name
         }
       },
-      posts: published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc).map { |post|
+      posts: posts_data.map { |post|
         {
           id: post.id,
           title: post.title,
@@ -125,12 +130,13 @@ class CorrespondenceThread < ApplicationRecord
 
   # 画像付きZIPエクスポート（メンバーのみ実行可能）
   def export_with_images_zip
-    require "zip"
+    # 投稿データを一度だけ取得（重複クエリ対策）
+    posts_with_includes = published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc).to_a
 
     stringio = Zip::OutputStream.write_buffer do |zip|
-      # 1. JSON追加
+      # 1. JSON追加（取得済みのpostsデータを再利用）
       zip.put_next_entry("#{slug}_data.json")
-      zip.write to_export_json.to_json
+      zip.write to_export_json(posts_with_includes: posts_with_includes).to_json
 
       # 2. カバーアート追加
       if thumbnail.attached?
@@ -138,8 +144,8 @@ class CorrespondenceThread < ApplicationRecord
         zip.write thumbnail.download
       end
 
-      # 3. 投稿画像追加（N+1クエリ対策: eager loading）
-      published_posts.includes(:user).with_attached_thumbnail.each do |post|
+      # 3. 投稿画像追加（既に取得済みのpostsデータを使用）
+      posts_with_includes.each do |post|
         if post.thumbnail.attached?
           zip.put_next_entry("images/post_#{post.id}_#{post.thumbnail.filename.sanitized}")
           zip.write post.thumbnail.download
