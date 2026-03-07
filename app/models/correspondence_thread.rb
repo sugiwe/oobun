@@ -126,6 +126,15 @@ class CorrespondenceThread < ApplicationRecord
     (Date.today - created_at.to_date).to_i
   end
 
+  # 非公開に戻せるかどうか（強制公開条件を満たしていない場合のみ可能）
+  def can_be_privatized?
+    return false if draft? # 既に非公開
+
+    # 5投稿未満 かつ 30日未満であれば非公開に戻せる
+    published_posts.count < AUTO_PUBLISH_POSTS_THRESHOLD &&
+      days_since_creation < AUTO_PUBLISH_DAYS_THRESHOLD
+  end
+
   # エクスポート用JSON生成（メンバーのみ実行可能）
   def to_export_json(posts_with_includes: nil)
     # postsが渡されていない場合は取得（重複クエリ対策）
