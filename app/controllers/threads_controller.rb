@@ -158,6 +158,7 @@ class ThreadsController < ApplicationController
   end
 
   def thread_params
-    params.require(:thread).permit(:title, :slug, :description, :status, :turn_based, :thumbnail)
+    # status の変更は toggle_published 経由のみ許可（編集フォームからは変更不可）
+    params.require(:thread).permit(:title, :slug, :description, :turn_based, :thumbnail)
   end
 end

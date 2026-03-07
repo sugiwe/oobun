@@ -71,8 +71,9 @@ class Post < ApplicationRecord
   end
 
   # Callbacks
-  # 公開済み投稿が作成された時、スレッドの自動公開をチェック
-  after_create_commit :check_auto_publish_thread, if: -> { status == "published" }
+  # 投稿が公開状態になった時、スレッドの自動公開をチェック
+  # (create時だけでなく、draft→publishedへの更新時にも対応)
+  after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
 
   private
 
