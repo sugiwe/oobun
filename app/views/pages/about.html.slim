@@ -7,19 +7,19 @@
     .prose.prose-sm.text-gray-700
       section.mb-8.mt-14
         h2.text-lg.font-semibold.mb-3 coconikkiとは？
-        p coconikki（ココニッキ）は、誰でも読める「公開交換日記」サービスです。
+        p coconikki（ココニッキ）は、誰でも読める「公開交換日記」プラットフォームです。
         p.mt-2 2人以上のメンバーが交代で投稿を重ねていく「交換日記」を、誰でも読める形で公開します。リアルタイムチャットではなく、蓄積されていく対話を「読み物」として楽しむことに価値を置いています。
 
       section.mb-8.mt-14
         h2.text-lg.font-semibold.mb-3 coconikkiの特徴
 
         .mt-4
-          h3.text-base.font-medium.mb-2 📮 交代制の投稿
-          p.text-sm.text-gray-600.ml-4 メンバーが順番に投稿していく「ターン制」を採用。自分の番が来たら、じっくり考えて投稿できます。
+          h3.text-base.font-medium.mb-2 🌐 公開プラットフォーム
+          p.text-sm.text-gray-600.ml-4 すべての投稿は原則として公開され、ログインしていなくても誰でも読むことができます。面白い対話を発見して、読み物として楽しめます。非公開設定は、公開前の一時的な準備期間としてのみ利用可能です。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 🌐 誰でも読める
-          p.text-sm.text-gray-600.ml-4 すべての投稿は公開され、ログインしていなくても誰でも読むことができます。面白い対話を発見して、読み物として楽しめます。
+          h3.text-base.font-medium.mb-2 📮 交代制の投稿
+          p.text-sm.text-gray-600.ml-4 メンバーが順番に投稿していく「ターン制」を採用。自分の番が来たら、じっくり考えて投稿できます。下書き保存機能もあるので、時間をかけて文章を練ることができます。
 
         .mt-6
           h3.text-base.font-medium.mb-2 🎨 カバーアートとサムネイル
@@ -34,23 +34,39 @@
 
         .mt-4
           h3.text-base.font-medium.mb-2 1. 交換日記を作成する
-          p.text-sm.text-gray-600.ml-4 ログイン後、「新しい交換日記」ボタンから交換日記を作成します。タイトル、URL、説明、カバーアートを設定できます。
+          p.text-sm.text-gray-600.ml-4 ログイン後、「新しい交換日記」ボタンから交換日記を作成します。タイトル、URL、説明、カバーアートを設定できます。作成時は非公開状態ですが、準備ができたら公開設定に切り替えましょう。
 
         .mt-6
           h3.text-base.font-medium.mb-2 2. メンバーを招待する
           p.text-sm.text-gray-600.ml-4 交換日記詳細ページの「招待URLを発行」ボタンで招待リンクを生成し、友達にシェアしましょう。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 3. 順番に投稿する
-          p.text-sm.text-gray-600.ml-4 自分のターンが来たら「投稿する」ボタンが表示されます。タイトル、本文、画像（任意）を入力して投稿しましょう。
+          h3.text-base.font-medium.mb-2 3. 下書きを作成・投稿する
+          p.text-sm.text-gray-600.ml-4 自分のターンが来たら「投稿する」ボタンが表示されます。タイトル、本文、画像（任意）を入力できます。「下書き保存」で一時保存し、後から編集して「投稿する」ボタンで公開できます。
 
         .mt-6
           h3.text-base.font-medium.mb-2 4. 交換日記を購読する
           p.text-sm.text-gray-600.ml-4 気に入った交換日記を見つけたら「購読する」ボタンで購読できます。トップページで購読中の交換日記が優先表示されます。
 
       section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 使用制限（ベータ版）
+        p 現在ベータ版として運営しており、以下の使用制限を設けています。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li 参加可能な交換日記：1ユーザーあたり10個まで
+          li ストレージ容量：1ユーザーあたり100MBまで
+          li 画像サイズ：1ファイルあたり5MBまで
+          li 投稿頻度：1時間あたり10投稿、1日あたり50投稿まで
+        p.mt-2 使用状況は、マイページの「使用状況」セクションで確認できます。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 公開・非公開について
+        p coconikkiは「公開読み物プラットフォーム」として設計されており、投稿は原則として公開されます。
+        p.mt-2 非公開設定は、公開前の準備期間として一時的に利用できます。将来的には、非公開期間に制限を設ける予定です（例：30日後に自動公開、一定投稿数後に自動公開など）。
+        p.mt-2 プライベートなやり取りには適していませんので、ご注意ください。
+
+      section.mb-8.mt-14
         h2.text-lg.font-semibold.mb-3 ご質問・お問い合わせ
         p
           | coconikkiについてのご質問やご要望は、
-          = link_to "お問い合わせページ", contact_path, class: "text-blue-600 hover:underline"
+          = link_to "お問い合わせフォーム", "https://forms.gle/xEZ8jNtB6g5nPMF16", target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:underline"
           | からお気軽にご連絡ください。
