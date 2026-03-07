@@ -6,73 +6,142 @@
 
     .prose.prose-sm.text-gray-700
       section.mb-8.mt-14
+        p coconikki（以下「本サービス」といいます）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。本プライバシーポリシーは、本サービスがどのような情報を収集し、どのように利用・管理するかを説明するものです。
+
+      section.mb-8.mt-14
         h2.text-lg.font-semibold.mb-3 1. 収集する情報
-        p coconikki（以下「本サービス」といいます）では、以下の情報を収集します。
+        p 本サービスでは、以下の情報を収集します。
 
         h3.text-base.font-medium.mt-4.mb-2 (1) Google OAuth認証により取得する情報
         ul.list-disc.list-inside.space-y-1
-          li メールアドレス
-          li 氏名
-          li プロフィール画像
+          li Googleアカウントのメールアドレス
+          li 氏名（Googleアカウントに登録された名前）
+          li プロフィール画像のURL
+          li Google User ID（認証用の一意識別子）
 
-        h3.text-base.font-medium.mt-4.mb-2 (2) ユーザーが入力する情報
+        h3.text-base.font-medium.mt-4.mb-2 (2) ユーザーが登録・入力する情報
         ul.list-disc.list-inside.space-y-1
           li ユーザー名（username）
           li 表示名（display_name）
           li 自己紹介（bio）
-          li 投稿内容（本文、画像）
+          li アバター画像
+          li 交換日記のタイトル、説明、カバーアート
+          li 投稿の本文、タイトル、画像
 
         h3.text-base.font-medium.mt-4.mb-2 (3) 自動的に収集される情報
         ul.list-disc.list-inside.space-y-1
           li IPアドレス
-          li Cookie情報
+          li アクセス日時
+          li Cookie情報（セッション管理用）
+          li ブラウザの種類、OS、デバイス情報
           li アクセスログ
+
+        h3.text-base.font-medium.mt-4.mb-2 (4) 使用状況に関する情報
+        ul.list-disc.list-inside.space-y-1
+          li 投稿数、投稿頻度
+          li ストレージ使用量
+          li 参加している交換日記の数
+          li 最終ログイン日時
 
       section.mb-8.mt-14
         h2.text-lg.font-semibold.mb-3 2. 情報の利用目的
         p 収集した情報は、以下の目的で利用します。
         ul.list-disc.list-inside.mt-2.space-y-1
-          li 本サービスの提供・運営
-          li ユーザー認証
+          li 本サービスの提供・運営・改善
+          li ユーザー認証とアカウント管理
+          li 使用制限の管理（投稿頻度制限、ストレージ容量管理など）
+          li 利用規約違反への対応、不正利用の防止
           li お問い合わせへの対応
-          li 利用規約違反への対応
-          li サービスの改善・分析
+          li サービスの品質向上、統計データの作成
+          li セキュリティの維持、システムの安定稼働
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 3. 第三者提供
+        h2.text-lg.font-semibold.mb-3 3. 投稿情報の公開性
+        p
+          strong 重要:
+          | 本サービスに投稿されたコンテンツ（交換日記のタイトル、説明、投稿の本文、画像など）は、原則として公開情報として扱われます。
+        p.mt-2 公開された投稿は、以下の特性を持ちます。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li インターネット上の不特定多数のユーザーが閲覧可能
+          li 検索エンジンにインデックスされる可能性がある
+          li 第三者が引用、共有、スクリーンショット等で保存する可能性がある
+        p.mt-2 公開を望まない個人情報や機密情報を投稿しないようご注意ください。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 4. 第三者提供
+        p 本サービスは、以下のサービスを利用しています。
+
+        h3.text-base.font-medium.mt-4.mb-2 (1) Google OAuth（認証）
         p
           | 本サービスは、認証にGoogle OAuthを利用しています。Googleのプライバシーポリシーについては、
           = link_to "Googleプライバシーポリシー", "https://policies.google.com/privacy", class: "text-blue-600 hover:underline", target: "_blank", rel: "noopener noreferrer"
           | をご確認ください。
-        p.mt-2 上記を除き、法令に基づく場合を除いて、ユーザーの同意なく第三者に個人情報を提供することはありません。
+
+        p.mt-4 上記を除き、以下の場合を除いて、ユーザーの同意なく第三者に個人情報を提供することはありません。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li 法令に基づく場合
+          li 人の生命、身体または財産の保護のために必要な場合
+          li 公衆衛生の向上または児童の健全な育成の推進のために特に必要な場合
+          li 国の機関等の法令の定める事務への協力のために必要な場合
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 4. Cookie
-        p 本サービスは、ユーザーの利便性向上のためにCookieを使用しています。Cookieの使用を望まない場合は、ブラウザの設定で無効化することができますが、一部機能が利用できなくなる場合があります。
+        h2.text-lg.font-semibold.mb-3 5. Cookie
+        p 本サービスは、ユーザーの利便性向上とセッション管理のためにCookieを使用しています。
+        p.mt-2 Cookieの使用を望まない場合は、ブラウザの設定で無効化することができますが、本サービスにログインできなくなるなど、一部機能が利用できなくなります。
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 5. ユーザーの権利
+        h2.text-lg.font-semibold.mb-3 6. データの保持期間
+        p 収集した個人情報は、以下の期間保持されます。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li アカウント情報：アカウント削除まで
+          li 投稿データ：投稿削除またはアカウント削除まで
+        p.mt-2 アカウントを削除すると、関連するすべてのデータ（投稿を含む）が削除され、復元できません。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 7. ユーザーの権利
         p ユーザーは、自身の個人情報について、以下の権利を有します。
         ul.list-disc.list-inside.mt-2.space-y-1
-          li 個人情報の開示請求
-          li 個人情報の訂正・削除
-          li アカウントの削除
-        p.mt-2 これらの権利を行使する場合は、お問い合わせページよりご連絡ください。
+          li アクセス権：自身の個人情報の開示請求
+          li 訂正権：個人情報の訂正（プロフィール編集画面から可能）
+          li 削除権：個人情報およびアカウントの削除（設定画面から可能）
+          li データポータビリティ権：データのエクスポート請求
+        p.mt-2
+          | これらの権利を行使する場合、または本プライバシーポリシーに関するお問い合わせは、
+          = link_to "お問い合わせフォーム", "https://forms.gle/xEZ8jNtB6g5nPMF16", target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:underline"
+          | よりご連絡ください。
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 6. セキュリティ
-        p 本サービスは、個人情報の保護のため、適切な安全管理措置を講じています。
+        h2.text-lg.font-semibold.mb-3 8. セキュリティ
+        p 本サービスは、個人情報の保護のため、以下の安全管理措置を講じています。
+        ul.list-disc.list-inside.mt-2.space-y-1
+          li HTTPS通信による暗号化
+          li 認証機能（Google OAuth）によるアクセス制御
+          li セッション管理によるセキュリティ保護
+          li セキュリティアップデートの実施
+          li 必要に応じたアクセスログの監視
+        p.mt-2 ただし、インターネット上での情報送信には常にリスクが伴います。本サービスは最善の努力を行いますが、絶対的な安全性を保証するものではありません。
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 7. プライバシーポリシーの変更
-        p 本プライバシーポリシーは、法令の変更や本サービスの機能変更等に応じて、予告なく変更することがあります。変更後のプライバシーポリシーは、本サービス上に掲載された時点で効力を生じるものとします。
+        h2.text-lg.font-semibold.mb-3 9. 子供のプライバシー保護
+        p 本サービスは13歳未満の方の利用を想定していません。13歳未満の方が誤って個人情報を提供した場合、直ちにアカウントを削除しますので、お問い合わせください。
+        p.mt-2 13歳以上18歳未満の方は、保護者の同意を得た上でご利用ください。
 
       section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 8. お問い合わせ
+        h2.text-lg.font-semibold.mb-3 10. データの国際転送
+        p 本サービスは日本国内のサーバーで運営されていますが、利用しているサービス（Google等）の特性上、データが国外のサーバーに保存される場合があります。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 11. プライバシーポリシーの変更
+        p 本プライバシーポリシーは、法令の変更や本サービスの機能変更等に応じて変更することがあります。
+        p.mt-2 重要な変更の場合は、本サービス上で事前に告知します。変更後のプライバシーポリシーは、本サービス上に掲載された時点で効力を生じるものとします。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 12. お問い合わせ
         p
           | 本プライバシーポリシーに関するお問い合わせは、
-          = link_to "お問い合わせページ", contact_path, class: "text-blue-600 hover:underline"
+          = link_to "お問い合わせフォーム", "https://forms.gle/xEZ8jNtB6g5nPMF16", target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:underline"
           | よりご連絡ください。
 
       .mt-12.text-sm.text-gray-500
-        p 最終更新日: 2026年2月28日
+        p 制定日: 2026年2月28日
+        p 最終更新日: 2026年3月7日
