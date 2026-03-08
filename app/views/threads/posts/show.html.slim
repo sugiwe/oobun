@@ -62,7 +62,7 @@
         - else
           / 下書きがない場合
           .text-center
-            = button_to "返事を書く", thread_posts_path(@thread.slug), method: :post, class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
+            = button_to thread_posts_path(@thread.slug), method: :post, class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
               span ✍️
               span 返事を書く
 
