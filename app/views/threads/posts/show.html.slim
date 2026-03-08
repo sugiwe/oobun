@@ -53,10 +53,18 @@
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?
-      .mt-12.pt-8.border-t.border-gray-200.text-center
-        = link_to new_thread_post_path(@thread.slug), class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
-          span ✍️
-          span 返事を書く
+      .mt-12.pt-8.border-t.border-gray-200
+        - if @draft
+          / 下書きがある場合
+          .flex.flex-col.items-center.gap-3
+            .text-xs.text-gray-500 ✍️ 下書きあり
+            = link_to "下書きの続きを書く", edit_thread_post_path(@thread.slug, @draft), class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors"
+        - else
+          / 下書きがない場合
+          .text-center
+            = button_to "返事を書く", thread_posts_path(@thread.slug), method: :post, class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
+              span ✍️
+              span 返事を書く
 
     / 次の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @next_post

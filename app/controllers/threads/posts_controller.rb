@@ -23,18 +23,26 @@ class Threads::PostsController < Threads::ApplicationController
 
     @prev_post = @post.prev
     @next_post = @post.next
+    @draft = @thread.draft_for(current_user) if logged_in?
   end
 
   def new
-    # 既存の下書きがあればそれを使う、なければ新規作成
+    # 新フロー: 下書きを作成してeditにリダイレクトする（GETで来た場合の後方互換性）
     @post = @thread.posts.unscope(where: :status)
-                         .draft_posts
-                         .find_or_initialize_by(user: current_user)
-
-    set_prev_post
+                         .find_or_create_by!(user: current_user, status: "draft")
+    redirect_to edit_thread_post_path(@thread.slug, @post)
   end
 
   def create
+    # パラメータが空の場合は、空の下書きを作成してeditにリダイレクト（新フロー）
+    if params[:post].blank?
+      @post = @thread.posts.unscope(where: :status)
+                           .find_or_create_by!(user: current_user, status: "draft")
+      redirect_to edit_thread_post_path(@thread.slug, @post)
+      return
+    end
+
+    # 以下は既存のフォーム送信処理（後方互換性のため残す）
     @post = @thread.posts.unscope(where: :status)
                          .find_or_initialize_by(user: current_user, status: "draft")
 
@@ -63,6 +71,7 @@ class Threads::PostsController < Threads::ApplicationController
 
   def edit
     # 下書きまたは公開済み投稿を編集可能
+    set_prev_post if @post.draft?
   end
 
   def update
