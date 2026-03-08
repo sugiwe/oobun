@@ -108,19 +108,6 @@ class CorrespondenceThread < ApplicationRecord
     end
   end
 
-  # 自動公開すべきかチェック
-  def should_auto_publish?
-    return false unless draft?
-
-    # 条件1: 5投稿以上
-    return true if published_posts.count >= AUTO_PUBLISH_POSTS_THRESHOLD
-
-    # 条件2: 30日経過
-    return true if days_since_creation >= AUTO_PUBLISH_DAYS_THRESHOLD
-
-    false
-  end
-
   # 作成からの経過日数
   def days_since_creation
     (Date.today - created_at.to_date).to_i
