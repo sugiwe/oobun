@@ -6,7 +6,9 @@
   .mb-6
     = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
 
-  h1.text-xl.mb-6 投稿する
+  .flex.items-center.justify-between.mb-6
+    h1.text-xl 投稿する
+    = button_to "下書きを削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "下書きを削除しますか？この操作は取り消せません。" }
 
   .flex.flex-col.md:flex-row.gap-6
     / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）

@@ -28,17 +28,13 @@ class Threads::PostsController < Threads::ApplicationController
 
   def new
     # 新フロー: 下書きを作成してeditにリダイレクトする（GETで来た場合の後方互換性）
-    @post = @thread.posts.unscope(where: :status)
-                         .find_or_create_by!(user: current_user, status: "draft")
-    redirect_to edit_thread_post_path(@thread.slug, @post)
+    find_or_create_draft_and_redirect
   end
 
   def create
     # パラメータが空の場合は、空の下書きを作成してeditにリダイレクト（新フロー）
     if params[:post].blank?
-      @post = @thread.posts.unscope(where: :status)
-                           .find_or_create_by!(user: current_user, status: "draft")
-      redirect_to edit_thread_post_path(@thread.slug, @post)
+      find_or_create_draft_and_redirect
       return
     end
 
@@ -77,21 +73,17 @@ class Threads::PostsController < Threads::ApplicationController
   def update
     @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
 
-    if @post.update(post_params)
-      # AJAX リクエスト（自動保存）の場合は JSON レスポンス
-      if request.xhr?
-        render json: { success: true, message: "自動保存しました" }, status: :ok
+    respond_to do |format|
+      if @post.update(post_params)
+        format.html do
+          notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
+          redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
+          redirect_to redirect_path, notice: notice
+        end
+        format.json { render json: { success: true, message: "自動保存しました" }, status: :ok }
       else
-        # 通常のフォーム送信
-        notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
-        redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
-        redirect_to redirect_path, notice: notice
-      end
-    else
-      if request.xhr?
-        render json: { success: false, errors: @post.errors.full_messages }, status: :unprocessable_entity
-      else
-        render :edit, status: :unprocessable_entity
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @post.errors.full_messages }, status: :unprocessable_entity }
       end
     end
   end
@@ -185,5 +177,11 @@ class Threads::PostsController < Threads::ApplicationController
     else
       yield
     end
+  end
+
+  def find_or_create_draft_and_redirect
+    @post = @thread.posts.unscope(where: :status)
+                         .find_or_create_by!(user: current_user, status: "draft")
+    redirect_to edit_thread_post_path(@thread.slug, @post)
   end
 end

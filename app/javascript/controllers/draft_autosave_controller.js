@@ -15,7 +15,7 @@ export default class extends Controller {
     this.savedBody = this.bodyTarget.value
 
     // CSRF トークンを取得
-    this.csrfToken = document.querySelector('[name="csrf-token"]').content
+    this.csrfToken = document.querySelector('[name="csrf-token"]')?.content
 
     // 保存中フラグ
     this.isSaving = false
@@ -84,7 +84,7 @@ export default class extends Controller {
         body: formData,
         headers: {
           "X-CSRF-Token": this.csrfToken,
-          "X-Requested-With": "XMLHttpRequest"
+          "Accept": "application/json"
         }
       })
 
