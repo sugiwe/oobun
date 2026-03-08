@@ -77,13 +77,17 @@
     .bg-yellow-50.border.border-yellow-200.rounded-lg.px-4.py-3.mb-6
       .text-sm.text-yellow-800
         p.font-medium この交換日記は現在非公開です
-        - posts_count = @thread.published_posts.count
-        - posts_remaining = [CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD - posts_count, 0].max
+        - published_posts_count = @thread.published_posts.count
+        - total_posts_count = @thread.posts.unscope(where: :status).count
+        - posts_remaining = [CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD - published_posts_count, 0].max
         - days_remaining = [CorrespondenceThread::AUTO_PUBLISH_DAYS_THRESHOLD - @thread.days_since_creation, 0].max
 
-        - if posts_count == 0
+        - if total_posts_count == 0
           p.mt-1.text-xs.text-red-700
             | ⚠️ 作成から30日以内に投稿がない場合、自動的に削除されます（残り#{days_remaining}日）
+        - elsif published_posts_count == 0
+          p.mt-1.text-xs.text-gray-600
+            | 下書きのみのため、自動削除・自動公開の対象外です
         - elsif posts_remaining > 0 && days_remaining > 0
           p.mt-1.text-xs
             | あと#{posts_remaining}投稿、または#{days_remaining}日で自動的に公開されます
