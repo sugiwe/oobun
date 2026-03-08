@@ -1,4 +1,7 @@
-= form_with model: @post, url: form_url, method: form_method do |f|
+/ 自動保存用のコントローラーを設定（下書きの場合のみ）
+- autosave_data = @post.draft? && @post.persisted? ? { controller: "draft-autosave", draft_autosave_url_value: thread_post_path(@thread.slug, @post) } : {}
+
+= form_with model: @post, url: form_url, method: form_method, data: autosave_data.merge({ draft_autosave_target: "form" }) do |f|
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
@@ -6,6 +9,7 @@
       = f.text_field :title,
           placeholder: "投稿のタイトルを入力してください",
           autofocus: true,
+          data: { draft_autosave_target: "title", action: "input->draft-autosave#input" },
           class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
 
     .flex.flex-col.gap-1
@@ -22,10 +26,15 @@
       p.text-xs.text-gray-400 投稿一覧で表示される画像です（JPEG, PNG, GIFなど）
 
     .flex.flex-col.gap-1
-      = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
+      .flex.justify-between.items-center
+        = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
+        / 自動保存ステータス（下書きの場合のみ表示）
+        - if @post.draft? && @post.persisted?
+          span.text-xs.text-gray-500 data-draft-autosave-target="status"
       = f.text_area :body,
           rows: 14,
           placeholder: "ここに文章を書いてください（10文字以上）",
+          data: { draft_autosave_target: "body", action: "input->draft-autosave#input" },
           class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
 
     - if @post.errors.any?

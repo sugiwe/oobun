@@ -69,11 +69,21 @@ class Threads::PostsController < Threads::ApplicationController
     @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
 
     if @post.update(post_params)
-      notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
-      redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
-      redirect_to redirect_path, notice: notice
+      # AJAX リクエスト（自動保存）の場合は JSON レスポンス
+      if request.xhr?
+        render json: { success: true, message: "自動保存しました" }, status: :ok
+      else
+        # 通常のフォーム送信
+        notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
+        redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
+        redirect_to redirect_path, notice: notice
+      end
     else
-      render :edit, status: :unprocessable_entity
+      if request.xhr?
+        render json: { success: false, errors: @post.errors.full_messages }, status: :unprocessable_entity
+      else
+        render :edit, status: :unprocessable_entity
+      end
     end
   end
 
