@@ -49,7 +49,11 @@
             = button_to "削除", thread_path(@thread.slug), method: :delete, data: { turbo_confirm: "この交換日記を削除しますか？すべての投稿も削除されます。この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
             / 公開/非公開切り替えボタン
             - if @thread.free? || @thread.paid?
-              = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+              - if @thread.can_be_privatized?
+                = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+              - else
+                button.text-xs.text-gray-400.border.border-gray-200.rounded.px-2.py-1.cursor-not-allowed disabled=true title="強制公開条件（5投稿以上、または30日経過）を満たしているため非公開にできません"
+                  | 非公開にできません
             - else
               = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
             / 招待ボタン
@@ -67,6 +71,29 @@
               = button_to "購読中", thread_subscription_path(@thread.slug), method: :delete, class: "text-sm text-gray-500 border border-gray-300 rounded-md px-3 py-1.5 hover:border-gray-500 hover:text-gray-700"
             - else
               = button_to "購読する", thread_subscription_path(@thread.slug), method: :post, class: "text-sm bg-gray-900 text-white rounded-md px-3 py-1.5 hover:bg-gray-700"
+
+  / 自動公開・自動削除の警告バナー（非公開スレッドのメンバー向け）
+  - if @thread.draft? && is_member
+    .bg-yellow-50.border.border-yellow-200.rounded-lg.px-4.py-3.mb-6
+      .text-sm.text-yellow-800
+        p.font-medium この交換日記は現在非公開です
+        - published_posts_count = @thread.published_posts.count
+        - total_posts_count = @thread.posts.unscope(where: :status).count
+        - posts_remaining = [CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD - published_posts_count, 0].max
+        - days_remaining = [CorrespondenceThread::AUTO_PUBLISH_DAYS_THRESHOLD - @thread.days_since_creation, 0].max
+
+        - if total_posts_count == 0
+          p.mt-1.text-xs.text-red-700
+            | ⚠️ 作成から30日以内に投稿がない場合、自動的に削除されます（残り#{days_remaining}日）
+        - elsif published_posts_count == 0
+          p.mt-1.text-xs.text-gray-600
+            | 下書きのみのため、自動削除・自動公開の対象外です
+        - elsif posts_remaining > 0 && days_remaining > 0
+          p.mt-1.text-xs
+            | あと#{posts_remaining}投稿、または#{days_remaining}日で自動的に公開されます
+        - else
+          p.mt-1.text-xs.text-green-700
+            | 間もなく自動的に公開されます
 
   / ターン表示・投稿ボタン（メンバーのみ）
   - if is_member

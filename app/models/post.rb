@@ -69,4 +69,18 @@ class Post < ApplicationRecord
     return false unless editable_by?(user)
     thread.my_turn?(user)
   end
+
+  # Callbacks
+  # 投稿が公開状態になった時、スレッドの自動公開をチェック
+  # (create時だけでなく、draft→publishedへの更新時にも対応)
+  after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
+
+  private
+
+  def check_auto_publish_thread
+    return unless thread.draft?
+    return unless thread.published_posts.count >= CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD
+
+    thread.auto_publish!
+  end
 end

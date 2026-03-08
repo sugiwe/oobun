@@ -90,6 +90,12 @@ class ThreadsController < ApplicationController
   end
 
   def toggle_published
+    # 公開→非公開に戻そうとする場合、条件チェック
+    if (@thread.free? || @thread.paid?) && !@thread.can_be_privatized?
+      redirect_to thread_path(@thread.slug), alert: "強制公開条件（5投稿以上、または30日経過）を満たしているため、非公開にできません"
+      return
+    end
+
     @thread.toggle_published!
     state = @thread.draft? ? "非公開" : "公開"
     redirect_to thread_path(@thread.slug), notice: "交換日記を#{state}にしました"
@@ -152,6 +158,7 @@ class ThreadsController < ApplicationController
   end
 
   def thread_params
-    params.require(:thread).permit(:title, :slug, :description, :status, :turn_based, :thumbnail)
+    # status の変更は toggle_published 経由のみ許可（編集フォームからは変更不可）
+    params.require(:thread).permit(:title, :slug, :description, :turn_based, :thumbnail)
   end
 end

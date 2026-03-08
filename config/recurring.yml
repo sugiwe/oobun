@@ -13,3 +13,13 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+
+  # 非公開スレッドの自動公開（毎日午前3時）
+  auto_publish_threads:
+    class: AutoPublishThreadsJob
+    schedule: at 3am every day
+
+  # 空の非公開スレッドの自動削除（毎日午前4時）
+  auto_delete_empty_threads:
+    class: AutoDeleteEmptyThreadsJob
+    schedule: at 4am every day
