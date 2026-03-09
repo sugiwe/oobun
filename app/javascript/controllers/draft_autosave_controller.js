@@ -94,12 +94,14 @@ export default class extends Controller {
         this.savedBody = this.bodyTarget.value
         this.updateStatus(`保存済み (${this.formatTime(new Date())})`)
       } else {
-        // エラー
-        this.updateStatus("保存エラー")
+        // エラー時にレスポンスからエラーメッセージを取得
+        const data = await response.json().catch(() => null)
+        const errorMessage = data?.errors?.join("、") || "保存に失敗しました"
+        this.updateStatus(`保存エラー: ${errorMessage}`)
       }
     } catch (error) {
       console.error("Autosave error:", error)
-      this.updateStatus("保存エラー")
+      this.updateStatus("保存エラー: ネットワークエラー")
     } finally {
       this.isSaving = false
     }
