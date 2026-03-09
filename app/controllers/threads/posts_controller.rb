@@ -23,18 +23,22 @@ class Threads::PostsController < Threads::ApplicationController
 
     @prev_post = @post.prev
     @next_post = @post.next
+    @draft = @thread.draft_for(current_user) if logged_in?
   end
 
   def new
-    # 既存の下書きがあればそれを使う、なければ新規作成
-    @post = @thread.posts.unscope(where: :status)
-                         .draft_posts
-                         .find_or_initialize_by(user: current_user)
-
-    set_prev_post
+    # 新フロー: 下書きを作成してeditにリダイレクトする（GETで来た場合の後方互換性）
+    find_or_create_draft_and_redirect
   end
 
   def create
+    # パラメータが空の場合は、空の下書きを作成してeditにリダイレクト（新フロー）
+    if params[:post].blank?
+      find_or_create_draft_and_redirect
+      return
+    end
+
+    # 以下は既存のフォーム送信処理（後方互換性のため残す）
     @post = @thread.posts.unscope(where: :status)
                          .find_or_initialize_by(user: current_user, status: "draft")
 
@@ -63,17 +67,24 @@ class Threads::PostsController < Threads::ApplicationController
 
   def edit
     # 下書きまたは公開済み投稿を編集可能
+    set_prev_post if @post.draft?
   end
 
   def update
     @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
 
-    if @post.update(post_params)
-      notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
-      redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
-      redirect_to redirect_path, notice: notice
-    else
-      render :edit, status: :unprocessable_entity
+    respond_to do |format|
+      if @post.update(post_params)
+        format.html do
+          notice = @post.draft? ? "下書きを更新しました" : "投稿を更新しました"
+          redirect_path = @post.draft? ? thread_path(@thread.slug) : thread_post_path(@thread.slug, @post)
+          redirect_to redirect_path, notice: notice
+        end
+        format.json { render json: { success: true, message: "自動保存しました" }, status: :ok }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @post.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -166,5 +177,11 @@ class Threads::PostsController < Threads::ApplicationController
     else
       yield
     end
+  end
+
+  def find_or_create_draft_and_redirect
+    @post = @thread.posts.unscope(where: :status)
+                         .find_or_create_by!(user: current_user, status: "draft")
+    redirect_to edit_thread_post_path(@thread.slug, @post)
   end
 end

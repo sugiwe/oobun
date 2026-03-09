@@ -10,7 +10,8 @@ class Post < ApplicationRecord
   # Validations
   validates :title, presence: true, length: { maximum: 100 }, if: :published?
   validates :title, length: { maximum: 100 }, allow_blank: true, if: :draft?
-  validates :body, presence: true, length: { in: 10..10_000 }
+  validates :body, presence: true, length: { in: 10..10_000 }, if: :published?
+  validates :body, length: { maximum: 10_000 }, allow_blank: true, if: :draft?
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
