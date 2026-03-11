@@ -18,13 +18,16 @@
       .flex-1.min-w-0.w-full
         / 公開状態バッジ（メンバー向け）
         - if is_member
-          .mb-3
+          .mb-3.flex.flex-wrap.items-center.gap-2
             - if @thread.free? || @thread.paid?
               span.inline-flex.items-center.gap-1.text-xs.bg-green-100.text-green-800.rounded.px-2.py-1
                 | 🌐 公開中
             - else
               span.inline-flex.items-center.gap-1.text-xs.bg-red-50.text-gray-700.rounded.px-2.py-1
                 | 🔒 非公開
+            - if @thread.show_in_list?
+              span.inline-flex.items-center.gap-1.text-xs.bg-blue-50.text-blue-700.rounded.px-2.py-1
+                | 📋 一覧表示中
 
         h1.text-2xl.mb-4 = @thread.title
         - if @thread.description.present?

@@ -1,0 +1,56 @@
+= form_with model: @thread, url: form_url, method: form_method do |f|
+  .flex.flex-col.gap-5
+
+    .flex.flex-col.gap-1
+      = f.label :title, "タイトル", class: "text-sm font-medium text-gray-700"
+      = f.text_field :title, autofocus: true, placeholder: "交換日記のタイトル",
+          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+
+    .flex.flex-col.gap-1
+      = f.label :slug, "URL スラッグ", class: "text-sm font-medium text-gray-700"
+      .flex.items-center.gap-1
+        span.text-gray-400.text-sm https://coconikki.com/
+        = f.text_field :slug, placeholder: "my-thread",
+            class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+      p.text-xs.text-gray-400 英小文字・数字・ハイフン、3〜50文字
+      - if @thread.persisted?
+        p.text-xs.text-amber-600 ⚠️ URLを変更すると、既存のリンクが無効になります
+
+    .flex.flex-col.gap-1
+      = f.label :description, "説明（任意）", class: "text-sm font-medium text-gray-700"
+      = f.text_area :description, rows: 3, placeholder: "この交換日記について",
+          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+    .flex.flex-col.gap-1
+      = f.label :thumbnail, "カバーアート（任意）", class: "text-sm font-medium text-gray-700"
+      - if @thread.thumbnail.attached?
+        .mb-2
+          = image_tag @thread.thumbnail, class: "w-32 h-32 object-cover rounded border border-gray-200"
+          p.text-xs.text-gray-400.mt-1 現在のカバーアート
+        .mb-2
+          = f.check_box :remove_thumbnail, class: "mr-2"
+          = f.label :remove_thumbnail, "カバーアートを削除", class: "text-sm text-gray-600"
+      = f.file_field :thumbnail,
+          accept: "image/*",
+          class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+      p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下。正方形推奨
+
+    .border.border-gray-200.rounded-lg.p-4.bg-gray-50
+      label.flex.items-start.gap-3.cursor-pointer
+        = f.check_box :show_in_list, class: "mt-1"
+        .flex-1
+          .text-sm.font-medium.text-gray-900
+            | この交換日記を一覧ページに表示する
+          .text-xs.text-gray-500.mt-1
+            | 💡 これはアクセス制限ではなく、一覧への表示／非表示の設定です。
+            br
+            | 　 公開後は、URLを知っている人は誰でも閲覧可能になります。
+
+    - if @thread.errors.any?
+      ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+        - @thread.errors.full_messages.each do |msg|
+          li = msg
+
+    .flex.justify-end.gap-3
+      = link_to "キャンセル", cancel_path, class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+      = f.submit submit_text, class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
