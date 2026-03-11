@@ -21,19 +21,28 @@ html
           = link_to "coconikki", root_path, class: "text-xl tracking-wide"
           = yield :back_link
 
-    / ユーザーアイコン（左下固定）
+    / メニューボタン（PC: 左下固定、スマホ: 右下固定）
     - if logged_in?
-      div class="fixed bottom-0 left-0 z-50 p-4" data={"controller" => "dropdown"}
-        button class="flex items-center gap-2 hover:opacity-80 transition-opacity" data={"action" => "click->dropdown#toggle"}
-          div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shrink-0 border-2 border-white shadow-lg"
-            = render "shared/avatar", user: current_user, show_fallback: true
+      div class="fixed bottom-0 left-0 md:left-0 right-0 md:right-auto z-50 p-6" data={"controller" => "dropdown"}
+        button class="flex items-center justify-center w-14 h-14 bg-white rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ml-auto md:ml-0" data={"action" => "click->dropdown#toggle"}
+          / ハンバーガーアイコン
+          svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2 5h20M2 12h20M2 19h20"
         / ドロップダウンメニュー（上に表示）
-        div class="absolute w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden left-2.5 bottom-[calc(100%-4px)]" data={"dropdown-target" => "menu"}
-          div class="px-4 py-2 border-b border-gray-100"
-            div class="text-sm font-medium text-gray-900" = current_user.display_name
-            div class="text-xs text-gray-500" = "@#{current_user.username}"
+        div class="absolute w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden right-2.5 md:left-2.5 md:right-auto bottom-[calc(100%-4px)]" data={"dropdown-target" => "menu"}
+          div class="px-4 py-3 border-b border-gray-100"
+            .flex.items-center.gap-3
+              div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0"
+                = render "shared/avatar", user: current_user, show_fallback: true
+              .flex-1.min-w-0
+                div class="text-sm font-medium text-gray-900 truncate" = current_user.display_name
+                div class="text-xs text-gray-500 truncate" = "@#{current_user.username}"
           = link_to user_path(username: current_user.username), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
             | マイページ
+          = link_to terms_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+            | 利用規約
+          = link_to privacy_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+            | プライバシーポリシー
           = button_to logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
             | ログアウト
     - else
