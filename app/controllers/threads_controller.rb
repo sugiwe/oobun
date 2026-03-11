@@ -30,10 +30,18 @@ class ThreadsController < ApplicationController
     @threads = CorrespondenceThread.discoverable
                                    .includes(:users, :memberships)
                                    .recent_order
+                                   .page(params[:page])
   end
 
   def show
-    @posts = @thread.visible_posts_for(current_user).includes(:user).reorder(created_at: :desc)
+    # ソート順（デフォルトは新しい順）
+    @current_sort = params[:sort] == "oldest" ? "oldest" : "newest"
+    order_direction = @current_sort == "oldest" ? :asc : :desc
+    @posts = @thread.visible_posts_for(current_user)
+                    .includes(:user)
+                    .reorder(created_at: order_direction)
+                    .page(params[:page])
+                    .per(10)
     @members = @thread.memberships.includes(:user).order(:position)
 
     respond_to do |format|

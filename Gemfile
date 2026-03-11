@@ -54,6 +54,9 @@ gem "googleauth"
 # ZIP file creation [https://github.com/rubyzip/rubyzip]
 gem "rubyzip"
 
+# Pagination [https://github.com/kaminari/kaminari]
+gem "kaminari"
+
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 7.1"

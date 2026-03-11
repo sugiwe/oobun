@@ -41,7 +41,16 @@
                 = render "shared/avatar", user: m.user, show_fallback: true
               span.text-sm.text-gray-600 = "@#{m.user.username}"
           span.text-xs.text-gray-400 ·
-          = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "text-xs text-gray-400 hover:text-gray-600 underline"
+          / RSSドロップダウンメニュー
+          div class="relative inline-block" data-controller="rss" data-rss-url-value="#{thread_url(@thread.slug, format: :rss)}"
+            button class="text-xs text-gray-400 hover:text-gray-600 underline" data-action="click->rss#toggle"
+              | RSS
+            / ドロップダウンメニュー
+            div class="absolute left-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden z-10" data-rss-target="menu"
+              = link_to thread_path(@thread.slug, format: :rss), target: "_blank", class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+                | RSSを開く
+              button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer" data-action="click->rss#copy"
+                | RSSをコピー
 
         / 管理ボタン（メンバー向け）
         - if is_member
@@ -125,6 +134,19 @@
       - elsif has_draft
         = link_to "下書きを見る", edit_thread_post_path(@thread.slug, draft), class: "text-xs text-gray-600 hover:text-gray-900 underline"
 
+  / ソート切り替え
+  - unless @posts.empty?
+    .flex.justify-end.mb-4
+      .flex.items-center.gap-2
+        - if @current_sort == "oldest"
+          = link_to thread_path(@thread.slug, sort: nil), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
+            | 最新順
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 古い順
+        - else
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 最新順
+          = link_to thread_path(@thread.slug, sort: "oldest"), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
+            | 古い順
+
   / 投稿一覧（タイムラインレイアウト）
   - if @posts.empty?
     .text-center.py-12.text-gray-400
@@ -132,3 +154,7 @@
   - else
     .flex.flex-col.gap-4
       = render partial: "posts/post_card", collection: @posts, as: :post
+
+    / ページネーション
+    .flex.justify-center.mt-8
+      = paginate @posts

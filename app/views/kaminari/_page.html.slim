@@ -1,0 +1,5 @@
+/ 各ページ番号のリンク
+- if page.current?
+  span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded = page
+- else
+  = link_to page, url, class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
