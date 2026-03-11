@@ -71,14 +71,13 @@ end
 ```ruby
 # app/models/correspondence_thread.rb
 class CorrespondenceThread < ApplicationRecord
-  # スコープ追加
-  scope :listed, -> { where(show_in_list: true) }
-
   # 既存のスコープ
-  scope :published, -> { where(status: [:free, :paid]) }
+  scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
+  scope :public_threads, -> { where(status: [ "free", "paid" ]) }
 
   # 一覧表示対象（公開 かつ 一覧表示オン）
-  scope :discoverable, -> { published.listed }
+  # YAGNI原則に従い、シンプルに実装
+  scope :discoverable, -> { public_threads.where(show_in_list: true) }
 end
 ```
 
@@ -88,16 +87,23 @@ end
 # app/controllers/threads_controller.rb
 class ThreadsController < ApplicationController
   def index
-    # 一覧ページは「公開 かつ 一覧表示オン」のスレッドのみ
-    @threads = CorrespondenceThread.discoverable
-                                    .includes(:members, :posts)
-                                    .order(updated_at: :desc)
+    if logged_in?
+      # パーソナライズドフィード（ログイン時）
+      build_personalized_feed
+    else
+      # ランディングページ（ログアウト時）
+      @threads = CorrespondenceThread.discoverable
+                                     .includes(:users, :memberships)
+                                     .recent_order
+                                     .limit(6)
+    end
   end
 
-  def show
-    # 詳細ページは従来通り、公開スレッドならアクセス可能
-    @thread = CorrespondenceThread.published.find_by!(slug: params[:slug])
-    # ...
+  def browse
+    # 全交換日記一覧ページ
+    @threads = CorrespondenceThread.discoverable
+                                   .includes(:users, :memberships)
+                                   .recent_order
   end
 end
 ```
@@ -106,11 +112,10 @@ end
 
 #### スレッド作成・編集フォーム
 
-```slim
-/ app/views/threads/_form.html.slim
+`app/views/threads/new.html.slim` と `app/views/threads/edit.html.slim` に以下を追加：
 
-/ 既存のフォームフィールドの後に追加
-.mt-6
+```slim
+.border.border-gray-200.rounded-lg.p-4.bg-gray-50
   label.flex.items-start.gap-3.cursor-pointer
     = f.check_box :show_in_list, class: "mt-1"
     .flex-1
@@ -122,15 +127,25 @@ end
         | 　 URLを知っている人は誰でも閲覧できます。非公開ではありませんのでご注意ください。
 ```
 
-#### トップページ（一覧が空の場合のメッセージ）
+**注**: 現在は `new.html.slim` と `edit.html.slim` の両方に同じコードがありますが、将来的にはパーシャルに切り出すことを推奨します。
+
+#### スレッド詳細ページ（一覧表示状態バッジ）
+
+`app/views/threads/show.html.slim` に以下を追加：
 
 ```slim
-/ app/views/threads/index.html.slim
-
-- if @threads.empty?
-  .text-center.py-12.text-gray-500
-    p まだ一覧に表示されている交換日記はありません
-    p.text-sm.mt-2 交換日記を作成して、一覧表示をオンにすると、ここに表示されます
+/ 公開状態バッジ（メンバー向け）
+- if is_member
+  .mb-3.flex.flex-wrap.items-center.gap-2
+    - if @thread.free? || @thread.paid?
+      span.inline-flex.items-center.gap-1.text-xs.bg-green-100.text-green-800.rounded.px-2.py-1
+        | 🌐 公開中
+    - else
+      span.inline-flex.items-center.gap-1.text-xs.bg-red-50.text-gray-700.rounded.px-2.py-1
+        | 🔒 非公開
+    - if @thread.show_in_list?
+      span.inline-flex.items-center.gap-1.text-xs.bg-blue-50.text-blue-700.rounded.px-2.py-1
+        | 📋 一覧表示中
 ```
 
 ### 5. Strong Parameters
@@ -138,12 +153,13 @@ end
 ```ruby
 # app/controllers/threads_controller.rb
 def thread_params
-  params.require(:correspondence_thread).permit(
+  # status の変更は toggle_published 経由のみ許可（編集フォームからは変更不可）
+  params.require(:thread).permit(
     :title,
-    :description,
     :slug,
-    :status,
-    :cover_art,
+    :description,
+    :turn_based,
+    :thumbnail,
     :show_in_list  # 追加
   )
 end
