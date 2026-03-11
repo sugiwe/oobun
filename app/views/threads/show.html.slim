@@ -41,7 +41,16 @@
                 = render "shared/avatar", user: m.user, show_fallback: true
               span.text-sm.text-gray-600 = "@#{m.user.username}"
           span.text-xs.text-gray-400 ·
-          = link_to "RSS", thread_path(@thread.slug, format: :rss), class: "text-xs text-gray-400 hover:text-gray-600 underline"
+          / RSSドロップダウンメニュー
+          div class="relative inline-block" data-controller="rss" data-rss-url-value="#{thread_url(@thread.slug, format: :rss)}"
+            button class="text-xs text-gray-400 hover:text-gray-600 underline" data-action="click->rss#toggle"
+              | RSS
+            / ドロップダウンメニュー
+            div class="absolute left-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden z-10" data-rss-target="menu"
+              = link_to thread_path(@thread.slug, format: :rss), target: "_blank", class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+                | RSSを開く
+              button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer" data-action="click->rss#copy"
+                | RSSをコピー
 
         / 管理ボタン（メンバー向け）
         - if is_member
