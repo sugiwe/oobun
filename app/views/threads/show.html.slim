@@ -125,6 +125,20 @@
       - elsif has_draft
         = link_to "下書きを見る", edit_thread_post_path(@thread.slug, draft), class: "text-xs text-gray-600 hover:text-gray-900 underline"
 
+  / ソート切り替え
+  - unless @posts.empty?
+    .flex.justify-end.mb-4
+      .flex.items-center.gap-2
+        - current_sort = params[:sort] || "newest"
+        - if current_sort == "oldest"
+          = link_to thread_path(@thread.slug, sort: nil), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
+            | 最新順
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 古い順
+        - else
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 最新順
+          = link_to thread_path(@thread.slug, sort: "oldest"), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
+            | 古い順
+
   / 投稿一覧（タイムラインレイアウト）
   - if @posts.empty?
     .text-center.py-12.text-gray-400
