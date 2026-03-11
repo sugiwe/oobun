@@ -31,6 +31,17 @@
             class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
         p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下。正方形推奨
 
+      .border.border-gray-200.rounded-lg.p-4.bg-gray-50
+        label.flex.items-start.gap-3.cursor-pointer
+          = f.check_box :show_in_list, class: "mt-1"
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | この交換日記を一覧ページに表示する
+            .text-xs.text-gray-500.mt-1
+              | 💡 一覧に表示しない場合でも、この交換日記は公開されています。
+              br
+              | 　 URLを知っている人は誰でも閲覧できます。非公開ではありませんのでご注意ください。
+
       - if @thread.errors.any?
         ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
           - @thread.errors.full_messages.each do |msg|
