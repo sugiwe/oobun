@@ -13,3 +13,7 @@
           | ？
   - else
     = render "threads/thread_grid", threads: @threads
+
+    / ページネーション
+    .flex.justify-center.mt-8
+      = paginate @threads

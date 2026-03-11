@@ -132,3 +132,7 @@
   - else
     .flex.flex-col.gap-4
       = render partial: "posts/post_card", collection: @posts, as: :post
+
+    / ページネーション
+    .flex.justify-center.mt-8
+      = paginate @posts
