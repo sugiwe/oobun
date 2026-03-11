@@ -35,7 +35,8 @@ class ThreadsController < ApplicationController
 
   def show
     # ソート順（デフォルトは新しい順）
-    order_direction = params[:sort] == "oldest" ? :asc : :desc
+    @current_sort = params[:sort] == "oldest" ? "oldest" : "newest"
+    order_direction = @current_sort == "oldest" ? :asc : :desc
     @posts = @thread.visible_posts_for(current_user)
                     .includes(:user)
                     .reorder(created_at: order_direction)

@@ -138,8 +138,7 @@
   - unless @posts.empty?
     .flex.justify-end.mb-4
       .flex.items-center.gap-2
-        - current_sort = params[:sort] || "newest"
-        - if current_sort == "oldest"
+        - if @current_sort == "oldest"
           = link_to thread_path(@thread.slug, sort: nil), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
             | 最新順
           span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 古い順
