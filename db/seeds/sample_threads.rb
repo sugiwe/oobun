@@ -3,6 +3,9 @@
 
 # Active Storageで画像をアタッチするヘルパーメソッド
 def attach_image_from_assets(record, attachment_name, file_path)
+  # すでにアタッチされている場合はスキップ（効率化）
+  return if record.public_send(attachment_name).attached?
+
   full_path = Rails.root.join("app/assets/images/samples/#{file_path}").to_s
   unless File.exist?(full_path)
     puts "⚠️  画像ファイルが見つかりません: #{full_path}"

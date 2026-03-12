@@ -223,7 +223,7 @@ thread = CorrespondenceThread.find_or_create_by!(slug: "sample-santai") do |t|
   t.is_sample = true
 end
 # カバーアートをアタッチ
-attach_image_from_assets(thread, :cover_art, "covers/santai.jpg")
+attach_image_from_assets(thread, :thumbnail, "covers/santai.jpg")
 
 # 3. 投稿を作成（任意でサムネイル画像を追加）
 post = Post.create!(
@@ -234,8 +234,8 @@ post = Post.create!(
   status: "published",
   created_at: Time.zone.parse("2026-02-01 20:00")
 )
-# 投稿サムネイル（任意）
-attach_image_from_assets(post, :thumbnail, "thumbnails/santai-post-1.jpg")
+# 投稿画像（任意）
+attach_image_from_assets(post, :image, "thumbnails/santai-post-1.jpg")
 ```
 
 ### 必要な画像
@@ -243,19 +243,19 @@ attach_image_from_assets(post, :thumbnail, "thumbnails/santai-post-1.jpg")
 **必須：**
 
 - ユーザーアバター：7枚（さくら、けんた、あゆみ、たける、ゆい、まい、りょう）
-- スレッドカバーアート：3枚（三体読書会、ランニングチャレンジ、AI対話）
+- スレッドサムネイル：3枚（三体読書会、ランニングチャレンジ、AI対話）
 
 **任意：**
 
-- 投稿サムネイル：一部の投稿に設定（バリエーションを持たせる）
+- 投稿画像：一部の投稿に設定（バリエーションを持たせる）
 
 ### 画像仕様
 
 - **形式：** JPEG または PNG
 - **サイズ：**
   - アバター：200x200px 推奨
-  - カバーアート：1200x1200px 推奨
-  - サムネイル：1200x800px 推奨
+  - スレッドサムネイル：1200x1200px 推奨
+  - 投稿画像：1200x800px 推奨
 - **容量：** 5MB以下（既存の画像サイズ制限に準拠）
 
 ---

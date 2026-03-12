@@ -4,12 +4,8 @@
   h1.text-xl すべての交換日記
 
   / サンプル交換日記セクション
-  - if @sample_threads.present?
-    .mb-12
-      .flex.items-center.justify-between.mb-4
-        h2.text-lg.font-medium サンプル交換日記
-        span.text-xs.text-gray-500 coconikkiの使い方の例です
-      = render "threads/thread_grid", threads: @sample_threads
+  .mb-12
+    = render "threads/sample_threads", sample_threads: @sample_threads
 
   / ユーザーの交換日記セクション
   .mb-12

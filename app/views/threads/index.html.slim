@@ -35,12 +35,7 @@
         = render "threads/thread_grid", threads: @followed_threads
 
     / サンプル交換日記セクション
-    - if @sample_threads.present?
-      section
-        .flex.items-center.justify-between.mb-4
-          h2.text-lg.font-medium サンプル交換日記
-          span.text-xs.text-gray-500 coconikkiの使い方の例です
-        = render "threads/thread_grid", threads: @sample_threads
+    = render "threads/sample_threads", sample_threads: @sample_threads
 
     / 5. すべての交換日記を見る
     section.text-center.py-8
@@ -87,12 +82,7 @@
         p.text-sm.text-gray-600 お気に入りのRSSリーダーで新着購読可能
 
     / サンプル交換日記セクション
-    - if @sample_threads.present?
-      section
-        .flex.items-center.justify-between.mb-4
-          h2.text-lg.font-medium サンプル交換日記
-          span.text-xs.text-gray-500 coconikkiの使い方の例です
-        = render "threads/thread_grid", threads: @sample_threads
+    = render "threads/sample_threads", sample_threads: @sample_threads
 
     / 最近の交換日記（6件まで）
     - if @threads.present?
