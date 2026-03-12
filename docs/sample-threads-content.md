@@ -8,18 +8,29 @@
 
 ## パターン1：『三体』読書日記
 
-**スレッドタイトル：** さくけんの『三体』読書会
-**スレッド説明：** 話題のSF小説『三体』を2人で読み進めながら、感想を交換していく読書日記です。⚠️この交換日記は『三体』へのネタバレを含みますのでご注意ください！
+### スレッド情報
 
-**メンバー：**
+- **slug:** `sample-santai`
+- **タイトル:** さくけんの『三体』読書会
+- **説明:** 話題のSF小説『三体』を2人で読み進めながら、感想を交換していく読書日記です。⚠️この交換日記は『三体』へのネタバレを含みますのでご注意ください！
+- **ステータス:** `free`（公開、誰でも参加可能）
+- **show_in_list:** `true`（一覧に表示）
+- **turn_based:** `true`（ターン制）
+- **is_sample:** `true`（サンプル交換日記フラグ）
 
-- **さくら**（@bloomy_s）
-  - display_name: さくら
-  - bio: Webエンジニア / SF好き / 読書とコーヒーが好き
+### メンバー情報
 
-- **けんた**（@kenkenken）
-  - display_name: けんた
-  - bio: UIデザイナー / SF初心者 / デザインと音楽が好き
+**さくら**（@bloomy_s）
+- username: `bloomy_s`
+- display_name: さくら
+- email: `sample.sakura@example.com`
+- bio: Webエンジニア / SF好き / 読書とコーヒーが好き
+
+**けんた**（@kenkenken）
+- username: `kenkenken`
+- display_name: けんた
+- email: `sample.kenta@example.com`
+- bio: UIデザイナー / SF初心者 / デザインと音楽が好き
 
 ---
 
@@ -134,22 +145,35 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 
 ## パターン2：大学生3人のランニング習慣チャレンジ
 
-**スレッドタイトル：** 週3ランニングを習慣化するための集い
-**スレッド説明：** 大学生3人で、週3回のランニングを習慣化するチャレンジ。まずは1ヶ月続けることを目指します！お互いに報告し合って、習慣化を目指す日記です。
+### スレッド情報
 
-**メンバー：**
+- **slug:** `sample-running`
+- **タイトル:** 週3ランニングを習慣化するための集い
+- **説明:** 大学生3人で、週3回のランニングを習慣化するチャレンジ。まずは1ヶ月続けることを目指します！お互いに報告し合って、習慣化を目指す日記です。
+- **ステータス:** `free`（公開、誰でも参加可能）
+- **show_in_list:** `true`（一覧に表示）
+- **turn_based:** `false`（自由投稿制）
+- **is_sample:** `true`（サンプル交換日記フラグ）
 
-- **あゆみ**（@ayu0901）
-  - display_name: あゆみ
-  - bio: 大学3年生 / 文学部 / レポートと就活で夜型生活
+### メンバー情報
 
-- **たける**（@takeru_camera）
-  - display_name: たける
-  - bio: 大学2年生 / 情報系 / 写真とプログラミングが好き
+**あゆみ**（@ayu0901）
+- username: `ayu0901`
+- display_name: あゆみ
+- email: `sample.ayumi@example.com`
+- bio: 大学3年生 / 文学部 / レポートと就活で夜型生活
 
-- **ゆい**（@ytkmr42）
-  - display_name: ゆい
-  - bio: 大学1年生 / 経済学部 / カフェでバイト中
+**たける**（@takeru_camera）
+- username: `takeru_camera`
+- display_name: たける
+- email: `sample.takeru@example.com`
+- bio: 大学2年生 / 情報系 / 写真とプログラミングが好き
+
+**ゆい**（@ytkmr42）
+- username: `ytkmr42`
+- display_name: ゆい
+- email: `sample.yui@example.com`
+- bio: 大学1年生 / 経済学部 / カフェでバイト中
 
 ---
 
@@ -336,18 +360,29 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 
 ## パターン3：AIについて異なる視点から語る
 
-**スレッドタイトル：** AIについて思うこと
-**スレッド説明：** 小学校教員とAIエンジニアが、それぞれの立場から「AI」について語る対話日記。
+### スレッド情報
 
-**メンバー：**
+- **slug:** `sample-ai-talk`
+- **タイトル:** AIについて思うこと
+- **説明:** 小学校教員とAIエンジニアが、それぞれの立場から「AI」について語る対話日記。
+- **ステータス:** `free`（公開、誰でも参加可能）
+- **show_in_list:** `true`（一覧に表示）
+- **turn_based:** `true`（ターン制）
+- **is_sample:** `true`（サンプル交換日記フラグ）
 
-- **まい**（@my-tnk）
-  - display_name: まい
-  - bio: 小学校教員 / 子どもたちの未来を考える / 読書と料理が好き
+### メンバー情報
 
-- **りょう**（@moduryo）
-  - display_name: りょう
-  - bio: AIエンジニア / スタートアップ勤務 / 技術で社会を変えたい
+**まい**（@my-tnk）
+- username: `my-tnk`
+- display_name: まい
+- email: `sample.mai@example.com`
+- bio: 小学校教員 / 子どもたちの未来を考える / 読書と料理が好き
+
+**りょう**（@moduryo）
+- username: `moduryo`
+- display_name: りょう
+- email: `sample.ryo@example.com`
+- bio: AIエンジニア / スタートアップ勤務 / 技術で社会を変えたい
 
 ---
 
