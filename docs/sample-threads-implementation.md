@@ -148,6 +148,111 @@ end
 
 ---
 
+## 画像の設定方法（Active Storage使用）
+
+### 実装方針
+
+サンプル交換日記用の画像（アバター・カバーアート・投稿サムネイル）は、**Active Storageを使って設定**します。
+
+**メリット：**
+- ✅ 既存の仕組み（Active Storage）をそのまま使える
+- ✅ ユーザーがアップロードした画像と同じように扱える
+- ✅ Gitでバージョン管理できる
+- ✅ 本番環境でも確実に動作
+
+### ディレクトリ構造
+
+```
+app/assets/images/samples/
+├── avatars/              # ユーザーアバター（必須）
+│   ├── sakura.jpg       # さくら
+│   ├── kenta.jpg        # けんた
+│   ├── ayumi.jpg        # あゆみ
+│   ├── takeru.jpg       # たける
+│   ├── yui.jpg          # ゆい
+│   ├── mai.jpg          # まい
+│   └── ryo.jpg          # りょう
+├── covers/              # スレッドカバーアート（必須）
+│   ├── santai.jpg       # 三体読書会
+│   ├── running.jpg      # ランニングチャレンジ
+│   └── ai-talk.jpg      # AI対話
+└── thumbnails/          # 投稿サムネイル（任意）
+    ├── santai-post-3.jpg
+    ├── running-post-2.jpg
+    └── ai-talk-post-4.jpg
+```
+
+### Seeds実装例
+
+```ruby
+# db/seeds/sample_threads.rb
+
+# Active Storageで画像をアタッチするヘルパーメソッド
+def attach_image_from_assets(record, attachment_name, file_path)
+  full_path = Rails.root.join("app/assets/images/samples/#{file_path}")
+  return unless File.exist?(full_path)
+
+  record.public_send(attachment_name).attach(
+    io: File.open(full_path),
+    filename: File.basename(file_path),
+    content_type: Marcel::MimeType.for(Pathname.new(file_path))
+  )
+end
+
+# 1. サンプルユーザーを作成
+sakura = User.find_or_create_by!(username: "bloomy_s") do |u|
+  u.display_name = "さくら"
+  u.email = "sample.sakura@example.com"
+  u.bio = "Webエンジニア / SF好き / 読書とコーヒーが好き\n※coconikkiサンプル交換日記用のアカウントです"
+end
+# アバター画像をアタッチ
+attach_image_from_assets(sakura, :avatar, "avatars/sakura.jpg")
+
+# 2. スレッドを作成
+thread = CorrespondenceThread.find_or_create_by!(slug: "sample-santai") do |t|
+  t.title = "さくけんの『三体』読書会"
+  t.description = "話題のSF小説『三体』を2人で読み進めながら、感想を交換していく読書日記です。⚠️この交換日記は『三体』へのネタバレを含みますのでご注意ください！\n\n※この交換日記はcoconikkiのサンプルです（ダミーアカウントによる架空の内容です）"
+  t.status = "free"
+  t.show_in_list = true
+  t.turn_based = true
+  t.is_sample = true
+end
+# カバーアートをアタッチ
+attach_image_from_assets(thread, :cover_art, "covers/santai.jpg")
+
+# 3. 投稿を作成（任意でサムネイル画像を追加）
+post = Post.create!(
+  thread: thread,
+  user: sakura,
+  title: "三体、ついに買った",
+  body: "念願の『三体』を買ってきました。...",
+  status: "published",
+  created_at: Time.zone.parse("2026-02-01 20:00")
+)
+# 投稿サムネイル（任意）
+attach_image_from_assets(post, :thumbnail, "thumbnails/santai-post-1.jpg")
+```
+
+### 必要な画像
+
+**必須：**
+- ユーザーアバター：7枚（さくら、けんた、あゆみ、たける、ゆい、まい、りょう）
+- スレッドカバーアート：3枚（三体読書会、ランニングチャレンジ、AI対話）
+
+**任意：**
+- 投稿サムネイル：一部の投稿に設定（バリエーションを持たせる）
+
+### 画像仕様
+
+- **形式：** JPEG または PNG
+- **サイズ：**
+  - アバター：200x200px 推奨
+  - カバーアート：1200x630px 推奨
+  - サムネイル：800x600px 推奨
+- **容量：** 5MB以下（既存の画像サイズ制限に準拠）
+
+---
+
 ## サンプル交換日記の構成
 
 ### パターン1：「読んでいる本をゆっくり消化する」
