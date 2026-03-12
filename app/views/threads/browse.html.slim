@@ -3,17 +3,26 @@
 .flex.flex-col.gap-6
   h1.text-xl すべての交換日記
 
-  - if @threads.empty?
-    .text-center.py-16.text-gray-400
-      p.text-lg まだ交換日記がありません
-      - if logged_in?
-        p.text-sm.mt-2
-          | 最初の交換日記を
-          = link_to "作成する", new_thread_path, class: "underline"
-          | ？
-  - else
-    = render "threads/thread_grid", threads: @threads
+  / サンプル交換日記セクション
+  - if @sample_threads.present?
+    .mb-12
+      .flex.items-center.justify-between.mb-4
+        h2.text-lg.font-medium サンプル交換日記
+        span.text-xs.text-gray-500 coconikkiの使い方の例です
+      = render "threads/thread_grid", threads: @sample_threads
 
-    / ページネーション
-    .flex.justify-center.mt-8
-      = paginate @threads
+  / ユーザーの交換日記セクション
+  .mb-12
+    h2.text-lg.font-medium.mb-4 交換日記一覧
+    - if @threads.empty?
+      .text-center.py-16.text-gray-400
+        p.text-lg まだ交換日記がありません
+        - if logged_in?
+          p.text-sm.mt-2
+            | 最初の交換日記を
+            = link_to "作成する", new_thread_path, class: "underline"
+            | ？
+    - else
+      = render "threads/thread_grid", threads: @threads
+      .flex.justify-center.mt-8
+        = paginate @threads

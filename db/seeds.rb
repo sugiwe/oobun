@@ -23,3 +23,6 @@ if Rails.env.development?
 
   puts "✅ 開発用テストユーザー #{test_users.size}人を作成しました"
 end
+
+# サンプル交換日記（開発環境・本番環境共通）
+load Rails.root.join("db", "seeds", "sample_threads.rb")
