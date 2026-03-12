@@ -13,6 +13,8 @@
 - **slug:** `sample-santai`
 - **タイトル:** さくけんの『三体』読書会
 - **説明:** 話題のSF小説『三体』を2人で読み進めながら、感想を交換していく読書日記です。⚠️この交換日記は『三体』へのネタバレを含みますのでご注意ください！
+
+※この交換日記はcoconikkiのサンプルです（ダミーアカウントによる架空の内容です）
 - **ステータス:** `free`（公開、誰でも参加可能）
 - **show_in_list:** `true`（一覧に表示）
 - **turn_based:** `true`（ターン制）
@@ -25,12 +27,14 @@
 - display_name: さくら
 - email: `sample.sakura@example.com`
 - bio: Webエンジニア / SF好き / 読書とコーヒーが好き
+※coconikkiサンプル交換日記用のアカウントです
 
 **けんた**（@kenkenken）
 - username: `kenkenken`
 - display_name: けんた
 - email: `sample.kenta@example.com`
 - bio: UIデザイナー / SF初心者 / デザインと音楽が好き
+※coconikkiサンプル交換日記用のアカウントです
 
 ---
 
@@ -150,6 +154,8 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 - **slug:** `sample-running`
 - **タイトル:** 週3ランニングを習慣化するための集い
 - **説明:** 大学生3人で、週3回のランニングを習慣化するチャレンジ。まずは1ヶ月続けることを目指します！お互いに報告し合って、習慣化を目指す日記です。
+
+※この交換日記はcoconikkiのサンプルです（ダミーアカウントによる架空の内容です）
 - **ステータス:** `free`（公開、誰でも参加可能）
 - **show_in_list:** `true`（一覧に表示）
 - **turn_based:** `false`（自由投稿制）
@@ -162,18 +168,21 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 - display_name: あゆみ
 - email: `sample.ayumi@example.com`
 - bio: 大学3年生 / 文学部 / レポートと就活で夜型生活
+※coconikkiサンプル交換日記用のアカウントです
 
 **たける**（@takeru_camera）
 - username: `takeru_camera`
 - display_name: たける
 - email: `sample.takeru@example.com`
 - bio: 大学2年生 / 情報系 / 写真とプログラミングが好き
+※coconikkiサンプル交換日記用のアカウントです
 
 **ゆい**（@ytkmr42）
 - username: `ytkmr42`
 - display_name: ゆい
 - email: `sample.yui@example.com`
 - bio: 大学1年生 / 経済学部 / カフェでバイト中
+※coconikkiサンプル交換日記用のアカウントです
 
 ---
 
@@ -365,6 +374,8 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 - **slug:** `sample-ai-talk`
 - **タイトル:** AIについて思うこと
 - **説明:** 小学校教員とAIエンジニアが、それぞれの立場から「AI」について語る対話日記。
+
+※この交換日記はcoconikkiのサンプルです（ダミーアカウントによる架空の内容です）
 - **ステータス:** `free`（公開、誰でも参加可能）
 - **show_in_list:** `true`（一覧に表示）
 - **turn_based:** `true`（ターン制）
@@ -377,12 +388,14 @@ VRMMOみたいな設定で、プレイヤーが三体文明の謎を解いてい
 - display_name: まい
 - email: `sample.mai@example.com`
 - bio: 小学校教員 / 子どもたちの未来を考える / 読書と料理が好き
+※coconikkiサンプル交換日記用のアカウントです
 
 **りょう**（@moduryo）
 - username: `moduryo`
 - display_name: りょう
 - email: `sample.ryo@example.com`
 - bio: AIエンジニア / スタートアップ勤務 / 技術で社会を変えたい
+※coconikkiサンプル交換日記用のアカウントです
 
 ---
 
