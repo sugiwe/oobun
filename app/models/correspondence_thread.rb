@@ -189,6 +189,8 @@ class CorrespondenceThread < ApplicationRecord
   scope :recent_order, -> { order(last_posted_at: :desc, created_at: :desc) }
   scope :public_threads, -> { where(status: [ "free", "paid" ]) }
   scope :discoverable, -> { public_threads.where(show_in_list: true) }
+  scope :sample_threads, -> { where(is_sample: true) }
+  scope :user_threads, -> { where(is_sample: false) }
 
   # Associations
   has_many :memberships, foreign_key: :thread_id, dependent: :destroy
