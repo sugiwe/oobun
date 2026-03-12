@@ -3,6 +3,7 @@ class ThreadsController < ApplicationController
   before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
   before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
   before_action :require_viewable, only: [ :show ]
+  before_action :set_sample_threads, only: [ :index, :browse ]
 
   # 画像付きエクスポートのレート制限（DoS対策）
   rate_limit to: 3, within: 1.hour, only: :export_with_images, by: -> { current_user.id }
@@ -18,19 +19,12 @@ class ThreadsController < ApplicationController
       build_personalized_feed
     else
       # ランディングページ（ログアウト時）
-      @threads = CorrespondenceThread.discoverable
-                                     .includes(:users, :memberships)
-                                     .recent_order
-                                     .limit(6)
+      @threads = fetch_user_threads(limit: 6)
     end
   end
 
   def browse
-    # 全交換日記一覧ページ
-    @threads = CorrespondenceThread.discoverable
-                                   .includes(:users, :memberships)
-                                   .recent_order
-                                   .page(params[:page])
+    @threads = fetch_user_threads(paginate: true)
   end
 
   def show
@@ -138,6 +132,29 @@ class ThreadsController < ApplicationController
   end
 
   private
+
+  def set_sample_threads
+    @sample_threads = CorrespondenceThread.sample_threads
+                                          .discoverable
+                                          .includes(:users, :memberships)
+                                          .recent_order
+                                          .limit(3)
+  end
+
+  def fetch_user_threads(limit: nil, paginate: false)
+    threads = CorrespondenceThread.user_threads
+                                  .discoverable
+                                  .includes(:users, :memberships)
+                                  .recent_order
+
+    if paginate
+      threads.page(params[:page])
+    elsif limit
+      threads.limit(limit)
+    else
+      threads
+    end
+  end
 
   def build_personalized_feed
     feed_data = current_user.personalized_feed_data
