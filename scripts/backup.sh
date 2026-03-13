@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e -o pipefail
 
 # coconikkiバックアップスクリプト
 # Google Driveへの自動バックアップ

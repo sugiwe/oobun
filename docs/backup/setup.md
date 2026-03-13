@@ -160,8 +160,11 @@ sudo -E ./scripts/backup.sh
 # cronを編集
 crontab -e
 
+# crontabファイルの上部に環境変数を定義（セキュリティベストプラクティス）
+DISCORD_WEBHOOK_URL=YOUR_WEBHOOK_URL
+
 # 以下の行を追加（毎日午前3時に実行、Discord通知を有効化）
-0 3 * * * export DISCORD_WEBHOOK_URL="YOUR_WEBHOOK_URL"; cd /home/deploy/oobun && sudo -E /home/deploy/oobun/scripts/backup.sh >> /home/deploy/backup.log 2>&1
+0 3 * * * cd /home/deploy/oobun && sudo -E /home/deploy/oobun/scripts/backup.sh >> /home/deploy/backup.log 2>&1
 
 # 保存して終了
 # cron設定を確認
@@ -172,11 +175,11 @@ crontab -l
 - 午前3時（日本時間）= アクセスが少ない時間帯
 - サーバー時刻がUTCの場合は調整が必要（`date`コマンドで確認）
 
-**注意事項**:
-- cron内で`export DISCORD_WEBHOOK_URL`としていますが、これは説明用の例です
-- **実際の運用では**、上記手順7で既に`~/.bashrc`に環境変数を設定済みです
-- `sudo -E`オプションにより、`.bashrc`の環境変数が引き継がれます
-- crontab内に直接シークレット情報を書く必要はありません
+**環境変数の設定方法**:
+- crontabファイルの上部で`DISCORD_WEBHOOK_URL`を定義することを推奨
+- この方法により、コマンドライン上にシークレットが露出しない
+- `sudo -E`オプションでcrontabの環境変数が引き継がれます
+- または、手順7で設定した`~/.bashrc`の環境変数も引き継がれます
 
 ---
 

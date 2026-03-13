@@ -304,18 +304,7 @@ bin/kamal app restart
 bin/kamal app logs
 ```
 
-### シナリオ2: 画像ファイルが全て消えた
-
-```bash
-# データベースはそのままで、ストレージのみ復元したい場合
-# restore.shを一部修正する必要があります
-
-# まずは通常の復元を実行
-cd ~/backup-scripts
-sudo ./restore.sh latest
-```
-
-### シナリオ3: VPS全体が故障・交換
+### シナリオ2: VPS全体が故障・交換
 
 1. **新しいVPSをセットアップ**
    - Railsアプリケーションをデプロイ

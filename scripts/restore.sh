@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e -o pipefail
 
 # coconikkiリストアスクリプト
 # Google Driveからのバックアップ復元
@@ -133,6 +133,9 @@ fi
 log "使用するバックアップ: $(basename $DB_BACKUP)"
 
 # データベースを一旦削除して再作成
+log "データベースへのアクティブな接続を切断中..."
+psql -U postgres -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'coconikki_production' AND pid <> pg_backend_pid();"
+
 log "既存のデータベースを削除中..."
 psql -U postgres -c "DROP DATABASE IF EXISTS coconikki_production;"
 psql -U postgres -c "CREATE DATABASE coconikki_production;"
