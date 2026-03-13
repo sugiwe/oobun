@@ -40,46 +40,35 @@ bin/kamal logs
 
 ## バックアップ
 
-本番環境のバックアップはGoogle Driveに自動保存されます。
+本番環境のバックアップはGoogle Driveに自動保存されます（毎日午前3時、Discord通知あり）。
 
-### セットアップ
+### 運用ドキュメント
 
-詳細は [docs/backup-setup.md](docs/backup-setup.md) を参照してください。
+- [バックアップ運用マニュアル](docs/backup/operations.md) - 日常的な運用方法
+- [復元ガイド](docs/backup/restore-guide.md) - バックアップからの復元手順
+- [セットアップ手順](docs/backup/setup.md) - 初回セットアップ方法
 
-### バックアップの確認
+### クイックリファレンス
 
 ```bash
-# VPSにSSH接続
-ssh -i ~/.ssh/coconikki_vps deploy@220.158.23.115
-
-# バックアップ一覧を確認
+# バックアップ確認
 rclone ls gdrive:coconikki_backups
+
+# 手動バックアップ
+cd ~/backup-scripts
+sudo -E ./backup.sh
+
+# 復元（最新）
+cd ~/backup-scripts
+sudo ./restore.sh latest
 ```
-
-### 手動バックアップ
-
-```bash
-# VPS上で実行
-cd /home/deploy/oobun
-sudo ./scripts/backup.sh
-```
-
-### リストア
-
-```bash
-# VPS上で実行
-cd /home/deploy/oobun
-sudo ./scripts/restore.sh latest
-```
-
-⚠️ 詳細な手順は [docs/backup-setup.md](docs/backup-setup.md) を必ず確認してください。
 
 ## ドキュメント
 
 - [設計ドキュメント](docs/design.md)
 - [機能仕様](docs/features.md)
 - [実装方針](docs/implementation.md)
-- [バックアップセットアップ](docs/backup-setup.md)
+- [バックアップ運用](docs/backup/) - バックアップシステムのドキュメント
 
 ## ライセンス
 
