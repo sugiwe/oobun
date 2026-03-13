@@ -118,14 +118,50 @@ rclone ls gdrive:coconikki_backups
 - `coconikki_db_YYYYMMDD_HHMMSS.sql.gz`
 - `coconikki_storage_YYYYMMDD_HHMMSS.tar.gz`
 
-### 7. cron設定（自動実行）
+### 7. Discord通知設定（任意）
+
+バックアップの成功・失敗をDiscordに通知できます。
+
+#### Discord Webhookの作成
+
+1. Discordサーバーの設定を開く
+2. 「連携サービス」→「ウェブフック」を選択
+3. 「新しいウェブフック」をクリック
+4. 名前を設定（例: coconikki-backup）
+5. 通知先チャンネルを選択
+6. 「ウェブフックURLをコピー」
+
+#### VPSで環境変数を設定
+
+```bash
+# .bashrcや.bash_profileに追加
+echo 'export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/YOUR_WEBHOOK_URL"' >> ~/.bashrc
+source ~/.bashrc
+
+# 設定を確認
+echo $DISCORD_WEBHOOK_URL
+```
+
+#### 通知のテスト
+
+```bash
+# テストバックアップを実行
+cd /home/deploy/oobun
+sudo -E ./scripts/backup.sh
+```
+
+**通知内容**:
+- ✅ 成功時: 緑色のembed、実行日時、各ファイルサイズ、保存先、Google Driveリンク
+- ❌ 失敗時: 赤色のembed、エラー内容
+
+### 8. cron設定（自動実行）
 
 ```bash
 # cronを編集
 crontab -e
 
-# 以下の行を追加（毎日午前3時に実行）
-0 3 * * * cd /home/deploy/oobun && sudo /home/deploy/oobun/scripts/backup.sh >> /home/deploy/backup.log 2>&1
+# 以下の行を追加（毎日午前3時に実行、Discord通知を有効化）
+0 3 * * * export DISCORD_WEBHOOK_URL="YOUR_WEBHOOK_URL"; cd /home/deploy/oobun && sudo -E /home/deploy/oobun/scripts/backup.sh >> /home/deploy/backup.log 2>&1
 
 # 保存して終了
 # cron設定を確認
@@ -135,6 +171,24 @@ crontab -l
 **実行時刻の選択**:
 - 午前3時（日本時間）= アクセスが少ない時間帯
 - サーバー時刻がUTCの場合は調整が必要（`date`コマンドで確認）
+
+**注意**: cron内で環境変数を使うため、`sudo -E`オプションで環境変数を引き継ぎます。
+
+---
+
+## 9. 動作確認
+
+バックアップが正常に動作しているか確認:
+
+```bash
+# ログを確認
+tail -50 /home/deploy/backup.log
+
+# Google Driveのファイルを確認
+rclone ls gdrive:coconikki_backups
+
+# Discord通知が届いているか確認
+```
 
 ---
 

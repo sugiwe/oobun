@@ -10,13 +10,22 @@ set -e
 # 必要な環境変数:
 #   BACKUP_BACKEND (デフォルト: gdrive)
 #   BACKUP_RETENTION_DAYS (デフォルト: 7)
+#   DISCORD_WEBHOOK_URL (任意: Discord通知用)
 
 # 設定
 BACKUP_BACKEND=${BACKUP_BACKEND:-gdrive}
 BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
 BACKUP_DIR="/tmp/coconikki_backup_$(date +%Y%m%d_%H%M%S)"
 DATE=$(date +%Y%m%d)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# バックアップ統計
+DB_SIZE=""
+STORAGE_SIZE=""
+TOTAL_SIZE=""
+BACKUP_STATUS="running"
+ERROR_MESSAGE=""
 
 # ログ出力
 log() {
@@ -26,7 +35,99 @@ log() {
 # エラーハンドリング
 error() {
   log "ERROR: $*"
+  ERROR_MESSAGE="$*"
+  BACKUP_STATUS="failed"
+  send_discord_notification
   exit 1
+}
+
+# Discord通知を送信
+send_discord_notification() {
+  if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+    return 0
+  fi
+
+  local color
+  local title
+  local description
+
+  if [ "$BACKUP_STATUS" = "success" ]; then
+    color=3066993  # 緑
+    title="✅ バックアップ成功"
+    description="coconikkiのバックアップが正常に完了しました"
+  else
+    color=15158332  # 赤
+    title="❌ バックアップ失敗"
+    description="coconikkiのバックアップ中にエラーが発生しました"
+  fi
+
+  # Google Driveフォルダリンク
+  local gdrive_link=""
+  if [ "$BACKUP_BACKEND" = "gdrive" ]; then
+    # フォルダIDを取得（rcloneから）
+    gdrive_link="https://drive.google.com/drive/folders/coconikki_backups"
+  fi
+
+  # JSON作成
+  local json_payload
+  json_payload=$(cat <<EOF
+{
+  "embeds": [{
+    "title": "$title",
+    "description": "$description",
+    "color": $color,
+    "fields": [
+      {
+        "name": "📅 実行日時",
+        "value": "$(date +'%Y-%m-%d %H:%M:%S JST')",
+        "inline": false
+      },
+      {
+        "name": "💾 データベース",
+        "value": "${DB_SIZE:-不明}",
+        "inline": true
+      },
+      {
+        "name": "🖼️ ストレージ",
+        "value": "${STORAGE_SIZE:-不明}",
+        "inline": true
+      },
+      {
+        "name": "📦 合計サイズ",
+        "value": "${TOTAL_SIZE:-不明}",
+        "inline": true
+      },
+      {
+        "name": "🗄️ 保存先",
+        "value": "$BACKUP_BACKEND",
+        "inline": true
+      },
+      {
+        "name": "⏳ 保持期間",
+        "value": "${BACKUP_RETENTION_DAYS}日",
+        "inline": true
+      }
+      $(if [ -n "$ERROR_MESSAGE" ]; then
+        echo ",{\"name\": \"⚠️ エラー内容\", \"value\": \"$ERROR_MESSAGE\", \"inline\": false}"
+      fi)
+      $(if [ -n "$gdrive_link" ]; then
+        echo ",{\"name\": \"🔗 バックアップ先\", \"value\": \"[Google Driveで確認]($gdrive_link)\", \"inline\": false}"
+      fi)
+    ],
+    "footer": {
+      "text": "coconikki backup system"
+    },
+    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+  }]
+}
+EOF
+)
+
+  # Webhookに送信
+  curl -H "Content-Type: application/json" \
+       -d "$json_payload" \
+       "$DISCORD_WEBHOOK_URL" \
+       --silent --show-error || log "Discord通知の送信に失敗しました"
 }
 
 # クリーンアップ
@@ -139,5 +240,12 @@ case $BACKUP_BACKEND in
     ;;
 esac
 
+# バックアップ成功
+BACKUP_STATUS="success"
+TOTAL_SIZE=$(du -sh "$BACKUP_DIR" | cut -f1)
+
 log "=== バックアップ完了 ==="
-log "合計サイズ: $(du -sh "$BACKUP_DIR" | cut -f1)"
+log "合計サイズ: ${TOTAL_SIZE}"
+
+# Discord通知を送信
+send_discord_notification
