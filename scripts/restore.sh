@@ -16,7 +16,7 @@ set -e
 
 # 設定
 BACKUP_BACKEND=${BACKUP_BACKEND:-gdrive}
-RESTORE_DIR="/tmp/coconikki_restore_$(date +%Y%m%d_%H%M%S)"
+RESTORE_DIR=$(mktemp -d /tmp/coconikki_restore.XXXXXX)
 BACKUP_TIMESTAMP=${1:-latest}
 
 # ログ出力
@@ -81,13 +81,18 @@ case $BACKUP_BACKEND in
 
     # ダウンロード
     if [ "$BACKUP_TIMESTAMP" = "latest" ]; then
-      log "最新のバックアップをダウンロード中..."
-      rclone copy "$REMOTE_PATH" "$RESTORE_DIR" --verbose
-    else
-      log "指定されたバックアップをダウンロード中..."
-      rclone copy "$REMOTE_PATH" "$RESTORE_DIR" \
-        --include "*${BACKUP_TIMESTAMP}*" --verbose
+      log "最新のバックアップを特定中..."
+      LATEST_TIMESTAMP=$(rclone lsf "$REMOTE_PATH" | grep 'coconikki_db_' | sed -E 's/.*coconikki_db_([0-9]{8}_[0-9]{6})\.sql\.gz/\1/' | sort -r | head -n 1)
+      if [ -z "$LATEST_TIMESTAMP" ]; then
+        error "最新のバックアップが見つかりません"
+      fi
+      log "最新のタイムスタンプ: $LATEST_TIMESTAMP"
+      BACKUP_TIMESTAMP=$LATEST_TIMESTAMP
     fi
+
+    log "指定されたバックアップをダウンロード中..."
+    rclone copy "$REMOTE_PATH" "$RESTORE_DIR" \
+      --include "*${BACKUP_TIMESTAMP}*" --verbose
 
     if [ ! "$(ls -A $RESTORE_DIR)" ]; then
       error "バックアップファイルが見つかりません"

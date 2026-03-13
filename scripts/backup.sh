@@ -16,8 +16,7 @@ set -e
 BACKUP_BACKEND=${BACKUP_BACKEND:-gdrive}
 BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
 DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
-BACKUP_DIR="/tmp/coconikki_backup_$(date +%Y%m%d_%H%M%S)"
-DATE=$(date +%Y%m%d)
+BACKUP_DIR=$(mktemp -d /tmp/coconikki_backup.XXXXXX)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # バックアップ統計
@@ -30,6 +29,11 @@ ERROR_MESSAGE=""
 # ログ出力
 log() {
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
+}
+
+# JSON文字列をエスケープ
+escape_json() {
+  echo "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g'
 }
 
 # エラーハンドリング
@@ -61,11 +65,10 @@ send_discord_notification() {
     description="coconikkiのバックアップ中にエラーが発生しました"
   fi
 
-  # Google Driveフォルダリンク
-  local gdrive_link=""
-  if [ "$BACKUP_BACKEND" = "gdrive" ]; then
-    # フォルダIDを取得（rcloneから）
-    gdrive_link="https://drive.google.com/drive/folders/coconikki_backups"
+  # エラーメッセージをエスケープ
+  local escaped_error=""
+  if [ -n "$ERROR_MESSAGE" ]; then
+    escaped_error=$(escape_json "$ERROR_MESSAGE")
   fi
 
   # JSON作成
@@ -107,11 +110,8 @@ send_discord_notification() {
         "value": "${BACKUP_RETENTION_DAYS}日",
         "inline": true
       }
-      $(if [ -n "$ERROR_MESSAGE" ]; then
-        echo ",{\"name\": \"⚠️ エラー内容\", \"value\": \"$ERROR_MESSAGE\", \"inline\": false}"
-      fi)
-      $(if [ -n "$gdrive_link" ]; then
-        echo ",{\"name\": \"🔗 バックアップ先\", \"value\": \"[Google Driveで確認]($gdrive_link)\", \"inline\": false}"
+      $(if [ -n "$escaped_error" ]; then
+        echo ",{\"name\": \"⚠️ エラー内容\", \"value\": \"$escaped_error\", \"inline\": false}"
       fi)
     ],
     "footer": {
@@ -153,7 +153,7 @@ log "PostgreSQLをバックアップ中..."
 
 DB_BACKUP_FILE="$BACKUP_DIR/coconikki_db_${TIMESTAMP}.sql.gz"
 
-if pg_dump -U postgres coconikki_production | gzip > "$DB_BACKUP_FILE"; then
+if sudo -u postgres pg_dump coconikki_production | gzip > "$DB_BACKUP_FILE"; then
   DB_SIZE=$(du -h "$DB_BACKUP_FILE" | cut -f1)
   log "PostgreSQLバックアップ完了: ${DB_SIZE}"
 else
@@ -230,6 +230,10 @@ case $BACKUP_BACKEND in
 
     if aws s3 sync "$BACKUP_DIR" "s3://${S3_BUCKET}/"; then
       log "AWS S3へのアップロード完了"
+
+      # TODO: 古いバックアップの削除処理を実装
+      # S3のライフサイクルポリシーを使用するか、AWS CLIで削除する
+      log "注意: S3バックエンドでは古いバックアップの自動削除が未実装です"
     else
       error "AWS S3へのアップロードに失敗しました"
     fi

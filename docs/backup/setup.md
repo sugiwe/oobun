@@ -107,8 +107,8 @@ chmod +x scripts/restore.sh
 ### 6. 手動でバックアップをテスト
 
 ```bash
-# テスト実行
-sudo ./scripts/backup.sh
+# テスト実行（-E フラグで環境変数を引き継ぐ）
+sudo -E ./scripts/backup.sh
 
 # 実行後、Google Driveを確認
 rclone ls gdrive:coconikki_backups
@@ -172,7 +172,11 @@ crontab -l
 - 午前3時（日本時間）= アクセスが少ない時間帯
 - サーバー時刻がUTCの場合は調整が必要（`date`コマンドで確認）
 
-**注意**: cron内で環境変数を使うため、`sudo -E`オプションで環境変数を引き継ぎます。
+**注意事項**:
+- cron内で`export DISCORD_WEBHOOK_URL`としていますが、これは説明用の例です
+- **実際の運用では**、上記手順7で既に`~/.bashrc`に環境変数を設定済みです
+- `sudo -E`オプションにより、`.bashrc`の環境変数が引き継がれます
+- crontab内に直接シークレット情報を書く必要はありません
 
 ---
 
