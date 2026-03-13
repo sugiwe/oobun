@@ -107,11 +107,17 @@ case $BACKUP_BACKEND in
     fi
 
     if [ "$BACKUP_TIMESTAMP" = "latest" ]; then
-      # 最新のバックアップを取得
-      cp -r "$LOCAL_BACKUP_DIR"/* "$RESTORE_DIR/"
-    else
-      cp "$LOCAL_BACKUP_DIR"/*${BACKUP_TIMESTAMP}* "$RESTORE_DIR/"
+      log "最新のバックアップを特定中..."
+      LATEST_TIMESTAMP=$(ls -1 "$LOCAL_BACKUP_DIR"/coconikki_db_*.sql.gz 2>/dev/null | sed -E 's/.*coconikki_db_([0-9]{8}_[0-9]{6})\.sql\.gz/\1/' | sort -r | head -n 1)
+      if [ -z "$LATEST_TIMESTAMP" ]; then
+        error "最新のバックアップが見つかりません"
+      fi
+      log "最新のタイムスタンプ: $LATEST_TIMESTAMP"
+      BACKUP_TIMESTAMP=$LATEST_TIMESTAMP
     fi
+
+    log "指定されたバックアップをコピー中..."
+    cp "$LOCAL_BACKUP_DIR"/*${BACKUP_TIMESTAMP}* "$RESTORE_DIR/"
     ;;
 
   *)
