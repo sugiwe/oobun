@@ -1,4 +1,16 @@
 ja:
+  # 日時フォーマット
+  time:
+    formats:
+      default: "%Y/%m/%d %H:%M"
+      short: "%m/%d %H:%M"
+      long: "%Y年%m月%d日 %H時%M分"
+  date:
+    formats:
+      default: "%Y/%m/%d"
+      short: "%m/%d"
+      long: "%Y年%m月%d日"
+
   # 日時の距離表現（time_ago_in_words用）
   datetime:
     distance_in_words:
