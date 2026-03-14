@@ -17,7 +17,7 @@ class Admin::AllowedUsersController < Admin::ApplicationController
     @allowed_user.added_by_admin = true
 
     if @allowed_user.save
-      redirect_to admin_allowed_users_path, notice: "ログイン許可ユーザーを追加しました"
+      redirect_to admin_allowed_users_path, notice: "ログイン許可ユーザーを追加しました", status: :see_other
     else
       render :new, status: :unprocessable_entity
     end
@@ -30,7 +30,7 @@ class Admin::AllowedUsersController < Admin::ApplicationController
   # PATCH/PUT /admin/allowed_users/:id
   def update
     if @allowed_user.update(allowed_user_params)
-      redirect_to admin_allowed_users_path, notice: "ログイン許可ユーザーを更新しました"
+      redirect_to admin_allowed_users_path, notice: "ログイン許可ユーザーを更新しました", status: :see_other
     else
       render :edit, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class Admin::AllowedUsersController < Admin::ApplicationController
   # DELETE /admin/allowed_users/:id
   def destroy
     @allowed_user.destroy
-    redirect_to admin_allowed_users_path, notice: "ログイン許可を削除しました"
+    redirect_to admin_allowed_users_path, notice: "ログイン許可を削除しました", status: :see_other
   end
 
   private

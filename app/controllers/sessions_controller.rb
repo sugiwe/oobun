@@ -38,13 +38,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
-
-      # 招待トークンがあれば処理
-      if session[:invitation_token]
-        process_invitation(user, session[:invitation_token])
-        session.delete(:invitation_token)
-      end
-
+      process_invitation_if_present(user)
       redirect_to root_path, notice: "ログインしました"
     end
   end

@@ -19,13 +19,7 @@ class UsernamesController < ApplicationController
     if user.save
       session.delete(:pending_google_payload)
       session[:user_id] = user.id
-
-      # 招待トークンがあれば処理（AllowedUser追加 & Membership作成）
-      if session[:invitation_token]
-        process_invitation(user, session[:invitation_token])
-        session.delete(:invitation_token)
-      end
-
+      process_invitation_if_present(user)
       redirect_to root_path, notice: "ようこそ！アカウントを作成しました"
     else
       @user = user

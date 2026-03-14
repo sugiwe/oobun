@@ -8,11 +8,10 @@ namespace :allowed_users do
 
     # 1. 既存のすべてのユーザーをAllowedUserに追加
     puts "Step 1: Adding all existing users to AllowedUser table..."
-    users = User.all
     added_count = 0
     skipped_count = 0
 
-    users.each do |user|
+    User.find_each do |user|
       if AllowedUser.exists?(email: user.email)
         puts "  [SKIP] #{user.email} - already exists"
         skipped_count += 1

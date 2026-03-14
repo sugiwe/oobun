@@ -25,6 +25,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  private
+
+  # 招待トークンがセッションにあれば処理
+  def process_invitation_if_present(user)
+    return unless session[:invitation_token]
+
+    process_invitation(user, session[:invitation_token])
+    session.delete(:invitation_token)
+  end
+
   # 招待トークンの処理: AllowedUserに追加 & Membership作成
   def process_invitation(user, token)
     invitation = Invitation.find_by(token: token)

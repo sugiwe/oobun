@@ -3,6 +3,7 @@ class Threads::InvitationsController < Threads::ApplicationController
   skip_before_action :set_thread, only: [ :show, :accept ]
   before_action :require_membership, only: [ :create ]
   before_action :set_invitation, only: [ :show, :accept ]
+  before_action :check_invitation_status, only: [ :show, :accept ]
 
   # POST /:thread_slug/invitation
   # 交換日記メンバーが招待URLを発行する
@@ -15,37 +16,16 @@ class Threads::InvitationsController < Threads::ApplicationController
   # GET /invite/:token
   # 招待を受け取った人が承認画面を見る
   def show
-    if @invitation.accepted?
-      redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
-      return
-    elsif @invitation.expired?
-      redirect_to root_path, alert: "この招待URLは有効期限切れです"
-      return
-    end
-
     # 招待トークンをセッションに保存（ログイン許可に使用）
     session[:invitation_token] = @invitation.token
 
     # ログインしていない場合はログイン画面へ
-    unless logged_in?
-      redirect_to login_path, notice: "招待を受け入れるにはログインが必要です"
-      return
-    end
+    redirect_to login_path, notice: "招待を受け入れるにはログインが必要です" unless logged_in?
   end
 
   # POST /invite/:token
   # 招待を承認してメンバーになる
   def accept
-    if @invitation.accepted?
-      redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
-      return
-    end
-
-    if @invitation.expired?
-      redirect_to root_path, alert: "この招待URLは有効期限切れです"
-      return
-    end
-
     if @invitation.thread.memberships.exists?(user: current_user)
       redirect_to thread_path(@invitation.thread.slug), notice: "すでにこの交換日記のメンバーです"
       return
@@ -69,6 +49,14 @@ class Threads::InvitationsController < Threads::ApplicationController
   end
 
   private
+
+  def check_invitation_status
+    if @invitation.accepted?
+      redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
+    elsif @invitation.expired?
+      redirect_to root_path, alert: "この招待URLは有効期限切れです"
+    end
+  end
 
   def set_invitation
     @invitation = Invitation.includes(:thread).find_by!(token: params[:token])
