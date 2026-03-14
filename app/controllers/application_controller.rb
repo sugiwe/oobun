@@ -25,22 +25,20 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  private
-
   # 招待トークンがセッションにあれば処理
-  def process_invitation_if_present(user)
+  def process_invitation_if_present(user, invitation = nil)
     return unless session[:invitation_token]
 
-    process_invitation(user, session[:invitation_token])
+    # 既にキャッシュされた招待がある場合はそれを使用、なければ取得
+    invitation ||= Invitation.find_by(token: session[:invitation_token])
+    process_invitation(user, invitation)
     session.delete(:invitation_token)
   end
 
   # 招待トークンの処理: AllowedUserに追加 & Membership作成
-  def process_invitation(user, token)
-    invitation = Invitation.find_by(token: token)
-
+  def process_invitation(user, invitation)
     # 招待が有効か確認
-    return unless invitation && !invitation.accepted? && !invitation.expired?
+    return unless invitation&.usable?
 
     # AllowedUserテーブルに追加（まだ存在しない場合）
     # 招待による登録なので added_by_admin = false

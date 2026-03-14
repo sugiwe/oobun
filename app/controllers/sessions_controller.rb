@@ -24,8 +24,9 @@ class SessionsController < ApplicationController
       return
     end
 
-    # ログイン許可チェック
-    unless user_allowed_or_invited?(payload["email"])
+    # ログイン許可チェック（招待をキャッシュして重複クエリを防ぐ）
+    invitation = cached_invitation
+    unless user_allowed_or_invited?(payload["email"], invitation)
       redirect_to login_path, alert: "現在ベータ版のため、招待されたユーザーのみログインできます。"
       return
     end
@@ -38,7 +39,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
-      process_invitation_if_present(user)
+      process_invitation_if_present(user, invitation)
       redirect_to root_path, notice: "ログインしました"
     end
   end
@@ -67,18 +68,20 @@ class SessionsController < ApplicationController
 
   private
 
+  # 招待トークンをキャッシュして重複クエリを防ぐ
+  def cached_invitation
+    return nil unless session[:invitation_token].present?
+
+    @cached_invitation ||= Invitation.find_by(token: session[:invitation_token])
+  end
+
   # ログイン許可チェック: AllowedUserテーブルまたは有効な招待トークンセッション
-  def user_allowed_or_invited?(email)
+  def user_allowed_or_invited?(email, invitation = nil)
     # AllowedUserテーブルに存在するか
     return true if AllowedUser.exists?(email: email.downcase.strip)
 
-    # 招待トークンがセッションにある場合、有効性を確認
-    if session[:invitation_token].present?
-      invitation = Invitation.find_by(token: session[:invitation_token])
-      return true if invitation && !invitation.accepted? && !invitation.expired?
-    end
-
-    false
+    # 招待が有効か確認
+    invitation&.usable? || false
   end
 
   def valid_google_csrf_token?

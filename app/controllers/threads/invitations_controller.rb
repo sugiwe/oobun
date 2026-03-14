@@ -51,10 +51,12 @@ class Threads::InvitationsController < Threads::ApplicationController
   private
 
   def check_invitation_status
-    if @invitation.accepted?
-      redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
-    elsif @invitation.expired?
-      redirect_to root_path, alert: "この招待URLは有効期限切れです"
+    unless @invitation.usable?
+      if @invitation.accepted?
+        redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
+      elsif @invitation.expired?
+        redirect_to root_path, alert: "この招待URLは有効期限切れです"
+      end
     end
   end
 
