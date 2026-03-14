@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # Admin email addresses cached at boot time
+  ADMIN_EMAIL_SET = ENV.fetch("ADMIN_EMAILS", "").split(",").map(&:strip).to_set.freeze
+
   # Associations
   has_many :memberships, dependent: :destroy
   has_many :correspondence_threads, through: :memberships, source: :thread
@@ -109,6 +112,10 @@ class User < ApplicationRecord
     posts.unscope(where: :status)
          .where("created_at >= ?", today_start)
          .count
+  end
+
+  def admin?
+    ADMIN_EMAIL_SET.include?(email)
   end
 
   private

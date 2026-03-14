@@ -19,6 +19,7 @@ class UsernamesController < ApplicationController
     if user.save
       session.delete(:pending_google_payload)
       session[:user_id] = user.id
+      process_invitation_if_present(user)
       redirect_to root_path, notice: "ようこそ！アカウントを作成しました"
     else
       @user = user

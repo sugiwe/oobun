@@ -33,6 +33,11 @@ Rails.application.routes.draw do
   # 全スレッド一覧（ブラウズページ）
   get "/threads", to: "threads#browse", as: :browse_threads
 
+  # 管理画面（管理者のみ）
+  namespace :admin do
+    resources :allowed_users, except: [ :show ]
+  end
+
   # 招待URL（トークンベース、スレッドURLとは独立）
   get  "/invite/:token", to: "threads/invitations#show",  as: :invitation
   post "/invite/:token", to: "threads/invitations#accept", as: :accept_invitation

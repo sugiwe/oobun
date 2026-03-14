@@ -24,4 +24,41 @@ class ApplicationController < ActionController::Base
       redirect_to login_path, alert: "ログインしてください"
     end
   end
+
+  # 招待トークンがセッションにあれば処理
+  def process_invitation_if_present(user, invitation = nil)
+    return unless session[:invitation_token]
+
+    # 既にキャッシュされた招待がある場合はそれを使用、なければ取得
+    invitation ||= Invitation.find_by(token: session[:invitation_token])
+    process_invitation(user, invitation)
+    session.delete(:invitation_token)
+  end
+
+  # 招待トークンの処理: AllowedUserに追加 & Membership作成
+  def process_invitation(user, invitation)
+    # 招待が有効か確認
+    return unless invitation&.usable?
+
+    # AllowedUserテーブルに追加（まだ存在しない場合）
+    # 招待による登録なので added_by_admin = false
+    AllowedUser.find_or_create_by!(email: user.email.downcase.strip) do |allowed_user|
+      allowed_user.invited_by = invitation.invited_by
+      allowed_user.added_by_admin = false
+      allowed_user.note = "招待リンクから登録 (#{invitation.invited_by&.display_name})"
+    end
+
+    # 招待を受け入れる（Membershipを作成）
+    # ユーザーレコードをロックして競合状態を防ぐ
+    user.with_lock do
+      if user.can_join_thread? && !invitation.thread.memberships.exists?(user: user)
+        invitation.accept!(user)
+        Rails.logger.info "User #{user.email} accepted invitation #{invitation.token}"
+      else
+        Rails.logger.warn "User #{user.email} cannot join thread (limit reached or already member)"
+      end
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.warn "Failed to process invitation: #{e.message}"
+  end
 end

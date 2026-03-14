@@ -17,6 +17,10 @@ class Invitation < ApplicationRecord
     expires_at < Time.current
   end
 
+  def usable?
+    !accepted? && !expired?
+  end
+
   def accept!(user)
     return false if accepted? || expired?
     return false if thread.memberships.exists?(user: user)

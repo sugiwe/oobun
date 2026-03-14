@@ -1,12 +1,7 @@
 class SessionsController < ApplicationController
   skip_before_action :require_login, only: [ :new, :create, :dev_login ]
 
-  # ベータ版：ログイン許可メールアドレスリスト（起動時に一度だけ読み込み）
-  ALLOWED_EMAILS_SET =
-    if ENV["ALLOWED_EMAILS"].present?
-      ENV["ALLOWED_EMAILS"].split(",").map(&:strip).to_set
-    end
-  private_constant :ALLOWED_EMAILS_SET
+  # ログイン許可はAllowedUserテーブルで管理（招待リンク or 管理者追加）
 
   def new
     redirect_to root_path if logged_in?
@@ -29,8 +24,9 @@ class SessionsController < ApplicationController
       return
     end
 
-    # ベータ版：メールアドレス許可リストチェック（開発環境ではスキップ）
-    unless Rails.env.development? || email_allowed?(payload["email"])
+    # ログイン許可チェック（招待をキャッシュして重複クエリを防ぐ）
+    invitation = cached_invitation
+    unless user_allowed_or_invited?(payload["email"], invitation)
       redirect_to login_path, alert: "現在ベータ版のため、招待されたユーザーのみログインできます。"
       return
     end
@@ -43,6 +39,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
+      process_invitation_if_present(user, invitation)
       redirect_to root_path, notice: "ログインしました"
     end
   end
@@ -71,12 +68,20 @@ class SessionsController < ApplicationController
 
   private
 
-  def email_allowed?(email)
-    # ALLOWED_EMAILS_SET が未設定の場合は全て許可
-    return true if ALLOWED_EMAILS_SET.nil?
+  # 招待トークンをキャッシュして重複クエリを防ぐ
+  def cached_invitation
+    return nil unless session[:invitation_token].present?
 
-    # Set の include? は O(1) で高速
-    ALLOWED_EMAILS_SET.include?(email)
+    @cached_invitation ||= Invitation.find_by(token: session[:invitation_token])
+  end
+
+  # ログイン許可チェック: AllowedUserテーブルまたは有効な招待トークンセッション
+  def user_allowed_or_invited?(email, invitation = nil)
+    # AllowedUserテーブルに存在するか
+    return true if AllowedUser.exists?(email: email.downcase.strip)
+
+    # 招待が有効か確認
+    invitation&.usable? || false
   end
 
   def valid_google_csrf_token?
