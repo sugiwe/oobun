@@ -39,8 +39,12 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
-      process_invitation_if_present(user, invitation)
-      redirect_to root_path, notice: "ログインしました"
+      thread_slug = process_invitation_if_present(user, invitation)
+      if thread_slug
+        redirect_to thread_path(thread_slug), notice: "ログインして交換日記に参加しました！"
+      else
+        redirect_to root_path, notice: "ログインしました"
+      end
     end
   end
 

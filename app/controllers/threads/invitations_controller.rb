@@ -18,9 +18,7 @@ class Threads::InvitationsController < Threads::ApplicationController
   def show
     # 招待トークンをセッションに保存（ログイン許可に使用）
     session[:invitation_token] = @invitation.token
-
-    # ログインしていない場合はログイン画面へ
-    redirect_to login_path, notice: "招待を受け入れるにはログインが必要です" unless logged_in?
+    # 未ログイン時も招待画面を表示（show.html.slimで分岐）
   end
 
   # POST /invite/:token

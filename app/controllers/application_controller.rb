@@ -25,20 +25,22 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # 招待トークンがセッションにあれば処理
+  # 招待トークンがセッションにあれば処理して交換日記ページへのリダイレクトURLを返す
   def process_invitation_if_present(user, invitation = nil)
-    return unless session[:invitation_token]
+    return nil unless session[:invitation_token]
 
     # 既にキャッシュされた招待がある場合はそれを使用、なければ取得
     invitation ||= Invitation.find_by(token: session[:invitation_token])
-    process_invitation(user, invitation)
+    thread_slug = process_invitation(user, invitation)
     session.delete(:invitation_token)
+    thread_slug
   end
 
   # 招待トークンの処理: AllowedUserに追加 & Membership作成
+  # 戻り値: 参加した交換日記のslug（成功時）またはnil（失敗時）
   def process_invitation(user, invitation)
     # 招待が有効か確認
-    return unless invitation&.usable?
+    return nil unless invitation&.usable?
 
     # AllowedUserテーブルに追加（まだ存在しない場合）
     # 招待による登録なので added_by_admin = false
@@ -50,15 +52,19 @@ class ApplicationController < ActionController::Base
 
     # 招待を受け入れる（Membershipを作成）
     # ユーザーレコードをロックして競合状態を防ぐ
+    thread_slug = nil
     user.with_lock do
       if user.can_join_thread? && !invitation.thread.memberships.exists?(user: user)
         invitation.accept!(user)
+        thread_slug = invitation.thread.slug
         Rails.logger.info "User #{user.email} accepted invitation #{invitation.token}"
       else
         Rails.logger.warn "User #{user.email} cannot join thread (limit reached or already member)"
       end
     end
+    thread_slug
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.warn "Failed to process invitation: #{e.message}"
+    nil
   end
 end
