@@ -55,10 +55,9 @@ class ApplicationController < ActionController::Base
     thread_slug = nil
     user.with_lock do
       if user.can_join_thread? && !invitation.thread.memberships.exists?(user: user)
-        if invitation.accept!(user)
-          thread_slug = invitation.thread.slug
-          Rails.logger.info "User #{user.email} accepted invitation #{invitation.token}"
-        end
+        invitation.accept!(user)
+        thread_slug = invitation.thread.slug
+        Rails.logger.info "User #{user.email} accepted invitation #{invitation.token}"
       else
         Rails.logger.warn "User #{user.email} cannot join thread (limit reached or already member)"
       end
