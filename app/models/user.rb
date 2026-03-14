@@ -111,6 +111,10 @@ class User < ApplicationRecord
          .count
   end
 
+  def admin?
+    ENV["ADMIN_EMAILS"]&.split(",")&.map(&:strip)&.include?(email)
+  end
+
   private
 
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
