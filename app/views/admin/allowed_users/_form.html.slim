@@ -1,0 +1,31 @@
+= form_with model: [:admin, @allowed_user] do |f|
+  .flex.flex-col.gap-5
+
+    .flex.flex-col.gap-1
+      = f.label :email, "メールアドレス", class: "text-sm font-medium text-gray-700"
+      = f.email_field :email, autofocus: true, placeholder: "user@example.com",
+          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+
+    .flex.flex-col.gap-1
+      = f.label :note, "メモ（任意）", class: "text-sm font-medium text-gray-700"
+      = f.text_area :note, rows: 3, placeholder: "このユーザーについてのメモ",
+          class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+    .border.border-gray-200.rounded-lg.p-4.bg-gray-50
+      label.flex.items-start.gap-3.cursor-pointer
+        = f.check_box :contacted, class: "mt-1"
+        .flex-1
+          .text-sm.font-medium.text-gray-900
+            | 連絡済み
+          .text-xs.text-gray-500.mt-1
+            | このユーザーに連絡済みの場合はチェックを入れてください
+
+    - if @allowed_user.errors.any?
+      ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
+        - @allowed_user.errors.full_messages.each do |msg|
+          li = msg
+
+    .flex.justify-end.gap-3
+      = link_to "キャンセル", admin_allowed_users_path, class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+      = f.submit @allowed_user.new_record? ? "追加する" : "更新する",
+          class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
