@@ -17,8 +17,19 @@ class Threads::InvitationsController < Threads::ApplicationController
   def show
     if @invitation.accepted?
       redirect_to thread_path(@invitation.thread.slug), notice: "この招待はすでに使用済みです"
+      return
     elsif @invitation.expired?
       redirect_to root_path, alert: "この招待URLは有効期限切れです"
+      return
+    end
+
+    # 招待トークンをセッションに保存（ログイン許可に使用）
+    session[:invitation_token] = @invitation.token
+
+    # ログインしていない場合はログイン画面へ
+    unless logged_in?
+      redirect_to login_path, notice: "招待を受け入れるにはログインが必要です"
+      return
     end
   end
 
@@ -48,6 +59,8 @@ class Threads::InvitationsController < Threads::ApplicationController
       end
 
       if @invitation.accept!(current_user)
+        # 招待トークンをセッションから削除
+        session.delete(:invitation_token)
         redirect_to thread_path(@invitation.thread.slug), notice: "交換日記に参加しました！"
       else
         redirect_to invitation_path(@invitation.token), alert: "参加に失敗しました"
