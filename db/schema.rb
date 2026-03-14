@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_12_082037) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_14_202126) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_082037) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "allowed_users", force: :cascade do |t|
+    t.boolean "added_by_admin", default: false, null: false
+    t.boolean "contacted", default: false, null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.bigint "invited_by_id"
+    t.text "note"
+    t.datetime "updated_at", null: false
+    t.index ["added_by_admin"], name: "index_allowed_users_on_added_by_admin"
+    t.index ["contacted"], name: "index_allowed_users_on_contacted"
+    t.index ["email"], name: "index_allowed_users_on_email", unique: true
+    t.index ["invited_by_id"], name: "index_allowed_users_on_invited_by_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -139,6 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_082037) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "allowed_users", "users", column: "invited_by_id"
   add_foreign_key "invitations", "threads"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "memberships", "threads"
