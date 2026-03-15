@@ -46,6 +46,8 @@ class ApplicationController < ActionController::Base
       session.delete(:login_invitation_token)
       Rails.logger.info "User #{user.email} used login invitation #{login_invitation.token}"
     end
+  rescue ActiveRecord::RecordNotUnique => e
+    Rails.logger.warn "Login invitation already processed (race condition): #{e.message}"
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.warn "Failed to process login invitation: #{e.message}"
   end
@@ -93,6 +95,9 @@ class ApplicationController < ActionController::Base
       end
     end
     thread_slug
+  rescue ActiveRecord::RecordNotUnique => e
+    Rails.logger.warn "Invitation already processed (race condition): #{e.message}"
+    nil
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.warn "Failed to process invitation: #{e.message}"
     nil

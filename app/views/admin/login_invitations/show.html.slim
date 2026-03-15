@@ -12,7 +12,7 @@
       label.block.text-sm.font-medium.text-gray-700.mb-2 招待URL
       .flex.gap-2
         input#invitation-url.flex-1.rounded-md.border-gray-300.bg-gray-50.text-sm value=@url readonly=true
-        button.bg-gray-900.text-white.rounded-md.px-4.py-2.text-sm.font-medium.hover:bg-gray-700 data-controller="clipboard" data-clipboard-target="button" data-action="click->clipboard#copy" data-clipboard-text-value=@url
+        button.bg-gray-900.text-white.rounded-md.px-4.py-2.text-sm.font-medium.hover:bg-gray-700 data-controller="clipboard" data-clipboard-text-value=@url data-action="click->clipboard#copy"
           | コピー
 
     .p-4.bg-gray-50.rounded.text-sm.text-gray-600.mb-6
@@ -53,35 +53,3 @@
     .flex.gap-3.justify-center
       = link_to "一覧に戻る", admin_login_invitations_path, class: "text-gray-600 hover:text-gray-900 px-4 py-2"
       = link_to "別の招待リンクを作成", new_admin_login_invitation_path, class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700"
-
-javascript:
-  document.addEventListener('turbo:load', () => {
-    const button = document.querySelector('[data-controller="clipboard"]');
-    if (!button) return;
-
-    const url = button.dataset.clipboardTextValue;
-
-    // 既存のリスナーを削除するため、クローンで置き換える
-    const newButton = button.cloneNode(true);
-    button.parentNode.replaceChild(newButton, button);
-
-    newButton.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-
-        const originalText = newButton.textContent;
-        newButton.textContent = 'コピーしました！';
-        newButton.classList.add('bg-green-600', 'hover:bg-green-700');
-        newButton.classList.remove('bg-gray-900', 'hover:bg-gray-700');
-
-        setTimeout(() => {
-          newButton.textContent = originalText;
-          newButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-          newButton.classList.add('bg-gray-900', 'hover:bg-gray-700');
-        }, 2000);
-      } catch (err) {
-        console.error('コピーに失敗しました:', err);
-        alert('コピーに失敗しました');
-      }
-    });
-  });
