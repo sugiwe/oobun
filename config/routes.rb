@@ -35,6 +35,8 @@ Rails.application.routes.draw do
 
   # 管理画面（管理者のみ）
   namespace :admin do
+    root to: "dashboard#index"
+    resources :users, only: [ :index, :show ]
     resources :allowed_users, except: [ :show ]
     resources :login_invitations, only: [ :index, :new, :create, :show ]
   end

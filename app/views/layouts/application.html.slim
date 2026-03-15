@@ -40,10 +40,8 @@ html
           = link_to user_path(username: current_user.username), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
             | マイページ
           - if current_user.admin?
-            = link_to admin_allowed_users_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
-              | ログイン許可管理
-            = link_to admin_login_invitations_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
-              | 招待リンク管理
+            = link_to admin_root_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+              | 管理者ダッシュボード
           = link_to terms_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
             | 利用規約
           = link_to privacy_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do

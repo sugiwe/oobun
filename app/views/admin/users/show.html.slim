@@ -1,0 +1,94 @@
+- content_for :title, "#{@user.display_name} - ユーザー詳細 - coconikki"
+
+.max-w-4xl.mx-auto
+  .flex.items-center.justify-between.mb-6
+    h1.text-2xl ユーザー詳細
+    = link_to "← 一覧に戻る", admin_users_path, class: "text-sm text-gray-600 hover:text-gray-900"
+
+  / 基本情報
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    .flex.items-start.gap-4.mb-6
+      div class="w-16 h-16 rounded-full bg-gray-200 overflow-hidden shrink-0"
+        = render "shared/avatar", user: @user, show_fallback: true
+      div.flex-1
+        h2.text-xl.text-gray-900 = @user.display_name
+        .text-gray-500.mb-2
+          | @
+          = @user.username
+        - if @user.admin?
+          span.inline-flex.items-center.px-2.py-1.rounded.text-xs.bg-purple-100.text-purple-800
+            | 管理者
+
+    .grid.grid-cols-1.md:grid-cols-2.gap-4.text-sm
+      div
+        .text-gray-500.mb-1 メールアドレス
+        .text-gray-900 = @user.email
+      div
+        .text-gray-500.mb-1 Google UID
+        .text-gray-900.font-mono.text-xs = @user.google_uid
+      div
+        .text-gray-500.mb-1 登録日時
+        .text-gray-900 = l(@user.created_at, format: :long)
+      div
+        .text-gray-500.mb-1 最終更新
+        .text-gray-900 = l(@user.updated_at, format: :long)
+
+    - if @user.bio.present?
+      .mt-4.pt-4.border-t.border-gray-200
+        .text-gray-500.text-sm.mb-1 自己紹介
+        .text-gray-900 = @user.bio
+
+  / ログイン許可情報
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    h3.text-gray-900.mb-4 ログイン許可情報
+    - if @allowed_user
+      .text-sm
+        .grid.grid-cols-1.md:grid-cols-2.gap-4
+          div
+            .text-gray-500.mb-1 許可状態
+            span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-green-100.text-green-800
+              | 許可済み
+          div
+            .text-gray-500.mb-1 追加方法
+            .text-gray-900 = @allowed_user.added_by
+          div
+            .text-gray-500.mb-1 追加日時
+            .text-gray-900 = l(@allowed_user.created_at, format: :short)
+          - if @allowed_user.login_invitation
+            div
+              .text-gray-500.mb-1 使用した招待リンク
+              = link_to admin_login_invitation_path(@allowed_user.login_invitation), class: "text-gray-600 hover:text-gray-900" do
+                = @allowed_user.login_invitation.note || "招待リンク ##{@allowed_user.login_invitation.id}"
+        - if @allowed_user.note.present?
+          .mt-4.pt-4.border-t.border-gray-200
+            .text-gray-500.mb-1 メモ
+            .text-gray-900 = @allowed_user.note
+    - else
+      .text-sm.text-gray-500
+        | このユーザーはログイン許可リストに登録されていません
+
+  / 参加中の交換日記
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden
+    .px-6.py-4.bg-gray-50.border-b.border-gray-200
+      h3.text-gray-900
+        | 参加中の交換日記
+        span.ml-2.text-sm.text-gray-500
+          | （
+          = @memberships.count
+          | 件）
+
+    - if @memberships.any?
+      .divide-y.divide-gray-200
+        - @memberships.each do |membership|
+          = link_to thread_path(membership.thread.slug), class: "block px-6 py-4 hover:bg-gray-50 transition-colors" do
+            .flex.items-center.justify-between
+              div
+                .text-gray-900 = membership.thread.title
+                .text-sm.text-gray-500.mt-1
+                  | 参加日:
+                  = l(membership.created_at, format: :short)
+              svg.w-5.h-5.text-gray-400 fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+    - else
+      .px-6.py-12.text-center.text-gray-500
+        | 参加中の交換日記はありません

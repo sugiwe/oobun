@@ -1,0 +1,52 @@
+- content_for :title, "ユーザー一覧 - coconikki"
+
+.max-w-6xl.mx-auto
+  .flex.items-center.justify-between.mb-6
+    h1.text-2xl ユーザー一覧
+    = link_to "← ダッシュボード", admin_root_path, class: "text-sm text-gray-600 hover:text-gray-900"
+
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden
+    .px-6.py-4.bg-gray-50.border-b.border-gray-200.flex.items-center.justify-between
+      .text-sm.text-gray-600
+        | 全
+        span.text-gray-900 = @users.count
+        |  人
+
+    - if @users.any?
+      .overflow-x-auto
+        table.w-full
+          thead.bg-gray-50.border-b.border-gray-200
+            tr
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase ID
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase ユーザー名
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase 表示名
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase メール
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase 管理者
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase 登録日
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase 操作
+          tbody.divide-y.divide-gray-200
+            - @users.each do |user|
+              tr.hover:bg-gray-50
+                td.px-6.py-4.text-sm.text-gray-900
+                  = user.id
+                td.px-6.py-4
+                  = link_to user_path(username: user.username), class: "text-sm text-gray-900 hover:text-gray-600" do
+                    | @
+                    = user.username
+                td.px-6.py-4.text-sm.text-gray-900
+                  = user.display_name
+                td.px-6.py-4.text-sm.text-gray-600
+                  = user.email
+                td.px-6.py-4.text-sm
+                  - if user.admin?
+                    span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-purple-100.text-purple-800
+                      | 管理者
+                  - else
+                    span.text-gray-400 —
+                td.px-6.py-4.text-sm.text-gray-500
+                  = l(user.created_at, format: :short)
+                td.px-6.py-4.text-sm
+                  = link_to "詳細", admin_user_path(user), class: "text-gray-600 hover:text-gray-900"
+    - else
+      .px-6.py-12.text-center.text-gray-500
+        | ユーザーがいません

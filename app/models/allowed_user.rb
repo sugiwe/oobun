@@ -14,7 +14,7 @@ class AllowedUser < ApplicationRecord
   before_validation :normalize_email
 
   def added_by
-    added_by_admin? ? "管理者" : "招待 (#{invited_by&.name})"
+    added_by_admin? ? "管理者" : "招待 (#{invited_by&.display_name})"
   end
 
   private
