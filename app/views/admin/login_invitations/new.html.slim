@@ -1,0 +1,36 @@
+- content_for :title, "招待リンク作成 - coconikki"
+
+.max-w-lg.mx-auto
+  h1.text-xl.mb-6 招待リンク作成
+
+  .bg-white.border.border-gray-200.rounded-lg.p-6
+    = form_with model: @login_invitation, url: admin_login_invitations_path, local: true do |f|
+      .mb-4
+        = f.label :unlimited, "使用回数", class: "block text-sm font-medium text-gray-700 mb-2"
+        .space-y-2
+          .flex.items-center
+            = f.radio_button :unlimited, false, checked: true, class: "mr-2"
+            = f.label :unlimited_false, "1回きり（1人のみ登録可能）", class: "text-sm text-gray-700"
+          .flex.items-center
+            = f.radio_button :unlimited, true, class: "mr-2"
+            = f.label :unlimited_true, "無制限（何人でも登録可能）", class: "text-sm text-gray-700"
+        p.text-xs.text-gray-500.mt-1
+          | 無制限は、信頼できるコミュニティ内などで共有する場合に使用します
+
+      .mb-4
+        = f.label :note, "メモ（任意）", class: "block text-sm font-medium text-gray-700 mb-2"
+        = f.text_field :note, placeholder: "例: 問い合わせ対応、○○さん用", class: "w-full rounded-md border-gray-300 shadow-sm focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
+        p.text-xs.text-gray-500.mt-1
+          | 誰向けの招待か後で分かるように記録できます
+
+      .mb-4.p-4.bg-gray-50.rounded.text-sm.text-gray-600
+        p.mb-2
+          strong 有効期限：
+          | 7日間
+        p
+          strong 機能：
+          | ログイン許可のみ（交換日記への参加なし）
+
+      .flex.gap-3
+        = f.submit "招待リンクを発行", class: "bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
+        = link_to "キャンセル", admin_login_invitations_path, class: "text-gray-600 hover:text-gray-900 px-4 py-2"

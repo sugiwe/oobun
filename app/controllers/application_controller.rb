@@ -25,6 +25,26 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # ログイン許可招待トークンがセッションにあれば処理してAllowedUserに追加
+  def process_login_invitation_if_present(user)
+    return unless session[:login_invitation_token]
+
+    login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
+    if login_invitation&.usable?
+      AllowedUser.find_or_create_by!(email: user.email.downcase.strip) do |allowed_user|
+        allowed_user.invited_by = login_invitation.created_by
+        allowed_user.login_invitation = login_invitation  # どの招待リンクから登録したかを記録
+        allowed_user.added_by_admin = true  # 管理者発行なのでtrue
+        allowed_user.note = "管理者招待リンクから登録 (#{login_invitation.created_by.display_name})"
+      end
+      login_invitation.mark_as_used!
+      session.delete(:login_invitation_token)
+      Rails.logger.info "User #{user.email} used login invitation #{login_invitation.token}"
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.warn "Failed to process login invitation: #{e.message}"
+  end
+
   # 招待トークンがセッションにあれば処理して交換日記ページへのリダイレクトURLを返す
   def process_invitation_if_present(user, invitation = nil)
     return nil unless session[:invitation_token]

@@ -39,6 +39,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
+      process_login_invitation_if_present(user)  # ログイン許可招待処理
       thread_slug = process_invitation_if_present(user, invitation)
       if thread_slug
         redirect_to thread_path(thread_slug), notice: "ログインして交換日記に参加しました！"
@@ -84,8 +85,16 @@ class SessionsController < ApplicationController
     # AllowedUserテーブルに存在するか
     return true if AllowedUser.exists?(email: email.downcase.strip)
 
-    # 招待が有効か確認
-    invitation&.usable? || false
+    # 交換日記への招待が有効か確認
+    return true if invitation&.usable?
+
+    # ログイン許可招待が有効か確認
+    if session[:login_invitation_token].present?
+      login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
+      return true if login_invitation&.usable?
+    end
+
+    false
   end
 
   def valid_google_csrf_token?

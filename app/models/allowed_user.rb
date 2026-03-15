@@ -1,5 +1,6 @@
 class AllowedUser < ApplicationRecord
   belongs_to :invited_by, class_name: "User", optional: true
+  belongs_to :login_invitation, optional: true
 
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },

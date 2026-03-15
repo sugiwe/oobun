@@ -36,9 +36,13 @@ Rails.application.routes.draw do
   # 管理画面（管理者のみ）
   namespace :admin do
     resources :allowed_users, except: [ :show ]
+    resources :login_invitations, only: [ :index, :new, :create, :show ]
   end
 
-  # 招待URL（トークンベース、スレッドURLとは独立）
+  # ログイン許可招待URL（管理者発行、トークンベース）
+  get "/login-invite/:token", to: "login_invitations#show", as: :login_invitation
+
+  # 交換日記招待URL（トークンベース、スレッドURLとは独立）
   get  "/invite/:token", to: "threads/invitations#show",  as: :invitation
   post "/invite/:token", to: "threads/invitations#accept", as: :accept_invitation
 
