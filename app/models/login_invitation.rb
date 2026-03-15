@@ -1,4 +1,6 @@
 class LoginInvitation < ApplicationRecord
+  EXPIRY_DAYS = 7
+
   belongs_to :created_by, class_name: "User"
   has_many :allowed_users, dependent: :nullify
 
@@ -28,10 +30,14 @@ class LoginInvitation < ApplicationRecord
   private
 
   def generate_token
-    self.token = SecureRandom.urlsafe_base64(32)
+    # トークンの一意性を保証（衝突回避）
+    loop do
+      self.token = SecureRandom.urlsafe_base64(32)
+      break unless LoginInvitation.exists?(token: self.token)
+    end
   end
 
   def set_expiry
-    self.expires_at = 7.days.from_now
+    self.expires_at = EXPIRY_DAYS.days.from_now
   end
 end

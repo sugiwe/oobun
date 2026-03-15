@@ -31,11 +31,16 @@ class ApplicationController < ActionController::Base
 
     login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
     if login_invitation&.usable?
-      AllowedUser.find_or_create_by!(email: user.email.downcase.strip) do |allowed_user|
-        allowed_user.invited_by = login_invitation.created_by
-        allowed_user.login_invitation = login_invitation  # どの招待リンクから登録したかを記録
-        allowed_user.added_by_admin = true  # 管理者発行なのでtrue
-        allowed_user.note = "管理者招待リンクから登録 (#{login_invitation.created_by.display_name})"
+      # トランザクションとロックで競合状態を防ぐ
+      AllowedUser.transaction do
+        allowed_user = AllowedUser.lock.find_or_initialize_by(email: user.normalized_email)
+        if allowed_user.new_record?
+          allowed_user.invited_by = login_invitation.created_by
+          allowed_user.login_invitation = login_invitation  # どの招待リンクから登録したかを記録
+          allowed_user.added_by_admin = true  # 管理者発行なのでtrue
+          allowed_user.note = "管理者招待リンクから登録 (#{login_invitation.created_by.display_name})"
+          allowed_user.save!
+        end
       end
       login_invitation.mark_as_used!
       session.delete(:login_invitation_token)
@@ -64,10 +69,15 @@ class ApplicationController < ActionController::Base
 
     # AllowedUserテーブルに追加（まだ存在しない場合）
     # 招待による登録なので added_by_admin = false
-    AllowedUser.find_or_create_by!(email: user.email.downcase.strip) do |allowed_user|
-      allowed_user.invited_by = invitation.invited_by
-      allowed_user.added_by_admin = false
-      allowed_user.note = "招待リンクから登録 (#{invitation.invited_by&.display_name})"
+    # トランザクションとロックで競合状態を防ぐ
+    AllowedUser.transaction do
+      allowed_user = AllowedUser.lock.find_or_initialize_by(email: user.normalized_email)
+      if allowed_user.new_record?
+        allowed_user.invited_by = invitation.invited_by
+        allowed_user.added_by_admin = false
+        allowed_user.note = "招待リンクから登録 (#{invitation.invited_by&.display_name})"
+        allowed_user.save!
+      end
     end
 
     # 招待を受け入れる（Membershipを作成）
