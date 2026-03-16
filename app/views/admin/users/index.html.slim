@@ -9,7 +9,7 @@
     .px-6.py-4.bg-gray-50.border-b.border-gray-200.flex.items-center.justify-between
       .text-sm.text-gray-600
         | 全
-        span.text-gray-900 = @users.count
+        span.text-gray-900 = @users.total_count
         |  人
 
     - if @users.any?
@@ -47,6 +47,9 @@
                   = l(user.created_at, format: :short)
                 td.px-6.py-4.text-sm
                   = link_to "詳細", admin_user_path(user), class: "text-gray-600 hover:text-gray-900"
+
+      .px-6.py-4.border-t.border-gray-200.flex.justify-center
+        = paginate @users
     - else
       .px-6.py-12.text-center.text-gray-500
         | ユーザーがいません

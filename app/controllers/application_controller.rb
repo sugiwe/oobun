@@ -41,8 +41,8 @@ class ApplicationController < ActionController::Base
           allowed_user.note = "管理者招待リンクから登録 (#{login_invitation.created_by.display_name})"
           allowed_user.save!
         end
+        login_invitation.mark_as_used!
       end
-      login_invitation.mark_as_used!
       session.delete(:login_invitation_token)
       Rails.logger.info "User #{user.email} used login invitation #{login_invitation.token}"
     end

@@ -25,6 +25,7 @@ class Admin::LoginInvitationsController < Admin::ApplicationController
   def show
     @login_invitation = LoginInvitation.includes(:allowed_users).find(params[:id])
     @url = login_invitation_url(@login_invitation.token)
+    @registered_users = @login_invitation.allowed_users.order(created_at: :desc)
   end
 
   private
