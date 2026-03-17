@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "editTab", "previewTab", "editArea", "previewArea", "preview", "textarea",
-    "linkModal", "linkUrlInput", "embedModal", "embedUrlInput"
+    "linkModal", "linkUrlInput"
   ]
 
   connect() {
@@ -109,19 +109,6 @@ export default class extends Controller {
     this.linkModalTarget.classList.add("hidden")
   }
 
-  // 埋め込みモーダルを開く
-  openEmbedModal(event) {
-    event.preventDefault()
-    this.embedUrlInputTarget.value = ""
-    this.embedModalTarget.classList.remove("hidden")
-  }
-
-  // 埋め込みモーダルを閉じる
-  closeEmbedModal(event) {
-    event.preventDefault()
-    this.embedModalTarget.classList.add("hidden")
-  }
-
   // そのままリンクを挿入
   insertPlainLink(event) {
     event.preventDefault()
@@ -179,25 +166,6 @@ export default class extends Controller {
     }
     this.insertTextAtCursor(`:::link-card ${url}\n`)
     this.closeLinkModal(event)
-  }
-
-  // 埋め込みを挿入（汎用）
-  insertEmbed(event) {
-    event.preventDefault()
-    const url = this.embedUrlInputTarget.value.trim()
-    if (!url) {
-      alert("URLを入力してください")
-      return
-    }
-
-    const embedType = event.currentTarget.dataset.embedType
-    if (!embedType) {
-      console.error("Embed type is not specified on the button.")
-      return
-    }
-
-    this.insertTextAtCursor(`:::embed-${embedType} ${url}\n`)
-    this.closeEmbedModal(event)
   }
 
   // カーソル位置にテキストを挿入

@@ -156,13 +156,12 @@
     / 埋め込み
     section
       h2.text-xl.mb-4.border-b.border-gray-200.pb-2 埋め込み
-      p.text-sm.text-gray-600.mb-3 「埋め込み挿入」ボタンから、YouTube・Spotify・X（Twitter）・Instagramの埋め込みを追加できます。
+      p.text-sm.text-gray-600.mb-3 YouTube・SpotifyのURLを貼り付けるだけで、自動的に埋め込みプレーヤーが表示されます。
       .bg-gray-50.rounded.p-4.mb-3
         pre.text-sm.font-mono.whitespace-pre-wrap
-          | :::embed-youtube https://www.youtube.com/watch?v=VIDEO_ID
-            :::embed-spotify https://open.spotify.com/track/TRACK_ID
-            :::embed-x https://x.com/username/status/TWEET_ID
-            :::embed-instagram https://www.instagram.com/p/POST_ID/
+          | https://www.youtube.com/watch?v=VIDEO_ID
+            https://open.spotify.com/track/TRACK_ID
+      p.text-sm.text-gray-500.mt-2 ※ リンクとして表示したい場合は、マークダウンリンク記法 [タイトル](URL) を使用してください
 
     / 水平線
     section
