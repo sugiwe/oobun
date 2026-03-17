@@ -49,7 +49,7 @@
           span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
 
     / 本文（手紙の内容）
-    .text-base.text-gray-800.whitespace-pre-wrap.leading-loose = @post.body
+    .text-base.text-gray-800.leading-loose.markdown-body = render_markdown(@post.body)
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?

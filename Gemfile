@@ -57,6 +57,12 @@ gem "rubyzip"
 # Pagination [https://github.com/kaminari/kaminari]
 gem "kaminari"
 
+# Markdown rendering [https://github.com/vmg/redcarpet]
+gem "redcarpet"
+
+# HTML sanitization [https://github.com/rgrove/sanitize]
+gem "sanitize"
+
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 8.0"
