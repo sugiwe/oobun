@@ -59,7 +59,7 @@
 
         = f.text_area :body,
             rows: 14,
-            placeholder: "ここに文章を書いてください（10文字以上）\n\nマークダウン記法が使えます：\n# 見出し\n**太字** *斜体*\n- リスト項目\n[リンクテキスト](URL)",
+            placeholder: "ここに文章を書いてください（10文字以上、マークダウン記法が使えます）",
             data: { draft_autosave_target: "body", action: "input->draft-autosave#input input->markdown-editor#updateCharCount", markdown_editor_target: "textarea" },
             class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-y overflow-hidden"
 

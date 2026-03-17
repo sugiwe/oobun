@@ -178,6 +178,12 @@ module MarkdownHelper
   end
 
   # Sanitizeの設定
+  #
+  # セキュリティ上の注意:
+  # - iframe要素とallow属性を許可しているため、XSS攻撃のリスクがあります
+  # - 現在はYouTube/Spotify等のメディア埋め込みに限定していますが、
+  #   この設定を変更する際は悪意のあるスクリプト実行を防ぐため厳格な検証が必要です
+  # - iframeのsrcプロトコルはhttpsのみに制限しています
   def sanitize_config
     {
       elements: %w[
@@ -204,7 +210,7 @@ module MarkdownHelper
       protocols: {
         "a" => { "href" => [ "http", "https", "mailto" ] },
         "img" => { "src" => [ "http", "https" ] },
-        "iframe" => { "src" => [ "https" ] }
+        "iframe" => { "src" => [ "https" ] }  # httpsのみ許可
       },
       css: {
         properties: %w[padding-bottom height position top left width]

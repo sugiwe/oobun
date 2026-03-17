@@ -10,14 +10,16 @@ class OgpFetchesController < ApplicationController
       return
     end
 
-    begin
-      ogp_data = fetch_ogp(url)
-      render json: ogp_data
-    rescue StandardError => e
-      Rails.logger.error "OGP fetch error: #{e.message}"
-      # エラー時はURLをタイトルとして返す
-      render json: { title: url, description: nil, image: nil }
-    end
+    ogp_data = fetch_ogp(url)
+    render json: ogp_data
+  rescue URI::InvalidURIError => e
+    # 不正なURL形式
+    Rails.logger.error "Invalid URL for OGP fetch: #{url} - #{e.message}"
+    render json: { title: url, description: nil, image: nil }
+  rescue Nokogiri::XML::SyntaxError => e
+    # HTML解析エラー
+    Rails.logger.error "HTML parse error for OGP fetch: #{url} - #{e.message}"
+    render json: { title: url, description: nil, image: nil }
   end
 
   private
