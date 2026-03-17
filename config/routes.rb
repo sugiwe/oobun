@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   get "/terms",   to: "pages#terms",   as: :terms
   get "/privacy", to: "pages#privacy", as: :privacy
   get "/contact", to: "pages#contact", as: :contact
+  get "/markdown-guide", to: "pages#markdown_guide", as: :markdown_guide
 
   # ユーザーページ（最優先でマッチさせる）
   get  "/@:username",      to: "users#show",   as: :user

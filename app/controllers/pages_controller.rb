@@ -12,4 +12,7 @@ class PagesController < ApplicationController
 
   def contact
   end
+
+  def markdown_guide
+  end
 end

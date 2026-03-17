@@ -1,0 +1,180 @@
+- content_for :title, "マークダウン記法ガイド - coconikki"
+
+.max-w-3xl.mx-auto.py-8.px-4
+
+  .mb-6
+    = link_to "← 戻る", :back, class: "text-sm text-gray-500 hover:text-gray-700"
+
+  h1.text-2xl.mb-8 マークダウン記法ガイド
+
+  .mb-8.text-sm.text-gray-700.leading-relaxed
+    p.mb-3
+      | マークダウン記法は、シンプルな記号を使って文章を装飾できる書き方です。
+      | 見出しやリスト、リンク、画像など、さまざまな表現が可能です。
+    p.mb-3
+      | 投稿フォームでは「編集」タブで記法を使って執筆し、「プレビュー」タブで仕上がりを確認できます。
+    .bg-yellow-50.border.border-yellow-200.rounded.p-3.text-xs
+      p.font-medium.text-yellow-800.mb-2 ⚠️ 現在対応していない機能
+      p.text-yellow-700.mb-1
+        strong テーブル（表）
+        | ：表組みの作成機能は今後追加予定です。
+      p.text-yellow-700.mb-1
+        strong タスクリスト
+        | ：チェックボックス付きリスト（`- [ ]` や `- [x]`）は今後追加予定です。
+      p.text-yellow-700
+        strong その他
+        | ：脚注、定義リスト、絵文字ショートコードなども順次対応予定です。
+
+  .space-y-8
+
+    / 見出し
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 見出し
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | # 見出し1
+            ## 見出し2
+            ### 見出し3
+            #### 見出し4
+      .markdown-body.border.border-gray-200.rounded.p-4
+        h1 見出し1
+        h2 見出し2
+        h3 見出し3
+        h4 見出し4
+
+    / 強調
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 強調・斜体
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | **太字**
+            *斜体*
+            ~~取り消し線~~
+      .markdown-body.border.border-gray-200.rounded.p-4
+        p
+          strong 太字
+          |
+          em 斜体
+          |
+          del 取り消し線
+
+    / リスト
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 リスト
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | - 項目1
+            - 項目2
+            - 項目3
+
+            1. 番号付き項目1
+            2. 番号付き項目2
+            3. 番号付き項目3
+      .markdown-body.border.border-gray-200.rounded.p-4
+        ul
+          li 項目1
+          li 項目2
+          li 項目3
+        ol
+          li 番号付き項目1
+          li 番号付き項目2
+          li 番号付き項目3
+
+    / リンク
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 リンク
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | [リンクテキスト](https://example.com)
+
+            直接URLを貼り付けることもできます：
+            https://example.com
+      .markdown-body.border.border-gray-200.rounded.p-4
+        p
+          a href="https://example.com" リンクテキスト
+        p 直接URLを貼り付けることもできます：
+        p
+          a href="https://example.com" https://example.com
+
+    / OGPカード
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 リンクカード（OGP）
+      p.text-sm.text-gray-600.mb-3 「リンク挿入」ボタンから「OGPカード」を選択すると、リンク先のタイトルや画像を含むカードを表示できます。
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | :::link-card https://example.com
+      p.text-sm.text-gray-500 ※実際にはリンク先のタイトルと説明、画像が表示されます
+
+    / 引用
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 引用
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | > 引用文
+            > 複数行の引用も
+            > できます
+      .markdown-body.border.border-gray-200.rounded.p-4
+        blockquote
+          | 引用文
+          br
+          | 複数行の引用も
+          br
+          | できます
+
+    / コード
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 コード
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | インラインコード: `code`
+
+            ```
+            複数行のコードブロック
+            def hello
+              puts "Hello, World!"
+            end
+            ```
+      .markdown-body.border.border-gray-200.rounded.p-4
+        p
+          | インラインコード:
+          code code
+        pre
+          code
+            | 複数行のコードブロック
+              def hello
+                puts "Hello, World!"
+              end
+
+    / 画像
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 画像
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | ![代替テキスト](https://example.com/image.jpg)
+      p.text-sm.text-gray-500 外部URLの画像を表示できます
+
+    / 埋め込み
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 埋め込み
+      p.text-sm.text-gray-600.mb-3 「埋め込み挿入」ボタンから、YouTube・Spotify・X（Twitter）・Instagramの埋め込みを追加できます。
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | :::embed-youtube https://www.youtube.com/watch?v=VIDEO_ID
+            :::embed-spotify https://open.spotify.com/track/TRACK_ID
+            :::embed-x https://x.com/username/status/TWEET_ID
+            :::embed-instagram https://www.instagram.com/p/POST_ID/
+
+    / 水平線
+    section
+      h2.text-xl.mb-4.border-b.border-gray-200.pb-2 水平線
+      .bg-gray-50.rounded.p-4.mb-3
+        pre.text-sm.font-mono.whitespace-pre-wrap
+          | ---
+      .markdown-body.border.border-gray-200.rounded.p-4
+        hr
+
+  .mt-12.pt-6.border-t.border-gray-200
+    p.text-sm.text-gray-500
+      | より詳しい情報は、
+      a.text-blue-600.hover:underline href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener" Markdown Guide
+      | をご覧ください。
