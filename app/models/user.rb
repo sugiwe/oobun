@@ -118,6 +118,11 @@ class User < ApplicationRecord
     ADMIN_EMAIL_SET.include?(email)
   end
 
+  # 正規化されたメールアドレスを返す（DRY原則）
+  def normalized_email
+    email.downcase.strip
+  end
+
   private
 
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_14_202126) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_023101) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,12 +48,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_202126) do
     t.datetime "created_at", null: false
     t.string "email", null: false
     t.bigint "invited_by_id"
+    t.bigint "login_invitation_id"
     t.text "note"
     t.datetime "updated_at", null: false
     t.index ["added_by_admin"], name: "index_allowed_users_on_added_by_admin"
     t.index ["contacted"], name: "index_allowed_users_on_contacted"
     t.index ["email"], name: "index_allowed_users_on_email", unique: true
     t.index ["invited_by_id"], name: "index_allowed_users_on_invited_by_id"
+    t.index ["login_invitation_id"], name: "index_allowed_users_on_login_invitation_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -67,6 +69,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_202126) do
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["thread_id"], name: "index_invitations_on_thread_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
+  create_table "login_invitations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id", null: false
+    t.datetime "expires_at", null: false
+    t.string "note"
+    t.string "token", null: false
+    t.boolean "unlimited", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.datetime "used_at"
+    t.index ["created_by_id"], name: "index_login_invitations_on_created_by_id"
+    t.index ["token"], name: "index_login_invitations_on_token", unique: true
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -153,9 +168,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_14_202126) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "allowed_users", "login_invitations"
   add_foreign_key "allowed_users", "users", column: "invited_by_id"
   add_foreign_key "invitations", "threads"
   add_foreign_key "invitations", "users", column: "invited_by_id"
+  add_foreign_key "login_invitations", "users", column: "created_by_id"
   add_foreign_key "memberships", "threads"
   add_foreign_key "memberships", "users"
   add_foreign_key "posts", "threads"

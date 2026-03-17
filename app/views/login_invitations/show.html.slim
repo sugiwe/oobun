@@ -1,0 +1,27 @@
+- content_for :title, "ログインの招待 - coconikki"
+
+.flex.flex-col.items-center.justify-center.min-h-64.gap-8
+  .text-center.max-w-sm
+    h1.text-xl.font-semibold.mb-2 coconikkiへの招待
+    p.text-gray-500.text-sm.mb-1
+      = "@#{@login_invitation.created_by.username}"
+      | さんから招待が届いています
+    p.text-lg.font-medium.mt-4 ログイン許可
+
+    .mt-6.text-xs.text-gray-400
+      | 有効期限：
+      = l(@login_invitation.expires_at.to_date, format: :long)
+      | まで
+
+  - if logged_in?
+    .text-center
+      p.text-sm.text-gray-500.mb-4 既にログイン済みです
+      = link_to "トップページへ", root_path, class: "text-sm text-gray-600 hover:text-gray-900 underline"
+  - else
+    .flex.flex-col.items-center.gap-3
+      p.text-sm.text-gray-500 このリンクからログインすると、coconikkiにアクセスできるようになります
+      = link_to "ログインする", login_path, class: "bg-gray-900 text-white rounded-md px-8 py-3 text-sm font-medium hover:bg-gray-700"
+
+  / coconikkiについてリンク（未ログイン・ログイン共通）
+  .mt-6.text-center
+    = link_to "coconikkiについて", about_path, target: "_blank", rel: "noopener noreferrer", class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 underline"
