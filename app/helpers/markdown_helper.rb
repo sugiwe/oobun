@@ -79,14 +79,14 @@ module MarkdownHelper
     description = ogp_data[:description]
     image = ogp_data[:image]
 
-    # OGPカードのHTMLを生成
+    # OGPカードのHTMLを生成（横並びレイアウト）
     <<~HTML
       <div class="link-card border border-gray-200 rounded-lg overflow-hidden my-4 hover:bg-gray-50 transition-colors">
-        <a href="#{ERB::Util.html_escape(url)}" target="_blank" rel="noopener noreferrer" class="block">
-          #{image ? "<div class=\"w-full h-48 bg-gray-200 overflow-hidden\"><img src=\"#{ERB::Util.html_escape(image)}\" alt=\"\" class=\"w-full h-full object-cover\" /></div>" : ""}
-          <div class="p-4">
+        <a href="#{ERB::Util.html_escape(url)}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center;">
+          #{image ? "<div style=\"width: 130px; flex-shrink: 0; background-color: #e5e7eb;\"><img src=\"#{ERB::Util.html_escape(image)}\" alt=\"\" style=\"width: 100%; height: 100%; object-fit: cover; aspect-ratio: 1 / 1;\" /></div>" : ""}
+          <div style="flex: 1; padding: 12px 16px; min-width: 0;">
             <div class="text-base text-gray-900 font-medium line-clamp-2 mb-1">#{ERB::Util.html_escape(title)}</div>
-            #{description ? "<div class=\"text-sm text-gray-600 line-clamp-2 mb-2\">#{ERB::Util.html_escape(description)}</div>" : ""}
+            #{description ? "<div class=\"text-xs text-gray-600 line-clamp-2 mb-1\">#{ERB::Util.html_escape(description)}</div>" : ""}
             <div class="text-xs text-gray-400 truncate">#{ERB::Util.html_escape(url)}</div>
           </div>
         </a>
@@ -215,8 +215,10 @@ module MarkdownHelper
         svg path
       ],
       attributes: {
-        "a" => %w[href target rel],
-        "img" => %w[src alt],
+        # a: OGPカード用にstyle属性を許可（display: flexなど）
+        "a" => %w[href target rel style],
+        # img: OGPカード用にstyle属性を許可（aspect-ratioなど）
+        "img" => %w[src alt style],
         # iframe: メディア埋め込み専用（render_youtube_embed / render_spotify_embed）
         "iframe" => %w[src width height frameborder allowfullscreen allowtransparency allow class style],
         # style属性: YouTube埋め込みのレスポンシブ対応に必要（padding-bottomなど）
@@ -231,8 +233,12 @@ module MarkdownHelper
         "iframe" => { "src" => [ "https" ] }  # httpsのみ許可
       },
       css: {
-        # XSS対策: 最小限のCSSプロパティのみ許可（YouTube埋め込みのレスポンシブ対応に必要）
-        properties: %w[padding-bottom height position top left width]
+        # XSS対策: 最小限のCSSプロパティのみ許可
+        # YouTube埋め込みのレスポンシブ対応、OGPカードのレイアウトに必要
+        properties: %w[
+          padding-bottom height position top left width aspect-ratio
+          display flex flex-shrink align-items background-color padding min-width object-fit
+        ]
       }
     }
   end
