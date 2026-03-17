@@ -9,7 +9,6 @@ export default class extends Controller {
   connect() {
     this.previewEndpoint = "/preview_markdown"
     this.ogpEndpoint = "/fetch_ogp"
-    this.debounceTimer = null
 
     // 初期表示時にテキストエリアの高さを調整
     this.adjustTextareaHeight()
@@ -182,51 +181,22 @@ export default class extends Controller {
     this.closeLinkModal(event)
   }
 
-  // YouTube埋め込みを挿入
-  insertYouTubeEmbed(event) {
+  // 埋め込みを挿入（汎用）
+  insertEmbed(event) {
     event.preventDefault()
     const url = this.embedUrlInputTarget.value.trim()
     if (!url) {
       alert("URLを入力してください")
       return
     }
-    this.insertTextAtCursor(`:::embed-youtube ${url}\n`)
-    this.closeEmbedModal(event)
-  }
 
-  // Spotify埋め込みを挿入
-  insertSpotifyEmbed(event) {
-    event.preventDefault()
-    const url = this.embedUrlInputTarget.value.trim()
-    if (!url) {
-      alert("URLを入力してください")
+    const embedType = event.currentTarget.dataset.embedType
+    if (!embedType) {
+      console.error("Embed type is not specified on the button.")
       return
     }
-    this.insertTextAtCursor(`:::embed-spotify ${url}\n`)
-    this.closeEmbedModal(event)
-  }
 
-  // X埋め込みを挿入
-  insertXEmbed(event) {
-    event.preventDefault()
-    const url = this.embedUrlInputTarget.value.trim()
-    if (!url) {
-      alert("URLを入力してください")
-      return
-    }
-    this.insertTextAtCursor(`:::embed-x ${url}\n`)
-    this.closeEmbedModal(event)
-  }
-
-  // Instagram埋め込みを挿入
-  insertInstagramEmbed(event) {
-    event.preventDefault()
-    const url = this.embedUrlInputTarget.value.trim()
-    if (!url) {
-      alert("URLを入力してください")
-      return
-    }
-    this.insertTextAtCursor(`:::embed-instagram ${url}\n`)
+    this.insertTextAtCursor(`:::embed-${embedType} ${url}\n`)
     this.closeEmbedModal(event)
   }
 

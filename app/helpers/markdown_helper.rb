@@ -36,37 +36,15 @@ module MarkdownHelper
 
   # 独自記法を処理してHTMLに変換
   def process_custom_syntax(text)
-    # :::link-card URL を処理
-    text = text.gsub(/:::link-card\s+(.+?)$/) do
-      url = Regexp.last_match(1).strip
-      render_link_card(url)
-    end
+    # 独自記法をまとめて処理
+    text.gsub(/:::(link-card|embed-youtube|embed-spotify|embed-x|embed-instagram)\s+(.+?)$/) do
+      tag_name = Regexp.last_match(1).tr("-", "_")
+      url = Regexp.last_match(2).strip
 
-    # :::embed-youtube URL を処理
-    text = text.gsub(/:::embed-youtube\s+(.+?)$/) do
-      url = Regexp.last_match(1).strip
-      render_youtube_embed(url)
+      # 対応する render_... メソッドを動的に呼び出す
+      # メソッド名が安全な文字のみで構成されることを正規表現で保証している
+      send("render_#{tag_name}", url)
     end
-
-    # :::embed-spotify URL を処理
-    text = text.gsub(/:::embed-spotify\s+(.+?)$/) do
-      url = Regexp.last_match(1).strip
-      render_spotify_embed(url)
-    end
-
-    # :::embed-x URL を処理
-    text = text.gsub(/:::embed-x\s+(.+?)$/) do
-      url = Regexp.last_match(1).strip
-      render_x_embed(url)
-    end
-
-    # :::embed-instagram URL を処理
-    text = text.gsub(/:::embed-instagram\s+(.+?)$/) do
-      url = Regexp.last_match(1).strip
-      render_instagram_embed(url)
-    end
-
-    text
   end
 
   # OGPカードのHTMLを生成
@@ -107,7 +85,16 @@ module MarkdownHelper
   def render_spotify_embed(url)
     # Spotify URLから埋め込み用URLを生成
     # 例: https://open.spotify.com/track/xxxxx → https://open.spotify.com/embed/track/xxxxx
-    embed_url = url.sub("open.spotify.com/", "open.spotify.com/embed/")
+    begin
+      uri = URI.parse(url)
+      return "" unless uri.host == "open.spotify.com"
+
+      # パスの先頭に /embed を追加
+      uri.path = "/embed#{uri.path}"
+      embed_url = uri.to_s
+    rescue URI::InvalidURIError
+      return ""
+    end
 
     <<~HTML
       <div class="spotify-embed my-4">

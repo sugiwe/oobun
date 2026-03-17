@@ -1,5 +1,7 @@
 require "open-uri"
 require "nokogiri"
+require "resolv"
+require "ipaddr"
 
 class OgpFetchesController < ApplicationController
   def create
@@ -12,6 +14,10 @@ class OgpFetchesController < ApplicationController
 
     ogp_data = fetch_ogp(url)
     render json: ogp_data
+  rescue ArgumentError => e
+    # SSRF対策でブロックされた、または不正なURL
+    Rails.logger.warn "OGP fetch blocked or invalid: #{url} - #{e.message}"
+    render json: { title: url, description: nil, image: nil }
   rescue URI::InvalidURIError => e
     # 不正なURL形式
     Rails.logger.error "Invalid URL for OGP fetch: #{url} - #{e.message}"
@@ -25,6 +31,9 @@ class OgpFetchesController < ApplicationController
   private
 
   def fetch_ogp(url)
+    # SSRF対策: URLを検証
+    validate_url_for_ssrf!(url)
+
     # タイムアウトを設定してURLを開く
     html = URI.open(url, read_timeout: 5, redirect: true).read
     doc = Nokogiri::HTML(html)
@@ -48,5 +57,37 @@ class OgpFetchesController < ApplicationController
     Rails.logger.warn "Failed to fetch OGP for #{url}: #{e.message}"
     # エラー時はURLをタイトルとして返す
     { title: url, description: nil, image: nil }
+  end
+
+  # SSRF対策: URLが安全かチェック
+  def validate_url_for_ssrf!(url)
+    uri = URI.parse(url)
+
+    # HTTPまたはHTTPSのみ許可
+    unless %w[http https].include?(uri.scheme)
+      raise ArgumentError, "HTTP/HTTPS以外のスキームは許可されていません: #{uri.scheme}"
+    end
+
+    # IPアドレスを解決
+    address = Resolv.getaddress(uri.host)
+    ip = IPAddr.new(address)
+
+    # プライベートIPアドレスをブロック
+    private_ranges = [
+      IPAddr.new("10.0.0.0/8"),       # プライベートネットワーク
+      IPAddr.new("172.16.0.0/12"),    # プライベートネットワーク
+      IPAddr.new("192.168.0.0/16"),   # プライベートネットワーク
+      IPAddr.new("127.0.0.0/8"),      # ループバック
+      IPAddr.new("169.254.0.0/16"),   # リンクローカル
+      IPAddr.new("::1/128"),          # IPv6 ループバック
+      IPAddr.new("fc00::/7"),         # IPv6 プライベート
+      IPAddr.new("fe80::/10")         # IPv6 リンクローカル
+    ]
+
+    if private_ranges.any? { |range| range.include?(ip) }
+      raise ArgumentError, "プライベートIPアドレスへのアクセスは許可されていません: #{address}"
+    end
+  rescue Resolv::ResolvError => e
+    raise ArgumentError, "ホスト名を解決できません: #{uri.host}"
   end
 end
