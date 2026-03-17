@@ -114,7 +114,7 @@ module MarkdownHelper
         <iframe
           src="#{ERB::Util.html_escape(embed_url)}"
           width="100%"
-          height="352"
+          height="152"
           frameborder="0"
           allowtransparency="true"
           allow="encrypted-media"
