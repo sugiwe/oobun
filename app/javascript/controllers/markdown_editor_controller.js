@@ -10,6 +10,23 @@ export default class extends Controller {
     this.previewEndpoint = "/preview_markdown"
     this.ogpEndpoint = "/fetch_ogp"
     this.debounceTimer = null
+
+    // 初期表示時にテキストエリアの高さを調整
+    this.adjustTextareaHeight()
+  }
+
+  // テキストエリアの高さを自動調整
+  adjustTextareaHeight() {
+    const textarea = this.textareaTarget
+
+    // 一旦高さをリセットして、scrollHeightを正確に取得
+    textarea.style.height = 'auto'
+
+    // 最小高さ（14行分、約336px）を確保しつつ、内容に応じて拡大
+    const minHeight = 336 // rows: 14 の場合の高さ
+    const newHeight = Math.max(minHeight, textarea.scrollHeight)
+
+    textarea.style.height = newHeight + 'px'
   }
 
   showEdit(event) {
@@ -76,8 +93,8 @@ export default class extends Controller {
   }
 
   updateCharCount() {
-    // 既存のdraft-autosaveコントローラーのinputイベントを邪魔しないため、
-    // ここでは何もしない（将来的に文字数カウント表示を追加する場合に使用）
+    // テキストエリアの高さを自動調整
+    this.adjustTextareaHeight()
   }
 
   // リンクモーダルを開く
@@ -224,6 +241,9 @@ export default class extends Controller {
     textarea.value = before + text + after
     textarea.selectionStart = textarea.selectionEnd = start + text.length
     textarea.focus()
+
+    // 高さを調整
+    this.adjustTextareaHeight()
 
     // draft-autosaveのinputイベントをトリガー
     textarea.dispatchEvent(new Event('input', { bubbles: true }))

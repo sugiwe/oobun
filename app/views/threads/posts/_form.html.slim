@@ -56,7 +56,7 @@
             rows: 14,
             placeholder: "ここに文章を書いてください（10文字以上）\n\nマークダウン記法が使えます：\n# 見出し\n**太字** *斜体*\n- リスト項目\n[リンクテキスト](URL)",
             data: { draft_autosave_target: "body", action: "input->draft-autosave#input input->markdown-editor#updateCharCount", markdown_editor_target: "textarea" },
-            class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+            class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-y overflow-hidden"
 
       / プレビューエリア
       .hidden.border.border-gray-300.rounded-md.px-4.py-3.min-h-96.bg-gray-50 data-markdown-editor-target="previewArea"
