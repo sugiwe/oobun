@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "editTab", "previewTab", "editArea", "previewArea", "preview", "textarea",
-    "linkModal", "linkUrlInput"
+    "linkModal", "linkUrlInput", "linkError"
   ]
 
   connect() {
@@ -100,13 +100,26 @@ export default class extends Controller {
   openLinkModal(event) {
     event.preventDefault()
     this.linkUrlInputTarget.value = ""
+    this.hideError()
     this.linkModalTarget.classList.remove("hidden")
   }
 
   // リンクモーダルを閉じる
   closeLinkModal(event) {
     event.preventDefault()
+    this.hideError()
     this.linkModalTarget.classList.add("hidden")
+  }
+
+  // エラーメッセージを表示
+  showError(message) {
+    this.linkErrorTarget.textContent = message
+    this.linkErrorTarget.classList.remove("hidden")
+  }
+
+  // エラーメッセージを非表示
+  hideError() {
+    this.linkErrorTarget.classList.add("hidden")
   }
 
   // そのままリンクを挿入
@@ -114,7 +127,7 @@ export default class extends Controller {
     event.preventDefault()
     const url = this.linkUrlInputTarget.value.trim()
     if (!url) {
-      alert("URLを入力してください")
+      this.showError("URLを入力してください")
       return
     }
     this.insertTextAtCursor(url)
@@ -126,7 +139,7 @@ export default class extends Controller {
     event.preventDefault()
     const url = this.linkUrlInputTarget.value.trim()
     if (!url) {
-      alert("URLを入力してください")
+      this.showError("URLを入力してください")
       return
     }
 
@@ -161,7 +174,7 @@ export default class extends Controller {
     event.preventDefault()
     const url = this.linkUrlInputTarget.value.trim()
     if (!url) {
-      alert("URLを入力してください")
+      this.showError("URLを入力してください")
       return
     }
     this.insertTextAtCursor(`:::link-card ${url}\n`)

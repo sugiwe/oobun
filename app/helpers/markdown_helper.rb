@@ -1,4 +1,15 @@
 module MarkdownHelper
+  # :::記法のマッピング
+  SYNTAX_MAP = {
+    "link-card" => :render_link_card
+  }.freeze
+
+  # YouTube埋め込み検出用の正規表現
+  YOUTUBE_LINK_REGEX = %r{<p><a href="(https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[\w\-]+(?:[?&][\w=\-]*)*)"[^>]*>\1</a></p>}m.freeze
+
+  # Spotify埋め込み検出用の正規表現
+  SPOTIFY_LINK_REGEX = %r{<p><a href="(https?://open\.spotify\.com/(?:track|album|playlist|episode)/[\w]+(?:\?[\w=\-&]*)*)"[^>]*>\1</a></p>}m.freeze
+
   # マークダウンテキストをHTMLに変換
   def render_markdown(text)
     return "" if text.blank?
@@ -40,33 +51,18 @@ module MarkdownHelper
   # Redcarpetが生成したリンクタグをチェックして、埋め込みに変換
   def convert_links_to_embeds(html)
     # <p>タグで囲まれた単独のリンクを検出して埋め込みに変換
-    # YouTube
-    html = html.gsub(%r{<p><a href="(https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[\w\-]+(?:[?&][\w=\-]*)*)"[^>]*>\1</a></p>}m) do
-      url = Regexp.last_match(1)
-      render_youtube_embed(url)
-    end
-
-    # Spotify
-    html = html.gsub(%r{<p><a href="(https?://open\.spotify\.com/(?:track|album|playlist|episode)/[\w]+(?:\?[\w=\-&]*)*)"[^>]*>\1</a></p>}m) do
-      url = Regexp.last_match(1)
-      render_spotify_embed(url)
-    end
-
+    html.gsub!(YOUTUBE_LINK_REGEX) { render_youtube_embed(Regexp.last_match(1)) }
+    html.gsub!(SPOTIFY_LINK_REGEX) { render_spotify_embed(Regexp.last_match(1)) }
     html
   end
 
   # :::記法を処理
   def process_explicit_syntax(text)
-    syntax_map = {
-      "link-card" => :render_link_card
-    }
-
     text.gsub(/:::(link-card)\s+(.+?)$/) do
       syntax_type = Regexp.last_match(1)
       url = Regexp.last_match(2).strip
 
-      method_name = syntax_map[syntax_type]
-      if method_name
+      if (method_name = SYNTAX_MAP[syntax_type])
         send(method_name, url)
       else
         ""

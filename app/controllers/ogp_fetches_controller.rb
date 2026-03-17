@@ -4,6 +4,18 @@ require "resolv"
 require "ipaddr"
 
 class OgpFetchesController < ApplicationController
+  # SSRF対策: ブロックするプライベートIPアドレス範囲
+  PRIVATE_IP_RANGES = [
+    IPAddr.new("10.0.0.0/8"),       # プライベートネットワーク
+    IPAddr.new("172.16.0.0/12"),    # プライベートネットワーク
+    IPAddr.new("192.168.0.0/16"),   # プライベートネットワーク
+    IPAddr.new("127.0.0.0/8"),      # ループバック
+    IPAddr.new("169.254.0.0/16"),   # リンクローカル
+    IPAddr.new("::1/128"),          # IPv6 ループバック
+    IPAddr.new("fc00::/7"),         # IPv6 プライベート
+    IPAddr.new("fe80::/10")         # IPv6 リンクローカル
+  ].freeze
+
   def create
     url = params[:url].to_s.strip
 
@@ -35,7 +47,8 @@ class OgpFetchesController < ApplicationController
     validate_url_for_ssrf!(url)
 
     # タイムアウトを設定してURLを開く
-    html = URI.open(url, read_timeout: 5, redirect: true).read
+    # SSRF対策: リダイレクトを無効化（リダイレクト先の検証を回避するため）
+    html = URI.open(url, read_timeout: 5, redirect: false).read
     doc = Nokogiri::HTML(html)
 
     # OGPタグから情報を取得
@@ -73,18 +86,7 @@ class OgpFetchesController < ApplicationController
     ip = IPAddr.new(address)
 
     # プライベートIPアドレスをブロック
-    private_ranges = [
-      IPAddr.new("10.0.0.0/8"),       # プライベートネットワーク
-      IPAddr.new("172.16.0.0/12"),    # プライベートネットワーク
-      IPAddr.new("192.168.0.0/16"),   # プライベートネットワーク
-      IPAddr.new("127.0.0.0/8"),      # ループバック
-      IPAddr.new("169.254.0.0/16"),   # リンクローカル
-      IPAddr.new("::1/128"),          # IPv6 ループバック
-      IPAddr.new("fc00::/7"),         # IPv6 プライベート
-      IPAddr.new("fe80::/10")         # IPv6 リンクローカル
-    ]
-
-    if private_ranges.any? { |range| range.include?(ip) }
+    if PRIVATE_IP_RANGES.any? { |range| range.include?(ip) }
       raise ArgumentError, "プライベートIPアドレスへのアクセスは許可されていません: #{address}"
     end
   rescue Resolv::ResolvError => e

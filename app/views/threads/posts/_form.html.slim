@@ -70,6 +70,7 @@
           h3.text-lg.mb-4 リンクを挿入
           .flex.flex-col.gap-3
             input.border.border-gray-300.rounded.px-3.py-2.text-sm placeholder="URLを入力" data-markdown-editor-target="linkUrlInput"
+            .text-xs.text-red-500.hidden data-markdown-editor-target="linkError" URLを入力してください
             .text-xs.text-gray-500 挿入方法を選択：
             button.border.border-gray-300.rounded.px-4.py-2.text-sm.hover:bg-gray-50 type="button" data-action="click->markdown-editor#insertPlainLink"
               | そのままリンク
