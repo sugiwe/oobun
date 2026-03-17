@@ -24,7 +24,7 @@ class LoginInvitationsController < ApplicationController
       if @login_invitation.expired?
         redirect_to root_path, alert: "この招待URLは有効期限切れです"
       elsif @login_invitation.used? && !@login_invitation.unlimited?
-        redirect_to root_path, notice: "この招待はすでに使用済みです"
+        redirect_to root_path, alert: "この招待はすでに使用済みです"
       end
     end
   end

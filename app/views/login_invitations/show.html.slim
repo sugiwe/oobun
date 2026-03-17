@@ -10,7 +10,7 @@
 
     .mt-6.text-xs.text-gray-400
       | 有効期限：
-      = @login_invitation.expires_at.strftime("%Y年%m月%d日")
+      = l(@login_invitation.expires_at.to_date, format: :long)
       | まで
 
   - if logged_in?
