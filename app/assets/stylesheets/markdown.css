@@ -13,26 +13,37 @@
 .markdown-body h6 {
   font-weight: 400;
   color: #111827;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
 }
 
 .markdown-body h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .markdown-body h2 {
-  font-size: 1.25rem;
+  font-size: 1.625rem;
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
 }
 
 .markdown-body h3 {
-  font-size: 1.125rem;
+  font-size: 1.375rem;
+  margin-top: 2rem;
+  margin-bottom: 0.875rem;
 }
 
-.markdown-body h4,
+.markdown-body h4 {
+  font-size: 1.125rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .markdown-body h5,
 .markdown-body h6 {
   font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .markdown-body p {
@@ -109,6 +120,7 @@
 .markdown-body a {
   color: #2563eb;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .markdown-body a:hover {
@@ -132,10 +144,12 @@
 /* Link card styles */
 .markdown-body .link-card {
   text-decoration: none;
+  cursor: pointer;
 }
 
 .markdown-body .link-card a {
   text-decoration: none;
+  cursor: pointer;
 }
 
 /* Video/Spotify embed responsive containers */
