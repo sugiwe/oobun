@@ -36,14 +36,27 @@ module MarkdownHelper
 
   # 独自記法を処理してHTMLに変換
   def process_custom_syntax(text)
+    # 各カスタム記法に対応するメソッド名のマッピング
+    syntax_map = {
+      "link-card" => :render_link_card,
+      "embed-youtube" => :render_youtube_embed,
+      "embed-spotify" => :render_spotify_embed,
+      "embed-x" => :render_x_embed,
+      "embed-instagram" => :render_instagram_embed
+    }
+
     # 独自記法をまとめて処理
     text.gsub(/:::(link-card|embed-youtube|embed-spotify|embed-x|embed-instagram)\s+(.+?)$/) do
-      tag_name = Regexp.last_match(1).tr("-", "_")
+      syntax_type = Regexp.last_match(1)
       url = Regexp.last_match(2).strip
 
-      # 対応する render_... メソッドを動的に呼び出す
-      # メソッド名が安全な文字のみで構成されることを正規表現で保証している
-      send("render_#{tag_name}", url)
+      method_name = syntax_map[syntax_type]
+      if method_name
+        send(method_name, url)
+      else
+        # 未知の記法の場合は空文字列を返す
+        ""
+      end
     end
   end
 
