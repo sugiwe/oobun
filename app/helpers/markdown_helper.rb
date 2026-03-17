@@ -72,16 +72,56 @@ module MarkdownHelper
 
   # OGPカードのHTMLを生成
   def render_link_card(url)
-    # TODO: OGP取得機能を実装する際に、ここで実際のOGPデータを取得する
-    # 現在はプレースホルダーとして簡易版を返す
+    # OGPデータを取得（エラー時はフォールバック）
+    ogp_data = fetch_ogp_data(url)
+
+    title = ogp_data[:title] || url
+    description = ogp_data[:description]
+    image = ogp_data[:image]
+
+    # OGPカードのHTMLを生成
     <<~HTML
-      <div class="link-card border border-gray-200 rounded-lg p-4 my-4 hover:bg-gray-50">
+      <div class="link-card border border-gray-200 rounded-lg overflow-hidden my-4 hover:bg-gray-50 transition-colors">
         <a href="#{ERB::Util.html_escape(url)}" target="_blank" rel="noopener noreferrer" class="block">
-          <div class="text-sm text-gray-900 font-medium">#{ERB::Util.html_escape(url)}</div>
-          <div class="text-xs text-gray-500 mt-1">リンクカード</div>
+          #{image ? "<div class=\"w-full h-48 bg-gray-200 overflow-hidden\"><img src=\"#{ERB::Util.html_escape(image)}\" alt=\"\" class=\"w-full h-full object-cover\" /></div>" : ""}
+          <div class="p-4">
+            <div class="text-base text-gray-900 font-medium line-clamp-2 mb-1">#{ERB::Util.html_escape(title)}</div>
+            #{description ? "<div class=\"text-sm text-gray-600 line-clamp-2 mb-2\">#{ERB::Util.html_escape(description)}</div>" : ""}
+            <div class="text-xs text-gray-400 truncate">#{ERB::Util.html_escape(url)}</div>
+          </div>
         </a>
       </div>
     HTML
+  end
+
+  # OGPデータを取得（OgpFetchesControllerのロジックを再利用）
+  def fetch_ogp_data(url)
+    require "open-uri"
+    require "nokogiri"
+
+    # タイムアウトを設定してURLを開く（SSRF対策は省略、表示時のみなのでリスク低）
+    html = URI.open(url, read_timeout: 5, redirect: false).read
+    doc = Nokogiri::HTML(html)
+
+    # OGPタグから情報を取得
+    title = doc.at('meta[property="og:title"]')&.[]("content") ||
+            doc.at("title")&.text ||
+            url
+
+    description = doc.at('meta[property="og:description"]')&.[]("content") ||
+                  doc.at('meta[name="description"]')&.[]("content")
+
+    image = doc.at('meta[property="og:image"]')&.[]("content")
+
+    {
+      title: title&.strip,
+      description: description&.strip,
+      image: image&.strip
+    }
+  rescue => e
+    # エラー時はURLのみ返す
+    Rails.logger.warn "Failed to fetch OGP for link-card: #{url} - #{e.message}"
+    { title: url, description: nil, image: nil }
   end
 
   # YouTube埋め込みのHTMLを生成
@@ -156,6 +196,10 @@ module MarkdownHelper
   # - 現在はYouTube/Spotify等のメディア埋め込みに限定していますが、
   #   この設定を変更する際は悪意のあるスクリプト実行を防ぐため厳格な検証が必要です
   # - iframeのsrcプロトコルはhttpsのみに制限しています
+  # - iframe要素は render_youtube_embed / render_spotify_embed メソッドでのみ生成され、
+  #   allow属性の値も固定されているため、ユーザー入力から直接iframeを生成することはありません
+  # - style属性はXSSリスクがあるため、CSSプロパティのホワイトリストを最小限に制限しています
+  #   （padding-bottom, height, position, top, left, width のみ許可）
   def sanitize_config
     {
       elements: %w[
@@ -173,7 +217,9 @@ module MarkdownHelper
       attributes: {
         "a" => %w[href target rel],
         "img" => %w[src alt],
+        # iframe: メディア埋め込み専用（render_youtube_embed / render_spotify_embed）
         "iframe" => %w[src width height frameborder allowfullscreen allowtransparency allow class style],
+        # style属性: YouTube埋め込みのレスポンシブ対応に必要（padding-bottomなど）
         "div" => %w[class style],
         "span" => %w[class],
         "svg" => %w[class fill viewBox],
@@ -185,6 +231,7 @@ module MarkdownHelper
         "iframe" => { "src" => [ "https" ] }  # httpsのみ許可
       },
       css: {
+        # XSS対策: 最小限のCSSプロパティのみ許可（YouTube埋め込みのレスポンシブ対応に必要）
         properties: %w[padding-bottom height position top left width]
       }
     }
