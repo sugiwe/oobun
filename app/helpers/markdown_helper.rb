@@ -202,9 +202,9 @@ module MarkdownHelper
         "path" => %w[d]
       },
       protocols: {
-        "a" => { "href" => ["http", "https", "mailto"] },
-        "img" => { "src" => ["http", "https"] },
-        "iframe" => { "src" => ["https"] }
+        "a" => { "href" => [ "http", "https", "mailto" ] },
+        "img" => { "src" => [ "http", "https" ] },
+        "iframe" => { "src" => [ "https" ] }
       },
       css: {
         properties: %w[padding-bottom height position top left width]
