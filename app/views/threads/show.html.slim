@@ -25,9 +25,12 @@
             - else
               span.inline-flex.items-center.gap-1.text-xs.bg-red-50.text-gray-700.rounded.px-2.py-1
                 | 🔒 非公開
-            - if @thread.show_in_list?
+            - unless @thread.show_in_list?
               span.inline-flex.items-center.gap-1.text-xs.bg-blue-50.text-blue-700.rounded.px-2.py-1
-                | 📋 一覧表示中
+                | 📋 一覧から除外
+            - if @thread.noindex?
+              span.inline-flex.items-center.gap-1.text-xs.bg-purple-50.text-purple-700.rounded.px-2.py-1
+                | 🔍 検索から除外
 
         h1.text-2xl.mb-4 = @thread.title
         - if @thread.description.present?

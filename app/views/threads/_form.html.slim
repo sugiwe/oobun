@@ -35,27 +35,31 @@
           class: "border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
       p.text-xs.text-gray-400 PNG、JPG、GIF、WebP形式、5MB以下。正方形推奨
 
+    / 公開範囲の設定
     .border.border-gray-200.rounded-lg.p-4.bg-gray-50
-      label.flex.items-start.gap-3.cursor-pointer
-        = f.check_box :show_in_list, class: "mt-1"
-        .flex-1
-          .text-sm.font-medium.text-gray-900
-            | この交換日記を一覧ページに表示する
-          .text-xs.text-gray-500.mt-1
-            | 💡 これはアクセス制限ではなく、一覧への表示／非表示の設定です。
-            br
-            | 　 公開後は、URLを知っている人は誰でも閲覧可能になります。
+      h3.text-sm.font-medium.text-gray-700.mb-3 公開範囲の設定
 
-    .border.border-gray-200.rounded-lg.p-4.bg-gray-50
-      label.flex.items-start.gap-3.cursor-pointer
-        = f.check_box :noindex, class: "mt-1"
-        .flex-1
-          .text-sm.font-medium.text-gray-900
-            | 検索エンジンに表示しない（noindex）
-          .text-xs.text-gray-500.mt-1
-            | 🔍 Google等の検索結果に表示されなくなります。
-            br
-            | 　 coconikki内では、URLを知っている人は引き続き閲覧できます。
+      .border.border-gray-200.rounded-lg.p-4.bg-white.mb-3
+        label.flex.items-start.gap-3.cursor-pointer
+          = f.check_box :show_in_list, {class: "mt-1"}, false, true
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | この交換日記を一覧ページから除外する
+            .text-xs.text-gray-500.mt-1
+              | 💡 チェックすると、coconikki内の一覧ページに表示されなくなります。
+              br
+              | 　 URLを知っている人は引き続き閲覧できます。
+
+      .border.border-gray-200.rounded-lg.p-4.bg-white
+        label.flex.items-start.gap-3.cursor-pointer
+          = f.check_box :noindex, class: "mt-1"
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | 検索エンジンから除外する（noindex）
+            .text-xs.text-gray-500.mt-1
+              | 🔍 チェックすると、Google等の検索結果に表示されなくなります。
+              br
+              | 　 coconikki内では、URLを知っている人は引き続き閲覧できます。
 
     - if @thread.errors.any?
       ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3
