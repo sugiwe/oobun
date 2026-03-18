@@ -4,6 +4,9 @@ html
     title
       = content_for(:title) || "coconikki"
     meta name="viewport" content="width=device-width,initial-scale=1"
+    / noindexメタタグ（スレッド詳細・投稿詳細ページでnoindexが有効な場合）
+    - if @thread&.noindex?
+      meta name="robots" content="noindex"
     = csrf_meta_tags
     = csp_meta_tag
     = yield :head
