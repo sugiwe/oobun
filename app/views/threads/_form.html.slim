@@ -38,7 +38,10 @@
 
     / 公開範囲の設定
     .border.border-gray-200.rounded-lg.p-4.bg-gray-50
-      h3.text-sm.font-medium.text-gray-700.mb-3 公開範囲の設定
+      .mb-3
+        h3.text-sm.font-medium.text-gray-700.mb-1 見つかりやすさの設定
+        p.text-xs.text-gray-500
+          | ⚠️ アクセス制限の設定ではありません。URLを知っている人は誰でも閲覧できます。
 
       .border.border-gray-200.rounded-lg.p-4.bg-white.mb-3
         label.flex.items-start.gap-3.cursor-pointer
@@ -47,7 +50,7 @@
           = f.check_box :show_in_list, {class: "mt-1"}, false, true
           .flex-1
             .text-sm.font-medium.text-gray-900
-              | この交換日記を一覧ページから除外する
+              | 一覧ページから除外する
             .text-xs.text-gray-500.mt-1
               | 💡 チェックすると、coconikki内の一覧ページに表示されなくなります。
               br
