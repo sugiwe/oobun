@@ -25,17 +25,61 @@
           class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
       p.text-xs.text-gray-400 投稿一覧で表示される画像です（JPEG, PNG, GIFなど）
 
-    .flex.flex-col.gap-1
-      .flex.justify-between.items-center
+    .flex.flex-col.gap-1 data-controller="markdown-editor"
+      .flex.justify-between.items-center.mb-2
         = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
         / 自動保存ステータス（下書きの場合のみ表示）
         - if @post.draft?
           span.text-xs.text-gray-500 data-draft-autosave-target="status"
-      = f.text_area :body,
-          rows: 14,
-          placeholder: "ここに文章を書いてください（10文字以上）",
-          data: { draft_autosave_target: "body", action: "input->draft-autosave#input" },
-          class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+
+      / タブ切り替え
+      .flex.gap-2.border-b.border-gray-200.mb-3
+        button.px-4.py-2.text-sm.border-b-2.transition-colors type="button" data-markdown-editor-target="editTab" data-action="click->markdown-editor#showEdit" class="border-gray-900 text-gray-900"
+          | 編集
+        button.px-4.py-2.text-sm.border-b-2.border-transparent.text-gray-500.transition-colors type="button" data-markdown-editor-target="previewTab" data-action="click->markdown-editor#showPreview" class="hover:text-gray-700"
+          | プレビュー
+
+      / 編集エリア
+      .relative data-markdown-editor-target="editArea"
+        / ツールバー
+        .flex.justify-between.items-center.mb-2
+          .flex.gap-2
+            button.px-3.py-1.text-xs.border.border-gray-300.rounded.hover:bg-gray-50.flex.items-center.gap-1 type="button" data-action="click->markdown-editor#openLinkModal"
+              svg.w-3.h-3 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              span リンク挿入
+          = link_to markdown_guide_path, target: "_blank", class: "text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1" do
+            svg.w-3.h-3 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            span マークダウン記法ガイド
+
+        = f.text_area :body,
+            rows: 14,
+            placeholder: "ここに文章を書いてください（10文字以上、マークダウン記法が使えます）",
+            data: { draft_autosave_target: "body", action: "input->draft-autosave#input input->markdown-editor#updateCharCount", markdown_editor_target: "textarea" },
+            class: "w-full border border-gray-300 rounded-md px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 resize-y overflow-hidden"
+
+      / プレビューエリア
+      .hidden.border.border-gray-300.rounded-md.px-4.py-3.min-h-96.bg-gray-50 data-markdown-editor-target="previewArea"
+        .markdown-body data-markdown-editor-target="preview"
+          .text-gray-400.text-sm プレビューを読み込み中...
+
+      / リンク挿入モーダル
+      .fixed.inset-0.bg-black.bg-opacity-50.flex.items-center.justify-center.z-50.hidden data-markdown-editor-target="linkModal"
+        .bg-white.rounded-lg.p-6.max-w-md.w-full.mx-4
+          h3.text-lg.mb-4 リンクを挿入
+          .flex.flex-col.gap-3
+            input.border.border-gray-300.rounded.px-3.py-2.text-sm placeholder="URLを入力" data-markdown-editor-target="linkUrlInput"
+            .text-xs.text-red-500.hidden data-markdown-editor-target="linkError" URLを入力してください
+            .text-xs.text-gray-500 挿入方法を選択：
+            button.border.border-gray-300.rounded.px-4.py-2.text-sm.hover:bg-gray-50 type="button" data-action="click->markdown-editor#insertPlainLink"
+              | そのままリンク
+            button.border.border-gray-300.rounded.px-4.py-2.text-sm.hover:bg-gray-50 type="button" data-action="click->markdown-editor#insertMarkdownLink"
+              | マークダウンリンク（タイトル自動取得）
+            button.border.border-gray-300.rounded.px-4.py-2.text-sm.hover:bg-gray-50 type="button" data-action="click->markdown-editor#insertLinkCard"
+              | OGPカード
+            button.border.border-gray-300.rounded.px-4.py-2.text-sm.text-gray-600.hover:bg-gray-50 type="button" data-action="click->markdown-editor#closeLinkModal"
+              | キャンセル
 
     - if @post.errors.any?
       ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3

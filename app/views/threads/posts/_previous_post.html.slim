@@ -1,0 +1,36 @@
+/ 前回の投稿表示（タブ切り替え付き）
+details.border.border-gray-200.rounded-lg.bg-gray-50 open=true
+  summary.cursor-pointer.px-4.py-3.text-gray-900.hover:bg-gray-100.rounded-t-lg 📮 前回の投稿
+  article.p-6.bg-white.rounded-b-lg.border-t.border-gray-200 data-controller="previous-post"
+    / ヘッダー（著者・日付）
+    .flex.items-center.gap-3.mb-6
+      .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+        = render "shared/avatar", user: prev_post.user, show_fallback: true
+      .flex.flex-col
+        span.text-sm.font-medium.text-gray-700 = prev_post.user.display_name
+        span.text-xs.text-gray-400 = prev_post.created_at.strftime("%Y年%m月%d日")
+
+    / サムネイル画像（あれば）
+    - if prev_post.thumbnail.attached?
+      .mb-4
+        = image_tag prev_post.thumbnail, class: "w-full rounded", alt: prev_post.title
+
+    / タイトル
+    - if prev_post.title.present?
+      h3.text-lg.text-gray-900.mb-4 = prev_post.title
+
+    / タブ切り替え
+    .flex.gap-2.border-b.border-gray-200.mb-3
+      button.px-3.py-1.text-xs.border-b-2.border-gray-900.text-gray-900.transition-colors type="button" data-previous-post-target="renderedTab" data-action="click->previous-post#showRendered"
+        | 表示
+      button.px-3.py-1.text-xs.border-b-2.border-transparent.text-gray-500.transition-colors type="button" data-previous-post-target="rawTab" data-action="click->previous-post#showRaw"
+        | マークダウン
+
+    / 表示（マークダウン変換後）
+    .text-sm.text-gray-700.leading-relaxed.overflow-y-auto data-previous-post-target="renderedArea" style="max-height: 430px"
+      .markdown-body
+        = render_markdown(prev_post.body)
+
+    / マークダウン（変換前）
+    .hidden.text-sm.text-gray-700.whitespace-pre-wrap.leading-relaxed.overflow-y-auto.font-mono.bg-gray-50.p-4.rounded data-previous-post-target="rawArea" style="max-height: 430px"
+      = prev_post.body

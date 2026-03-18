@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   get "/terms",   to: "pages#terms",   as: :terms
   get "/privacy", to: "pages#privacy", as: :privacy
   get "/contact", to: "pages#contact", as: :contact
+  get "/markdown-guide", to: "pages#markdown_guide", as: :markdown_guide
 
   # ユーザーページ（最優先でマッチさせる）
   get  "/@:username",      to: "users#show",   as: :user
@@ -43,6 +44,12 @@ Rails.application.routes.draw do
 
   # ログイン許可招待URL（管理者発行、トークンベース）
   get "/login-invite/:token", to: "login_invitations#show", as: :login_invitation
+
+  # マークダウンプレビュー
+  post "/preview_markdown", to: "markdown_previews#create", as: :preview_markdown
+
+  # OGP取得
+  post "/fetch_ogp", to: "ogp_fetches#create", as: :fetch_ogp
 
   # 交換日記招待URL（トークンベース、スレッドURLとは独立）
   get  "/invite/:token", to: "threads/invitations#show",  as: :invitation

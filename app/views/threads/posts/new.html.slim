@@ -10,28 +10,7 @@ h1.text-xl.mb-6 投稿する
   / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）
   - if @prev_post
     .w-full.md:flex-1.md:min-w-0
-      details.border.border-gray-200.rounded-lg.bg-gray-50 open=true
-        summary.cursor-pointer.px-4.py-3.text-gray-900.hover:bg-gray-100.rounded-t-lg 📮 前回の投稿
-        article.p-6.bg-white.rounded-b-lg.border-t.border-gray-200
-          / ヘッダー（著者・日付）
-          .flex.items-center.gap-3.mb-6
-            .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-              = render "shared/avatar", user: @prev_post.user, show_fallback: true
-            .flex.flex-col
-              span.text-sm.font-medium.text-gray-700 = @prev_post.user.display_name
-              span.text-xs.text-gray-400 = @prev_post.created_at.strftime("%Y年%m月%d日")
-
-          / サムネイル画像（あれば）
-          - if @prev_post.thumbnail.attached?
-            .mb-4
-              = image_tag @prev_post.thumbnail, class: "w-full rounded", alt: @prev_post.title
-
-          / タイトル
-          - if @prev_post.title.present?
-            h3.text-lg.text-gray-900.mb-4 = @prev_post.title
-
-          / 本文（スクロール可能）
-          .text-sm.text-gray-700.whitespace-pre-wrap.leading-relaxed.max-h-96.overflow-y-auto = @prev_post.body
+      = render "previous_post", prev_post: @prev_post
 
   / 右: 投稿フォーム
   .w-full.md:flex-1.md:min-w-0
