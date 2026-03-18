@@ -42,6 +42,8 @@
 
       .border.border-gray-200.rounded-lg.p-4.bg-white.mb-3
         label.flex.items-start.gap-3.cursor-pointer
+          / チェックボックスの値を反転（false, true）: チェックON=show_in_list:false、チェックOFF=show_in_list:true
+          / これにより「チェック=より制限的」という統一されたUX体験を実現
           = f.check_box :show_in_list, {class: "mt-1"}, false, true
           .flex-1
             .text-sm.font-medium.text-gray-900
