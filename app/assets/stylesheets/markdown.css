@@ -2,7 +2,7 @@
 .markdown-body {
   font-size: 1rem;
   color: #1f2937;
-  line-height: 1.75;
+  line-height: 2;
 }
 
 .markdown-body h1,
@@ -16,21 +16,25 @@
 }
 
 .markdown-body h1 {
-  font-size: 2rem;
-  margin-top: 2.5rem;
+  font-size: 1.5rem;
+  margin-top: 3rem;
   margin-bottom: 1.25rem;
 }
 
 .markdown-body h2 {
-  font-size: 1.625rem;
-  margin-top: 2.25rem;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.125rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .markdown-body h3 {
-  font-size: 1.375rem;
+  font-size: 1.125rem;
   margin-top: 2rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 1em;
+  padding-left: 0.75rem;
+  border-left: 1px solid #d1d5db;
 }
 
 .markdown-body h4 {
@@ -46,9 +50,47 @@
   margin-bottom: 0.75rem;
 }
 
+/* スマホ表示用の調整 */
+@media (max-width: 768px) {
+  .markdown-body h1 {
+    font-size: 1.25rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .markdown-body h2 {
+    font-size: 1.125rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .markdown-body h3 {
+    font-size: 1rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.875rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid #d1d5db;
+  }
+
+  .markdown-body h4 {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .markdown-body h5,
+  .markdown-body h6 {
+    font-size: 0.875rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
 .markdown-body p {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 1.75rem;
+  margin-bottom: 1.75rem;
 }
 
 .markdown-body strong {
@@ -86,7 +128,7 @@
 }
 
 .markdown-body blockquote {
-  border-left: 4px solid #d1d5db;
+  border-left: 2px solid #d1d5db;
   padding-left: 1rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -118,13 +160,13 @@
 }
 
 .markdown-body a {
-  color: #2563eb;
+  color: #4b5563;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .markdown-body a:hover {
-  color: #1e40af;
+  color: #111827;
 }
 
 .markdown-body img {
