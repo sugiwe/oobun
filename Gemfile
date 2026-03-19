@@ -66,6 +66,13 @@ gem "sanitize"
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 8.0"
+
+  # Factory Bot for test data creation [https://github.com/thoughtbot/factory_bot_rails]
+  gem "factory_bot_rails"
+
+  # Faker for generating fake data [https://github.com/faker-ruby/faker]
+  gem "faker"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
@@ -77,6 +84,11 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+end
+
+group :test do
+  # Shoulda Matchers for RSpec [https://github.com/thoughtbot/shoulda-matchers]
+  gem "shoulda-matchers", "~> 6.0"
 end
 
 group :development do
