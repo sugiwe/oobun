@@ -48,13 +48,13 @@ class UsersController < ApplicationController
     ActiveRecord::Base.transaction do
       # 1. 投稿内容を匿名化（空文字列に変更）
       @user.posts.unscope(where: :status).update_all(
-        title: "[削除済み]",
+        title: Post::ANONYMIZED_TITLE,
         body: "",
         status: "anonymized"
       )
 
       # 2. 投稿の画像を削除
-      @user.posts.unscope(where: :status).each do |post|
+      @user.posts.unscope(where: :status).with_attached_thumbnail.each do |post|
         post.thumbnail.purge if post.thumbnail.attached?
       end
 
@@ -64,7 +64,7 @@ class UsersController < ApplicationController
       # 4. ユーザー情報を匿名化
       @user.update!(
         username: "deleted_user_#{@user.id}",
-        display_name: "退会済みユーザー",
+        display_name: User::ANONYMIZED_DISPLAY_NAME,
         email: "deleted_#{@user.id}@deleted.coconikki.com",
         bio: nil,
         google_uid: nil,

@@ -75,8 +75,7 @@ Rails.application.routes.draw do
     end
     resource :skip,         only: [ :create ], controller: "threads/skips"
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
-    resource :membership,   only: [ :destroy ], controller: "threads/memberships" do
-      delete "remove/:user_id", to: "threads/memberships#remove_member", on: :collection, as: :remove_member
-    end
+    resource :membership,   only: [ :destroy ], controller: "threads/memberships"
+    delete "memberships/:user_id", to: "threads/memberships#remove_member", as: :remove_membership
   end
 end

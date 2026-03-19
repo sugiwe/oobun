@@ -2,6 +2,9 @@ class User < ApplicationRecord
   # Admin email addresses cached at boot time
   ADMIN_EMAIL_SET = ENV.fetch("ADMIN_EMAILS", "").split(",").map(&:strip).to_set.freeze
 
+  # 匿名化された退会ユーザーの表示名
+  ANONYMIZED_DISPLAY_NAME = "退会済みユーザー"
+
   # Associations
   has_many :memberships, dependent: :destroy
   has_many :correspondence_threads, through: :memberships, source: :thread

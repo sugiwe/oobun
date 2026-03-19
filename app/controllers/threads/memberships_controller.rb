@@ -13,18 +13,20 @@ class Threads::MembershipsController < ApplicationController
       return
     end
 
-    # 下書きがある場合は削除
-    draft = @thread.draft_for(current_user)
-    draft&.destroy
+    ActiveRecord::Base.transaction do
+      # 下書きがある場合は削除
+      draft = @thread.draft_for(current_user)
+      draft&.destroy
 
-    # メンバーシップを削除
-    @membership.destroy!
+      # メンバーシップを削除
+      @membership.destroy!
 
-    # ターン順の位置を詰める（削除されたメンバーより後ろの position を -1）
-    @thread.memberships.where("position > ?", @membership.position).update_all("position = position - 1")
+      # ターン順の位置を詰める（削除されたメンバーより後ろの position を -1）
+      @thread.memberships.where("position > ?", @membership.position).update_all("position = position - 1")
 
-    # 最終投稿メタデータを更新
-    @thread.update_last_post_metadata!
+      # 最終投稿メタデータを更新
+      @thread.update_last_post_metadata!
+    end
 
     redirect_to root_path, notice: "「#{@thread.title}」から抜けました"
   end
@@ -40,14 +42,16 @@ class Threads::MembershipsController < ApplicationController
       return
     end
 
-    # メンバーシップを削除
-    target_membership.destroy!
+    ActiveRecord::Base.transaction do
+      # メンバーシップを削除
+      target_membership.destroy!
 
-    # ターン順の位置を詰める
-    @thread.memberships.where("position > ?", target_membership.position).update_all("position = position - 1")
+      # ターン順の位置を詰める
+      @thread.memberships.where("position > ?", target_membership.position).update_all("position = position - 1")
 
-    # 最終投稿メタデータを更新
-    @thread.update_last_post_metadata!
+      # 最終投稿メタデータを更新
+      @thread.update_last_post_metadata!
+    end
 
     redirect_to thread_path(@thread.slug), notice: "退会済みユーザーを除外しました"
   end

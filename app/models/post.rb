@@ -1,4 +1,7 @@
 class Post < ApplicationRecord
+  # 匿名化された投稿のタイトル
+  ANONYMIZED_TITLE = "[削除済み]"
+
   # Enums
   enum :status, { draft: "draft", published: "published", anonymized: "anonymized" }, default: :published
 
