@@ -88,12 +88,8 @@
         - if @post.published?
           / 公開済み投稿の編集
           = f.submit "更新する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
-        - elsif @post.persisted?
-          / 既存の下書きを編集中
+        - else
+          / 下書きを編集中（draft-first patternにより、@post.persisted? は常に true）
           = f.submit "下書き更新", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き更新"
           - if @thread.my_turn?(current_user)
             = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { turbo_method: :post }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
-        - else
-          / 新規投稿フォーム
-          = f.submit "下書き保存", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き保存"
-          = f.submit "投稿する", class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer", name: "commit", value: "投稿する"

@@ -1,24 +1,8 @@
 - content_for :title, "投稿 - #{@thread.title} - coconikki"
 - content_for :main_width, 'max-w-7xl'
 
-/ 自動保存コントローラーのスコープ（下書きの場合のみ）
-- autosave_data = @post.draft? ? { controller: "draft-autosave", draft_autosave_url_value: (@post.persisted? ? thread_post_path(@thread.slug, @post) : thread_posts_path(@thread.slug)) } : {}
-div data=autosave_data
-  .mb-6
-    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
-
-  h1.text-xl.mb-6 投稿する
-
-  .flex.flex-col.md:flex-row.gap-6
-    / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）
-    - if @prev_post
-      .w-full.md:flex-1.md:min-w-0
-        = render "previous_post", prev_post: @prev_post
-
-    / 右: 投稿フォーム
-    .w-full.md:flex-1.md:min-w-0
-      = render "form", form_url: (@post.persisted? ? thread_post_path(@thread.slug, @post) : thread_posts_path(@thread.slug)), form_method: (@post.persisted? ? :patch : :post)
-
-  / 自動保存ステータス（下書きの場合のみ、画面右下に固定表示）
-  - if @post.draft?
-    .fixed.bottom-4.right-4.bg-white.rounded-full.shadow-lg.px-4.py-2.text-xs.text-gray-600.border.border-gray-200.z-50.transition-opacity data-draft-autosave-target="status"
+/ このファイルは表示されません（newアクションは常にeditにリダイレクト）
+/ 万が一表示された場合のためにリダイレクト先へのリンクを表示
+.max-w-2xl.mx-auto.mt-8.text-center
+  p.text-gray-600.mb-4 投稿画面に移動しています...
+  = link_to "投稿画面へ", edit_thread_post_path(@thread.slug, @post), class: "text-blue-600 hover:text-blue-800 underline"
