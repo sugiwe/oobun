@@ -53,11 +53,11 @@ class CorrespondenceThread < ApplicationRecord
     draft_for(user).present?
   end
 
-  # 公開済み投稿＋特定ユーザーの下書きを取得（表示用）
+  # 公開済み投稿＋匿名化済み投稿＋特定ユーザーの下書きを取得（表示用）
   def visible_posts_for(user = nil)
     if user
       posts.unscope(where: :status)
-           .where("status = 'published' OR (status = 'draft' AND user_id = ?)", user.id)
+           .where("status IN ('published', 'anonymized') OR (status = 'draft' AND user_id = ?)", user.id)
     else
       published_posts
     end

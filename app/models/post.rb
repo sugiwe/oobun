@@ -1,6 +1,6 @@
 class Post < ApplicationRecord
   # Enums
-  enum :status, { draft: "draft", published: "published" }, default: :published
+  enum :status, { draft: "draft", published: "published", anonymized: "anonymized" }, default: :published
 
   # Associations
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
@@ -30,10 +30,10 @@ class Post < ApplicationRecord
   end
 
   # Scopes
-  scope :published_posts, -> { where(status: "published").order(created_at: :asc) }
+  scope :published_posts, -> { where(status: [ "published", "anonymized" ]).order(created_at: :asc) }
   scope :draft_posts, -> { where(status: "draft") }
 
-  # Default scope: 公開済み投稿のみ表示
+  # Default scope: 公開済み投稿と匿名化済み投稿を表示（下書きは除外）
   default_scope -> { published_posts }
 
   # 前後のナビゲーション（公開済み投稿のみ）

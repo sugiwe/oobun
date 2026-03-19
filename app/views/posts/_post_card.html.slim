@@ -1,29 +1,47 @@
 / 投稿カード（ホーム・交換日記詳細で共通利用）
-a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group class="#{post.draft? ? 'border-amber-200 bg-amber-50/30' : 'border-gray-200'}" href=thread_post_path(post.thread.slug, post)
-  .flex.flex-row
-    / 左：サムネイル画像（スマホ: 正方形120x120、PC: 3:2比率240x160）
-    .bg-gray-100.flex.items-center.justify-center.overflow-hidden.flex-shrink-0.w-30.h-30.md:w-60.md:h-40.rounded
-      - if post.thumbnail.attached?
-        = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
-      - else
-        .text-gray-300.text-xl.md:text-2xl = post.draft? ? "✍️" : "📮"
+- if post.anonymized?
+  / 匿名化済み投稿の表示
+  .block.border.border-gray-200.rounded-lg.overflow-hidden.bg-gray-50
+    .flex.flex-row
+      / 左：匿名化済みアイコン
+      .bg-gray-200.flex.items-center.justify-center.overflow-hidden.flex-shrink-0.w-30.h-30.md:w-60.md:h-40.rounded
+        .text-gray-400.text-xl.md:text-2xl 👻
 
-    / 右：コンテンツ
-    .p-4.md:p-6.flex.flex-col.gap-1.md:gap-2.flex-1.min-w-0
-      / タイトル
-      .flex.items-center.gap-2
-        h3.text-sm.md:text-base.mb-1.text-gray-900.line-clamp-2.md:line-clamp-1.flex-1 = post.title
-        - if post.draft?
-          span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
+      / 右：匿名化済みメッセージ
+      .p-4.md:p-6.flex.flex-col.gap-1.md:gap-2.flex-1.min-w-0
+        h3.text-sm.md:text-base.mb-1.text-gray-400 退会したユーザーの投稿
+        .text-xs.md:text-sm.text-gray-400 投稿内容は閲覧できません
+        .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
+          .flex.items-center.gap-2
+            .w-5.h-5.rounded-full.bg-gray-300.flex-shrink-0
+            span.text-xs.text-gray-400 退会済みユーザー
+            span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
+- else
+  a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group class="#{post.draft? ? 'border-amber-200 bg-amber-50/30' : 'border-gray-200'}" href=thread_post_path(post.thread.slug, post)
+    .flex.flex-row
+      / 左：サムネイル画像（スマホ: 正方形120x120、PC: 3:2比率240x160）
+      .bg-gray-100.flex.items-center.justify-center.overflow-hidden.flex-shrink-0.w-30.h-30.md:w-60.md:h-40.rounded
+        - if post.thumbnail.attached?
+          = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
+        - else
+          .text-gray-300.text-xl.md:text-2xl = post.draft? ? "✍️" : "📮"
 
-      / 本文プレビュー（改行を削除、スマホ1行・PC2行表示）
-      .text-xs.md:text-sm.text-gray-500.line-clamp-1.md:line-clamp-2 = post.body&.squish
-
-      / 著者・日付
-      .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
+      / 右：コンテンツ
+      .p-4.md:p-6.flex.flex-col.gap-1.md:gap-2.flex-1.min-w-0
+        / タイトル
         .flex.items-center.gap-2
-          .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-            = render "shared/avatar", user: post.user, show_fallback: true
-          span.text-xs.text-gray-500 = post.user.display_name
-          span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
-        span.text-xs.text-gray-400.group-hover:text-gray-700.md:ml-auto →
+          h3.text-sm.md:text-base.mb-1.text-gray-900.line-clamp-2.md:line-clamp-1.flex-1 = post.title
+          - if post.draft?
+            span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
+
+        / 本文プレビュー（改行を削除、スマホ1行・PC2行表示）
+        .text-xs.md:text-sm.text-gray-500.line-clamp-1.md:line-clamp-2 = post.body&.squish
+
+        / 著者・日付
+        .flex.flex-wrap.items-center.justify-between.gap-2.mt-auto
+          .flex.items-center.gap-2
+            .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+              = render "shared/avatar", user: post.user, show_fallback: true
+            span.text-xs.text-gray-500 = post.user.display_name
+            span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
+          span.text-xs.text-gray-400.group-hover:text-gray-700.md:ml-auto →

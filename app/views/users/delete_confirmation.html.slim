@@ -1,0 +1,43 @@
+- content_for :title, "退会確認 - coconikki"
+
+.max-w-2xl.mx-auto
+  .mb-6
+    = link_to "← プロフィール編集に戻る", edit_user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700"
+
+  .border.border-red-300.rounded-lg.p-8.bg-red-50
+    h1.text-2xl.font-semibold.text-red-900.mb-6 退会の確認
+
+    .mb-6
+      h2.text-lg.font-semibold.text-red-900.mb-3 退会すると以下が削除されます：
+      ul.list-disc.list-inside.text-sm.text-red-800.space-y-2.ml-4
+        li すべての投稿内容（タイトル・本文・画像）
+        li プロフィール情報
+        li アップロードした画像
+
+    - if @participated_threads.any?
+      .mb-6
+        h2.text-lg.font-semibold.text-red-900.mb-3 参加している交換日記：
+        ul.list-disc.list-inside.text-sm.text-red-800.space-y-1.ml-4
+          - @participated_threads.each do |thread|
+            li
+              = thread.title
+              |  (
+              = thread.users.map(&:username).map { |u| "@#{u}" }.join(", ")
+              | )
+        p.mt-3.text-sm.text-red-700
+          | ⚠️ これらの交換日記には影響しませんが、あなたの投稿は「退会済みユーザー」として表示されます。
+
+    .mb-6.p-4.bg-yellow-50.border.border-yellow-300.rounded
+      p.text-sm.text-yellow-900.font-semibold
+        | ⚠️ この操作は取り消せません
+
+    = form_with url: user_path(@user.username), method: :delete do |f|
+      .mb-6
+        = f.label :username_confirmation, "退会するには、ユーザー名を入力してください：", class: "text-sm font-medium text-red-900 block mb-2"
+        .flex.items-center.gap-2.mb-2
+          span.text-sm.text-gray-600 @
+          = f.text_field :username_confirmation, placeholder: @user.username, class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+
+      .flex.justify-end.gap-3
+        = link_to "キャンセル", edit_user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+        = f.submit "退会する", class: "bg-red-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-red-700 cursor-pointer"

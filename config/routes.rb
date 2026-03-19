@@ -24,9 +24,11 @@ Rails.application.routes.draw do
   get "/markdown-guide", to: "pages#markdown_guide", as: :markdown_guide
 
   # ユーザーページ（最優先でマッチさせる）
-  get  "/@:username",      to: "users#show",   as: :user
-  get  "/@:username/edit", to: "users#edit",   as: :edit_user
-  patch "/@:username",     to: "users#update"
+  get    "/@:username",        to: "users#show",   as: :user
+  get    "/@:username/edit",   to: "users#edit",   as: :edit_user
+  patch  "/@:username",        to: "users#update"
+  get    "/@:username/delete", to: "users#delete_confirmation", as: :delete_confirmation_user
+  delete "/@:username",        to: "users#destroy"
 
   # トップページ（パーソナライズドフィード）
   root "threads#index"
@@ -73,5 +75,8 @@ Rails.application.routes.draw do
     end
     resource :skip,         only: [ :create ], controller: "threads/skips"
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
+    resource :membership,   only: [ :destroy ], controller: "threads/memberships" do
+      delete "remove/:user_id", to: "threads/memberships#remove_member", on: :collection, as: :remove_member
+    end
   end
 end

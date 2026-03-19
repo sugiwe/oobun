@@ -118,6 +118,11 @@ class User < ApplicationRecord
     ADMIN_EMAIL_SET.include?(email)
   end
 
+  # 退会済みかどうか
+  def deleted?
+    deleted_at.present?
+  end
+
   # 正規化されたメールアドレスを返す（DRY原則）
   def normalized_email
     email.downcase.strip
