@@ -8,6 +8,7 @@ class Threads::MembershipsController < ApplicationController
     @membership = @thread.memberships.find_by!(user: current_user)
 
     # 最後の1人の場合は抜けられない
+    # TODO: 将来的に同時アクセスが増えた場合、競合状態対策としてトランザクション内でlockを検討
     if @thread.memberships.count == 1
       redirect_to thread_path(@thread.slug), alert: "最後のメンバーは抜けることができません。交換日記を削除する場合は削除ボタンをご利用ください。"
       return

@@ -53,8 +53,8 @@ class UsersController < ApplicationController
         status: "anonymized"
       )
 
-      # 2. 投稿の画像を削除
-      @user.posts.unscope(where: :status).with_attached_thumbnail.each do |post|
+      # 2. 投稿の画像を削除（バッチ処理でメモリ効率を改善）
+      @user.posts.unscope(where: :status).with_attached_thumbnail.find_each do |post|
         post.thumbnail.purge if post.thumbnail.attached?
       end
 
