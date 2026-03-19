@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ["title", "body", "status", "form"]
   static values = {
     url: String,
-    interval: { type: Number, default: 5000 } // 5秒間隔
+    interval: { type: Number, default: 3000 } // 3秒間隔
   }
 
   connect() {
@@ -22,12 +22,21 @@ export default class extends Controller {
 
     // debounce タイマー
     this.saveTimer = null
+
+    // カウントダウン用インターバル
+    this.countdownInterval = null
+
+    // 初期ステータス表示
+    this.updateStatus("入力内容は自動保存されます")
   }
 
   disconnect() {
     // タイマーをクリア
     if (this.saveTimer) {
       clearTimeout(this.saveTimer)
+    }
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval)
     }
   }
 
@@ -38,16 +47,41 @@ export default class extends Controller {
       return
     }
 
-    // ステータス更新
-    this.updateStatus("未保存...")
-
-    // 既存のタイマーをクリア
+    // 既存のタイマーとカウントダウンをクリア
     if (this.saveTimer) {
       clearTimeout(this.saveTimer)
     }
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval)
+    }
+
+    // 残り秒数を計算（ミリ秒 → 秒）
+    const intervalSeconds = Math.ceil(this.intervalValue / 1000)
+    let remainingSeconds = intervalSeconds
+
+    // 初回表示
+    this.updateStatus(`${remainingSeconds}秒後に自動保存...`)
+
+    // 1秒ごとにカウントダウン
+    this.countdownInterval = setInterval(() => {
+      remainingSeconds--
+      if (remainingSeconds > 0) {
+        this.updateStatus(`${remainingSeconds}秒後に自動保存...`)
+      } else {
+        // カウントダウン終了時にクリア（save()が実行される直前）
+        clearInterval(this.countdownInterval)
+        this.countdownInterval = null
+        // 「保存中...」は save() メソッド内で表示されるので、ここでは何もしない
+      }
+    }, 1000)
 
     // debounce: 一定時間後に保存
     this.saveTimer = setTimeout(() => {
+      // カウントダウンをクリア（念のため）
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval)
+        this.countdownInterval = null
+      }
       this.save()
     }, this.intervalValue)
   }

@@ -1,7 +1,4 @@
-/ 自動保存用のコントローラーを設定（下書きの場合のみ）
-- autosave_data = @post.draft? ? { controller: "draft-autosave", draft_autosave_url_value: thread_post_path(@thread.slug, @post) } : {}
-
-= form_with model: @post, url: form_url, method: form_method, data: autosave_data.merge({ draft_autosave_target: "form" }) do |f|
+= form_with model: @post, url: form_url, method: form_method, data: { draft_autosave_target: "form" } do |f|
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
@@ -28,9 +25,6 @@
     .flex.flex-col.gap-1 data-controller="markdown-editor"
       .flex.justify-between.items-center.mb-2
         = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
-        / 自動保存ステータス（下書きの場合のみ表示）
-        - if @post.draft?
-          span.text-xs.text-gray-500 data-draft-autosave-target="status"
 
       / タブ切り替え
       .flex.gap-2.border-b.border-gray-200.mb-3
@@ -94,12 +88,8 @@
         - if @post.published?
           / 公開済み投稿の編集
           = f.submit "更新する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
-        - elsif @post.persisted?
-          / 既存の下書きを編集中
+        - else
+          / 下書きを編集中（draft-first patternにより、@post.persisted? は常に true）
           = f.submit "下書き更新", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き更新"
           - if @thread.my_turn?(current_user)
             = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { turbo_method: :post }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
-        - else
-          / 新規投稿フォーム
-          = f.submit "下書き保存", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き保存"
-          = f.submit "投稿する", class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 cursor-pointer", name: "commit", value: "投稿する"

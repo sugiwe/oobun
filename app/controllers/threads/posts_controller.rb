@@ -32,37 +32,8 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def create
-    # パラメータが空の場合は、空の下書きを作成してeditにリダイレクト（新フロー）
-    if params[:post].blank?
-      find_or_create_draft_and_redirect
-      return
-    end
-
-    # 以下は既存のフォーム送信処理（後方互換性のため残す）
-    @post = @thread.posts.unscope(where: :status)
-                         .find_or_initialize_by(user: current_user, status: "draft")
-
-    # ボタンの種類で処理を分岐
-    if params[:commit] == "投稿する"
-      # 直接公開
-      ActiveRecord::Base.transaction do
-        @post.assign_attributes(post_params.merge(status: "published"))
-        @post.save!
-        @thread.update_last_post_metadata!
-      end
-      redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
-    else
-      # 下書き保存
-      if @post.update(post_params.merge(status: "draft"))
-        redirect_to thread_path(@thread.slug), notice: "下書きを保存しました"
-      else
-        set_prev_post
-        render :new, status: :unprocessable_entity
-      end
-    end
-  rescue ActiveRecord::RecordInvalid
-    set_prev_post
-    render :new, status: :unprocessable_entity
+    # draft-first pattern: 常に空の下書きを作成してeditにリダイレクト
+    find_or_create_draft_and_redirect
   end
 
   def edit

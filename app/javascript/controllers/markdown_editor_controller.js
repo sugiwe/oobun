@@ -25,6 +25,7 @@ export default class extends Controller {
     const minHeight = 336 // rows: 14 の場合の高さ
     const newHeight = Math.max(minHeight, textarea.scrollHeight)
 
+    // 計算した高さを設定（'auto' から具体的な高さに戻すことで画面ジャンプを防止）
     textarea.style.height = newHeight + 'px'
   }
 
