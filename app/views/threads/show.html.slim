@@ -37,12 +37,17 @@
           p.text-gray-500.text-sm.mt-2 = @thread.description
 
         / 参加者（アバター付き）
-        .flex.items-center.gap-3.mt-4
+        .flex.items-center.gap-3.mt-4.flex-wrap
           - @members.each do |m|
             .flex.items-center.gap-1.5
               .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
                 = render "shared/avatar", user: m.user, show_fallback: true
-              span.text-sm.text-gray-600 = "@#{m.user.username}"
+              - if m.user.deleted?
+                span.text-sm.text-gray-400 退会済みユーザー
+                - if is_member
+                  = button_to "除外", remove_membership_path(@thread.slug, m.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？投稿は残り続けます。" }, class: "text-xs text-gray-500 hover:text-gray-700 underline ml-1"
+              - else
+                span.text-sm.text-gray-600 = "@#{m.user.username}"
           span.text-xs.text-gray-400 ·
           / RSSドロップダウンメニュー
           div class="relative inline-block" data-controller="rss" data-rss-url-value="#{thread_url(@thread.slug, format: :rss)}"
@@ -79,6 +84,11 @@
                 input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
                 button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
                   | コピー
+            / 脱退ボタン
+            - if @thread.memberships.count > 1
+              - draft = @thread.draft_for(current_user)
+              - confirm_message = draft ? "本当にこの交換日記から抜けますか？保存中の下書きは削除され、あなたの投稿は残り続けます。" : "本当にこの交換日記から抜けますか？あなたの投稿は残り続けます。"
+              = button_to "この交換日記から抜ける", thread_membership_path(@thread.slug), method: :delete, data: { turbo_confirm: confirm_message }, class: "text-xs text-gray-500 hover:text-gray-700 border border-gray-300 rounded px-2 py-1"
         / 購読ボタン（非メンバー＆ログインユーザー）
         - elsif logged_in?
           .mt-4

@@ -57,3 +57,10 @@
       .flex.justify-end.gap-3
         = link_to "キャンセル", user_path(@user.username), class: "text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
         = f.submit "更新する", class: "bg-gray-900 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-700 cursor-pointer"
+
+  / Danger Zone
+  .mt-16.border.border-red-300.rounded-lg.p-6.bg-red-50
+    h2.text-lg.font-semibold.text-red-900.mb-3 退会
+    p.text-sm.text-red-800.mb-4
+      | アカウントを削除すると、すべての投稿内容が削除されます。この操作は取り消せません。
+    = link_to "退会する", delete_confirmation_user_path(@user.username), class: "inline-block bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700"
