@@ -1,33 +1,39 @@
 - content_for :title, "#{@post.draft? ? '投稿' : '投稿を編集'} - #{@thread.title} - coconikki"
 - content_for :main_width, 'max-w-7xl' if @post.draft?
 
-- if @post.draft?
-  / 下書き編集時は new.html.slim と同じレイアウト
-  .mb-6
-    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
-
-  .flex.items-center.justify-between.mb-6
-    h1.text-xl 投稿する
-    = button_to "下書きを削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "下書きを削除しますか？この操作は取り消せません。" }
-
-  .flex.flex-col.md:flex-row.gap-6
-    / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）
-    - if @prev_post
-      .w-full.md:flex-1.md:min-w-0
-        = render "previous_post", prev_post: @prev_post
-
-    / 右: 投稿フォーム
-    .w-full.md:flex-1.md:min-w-0
-      = render "form", form_url: thread_post_path(@thread.slug, @post), form_method: :patch
-
-- else
-  / 公開済み投稿の編集時は従来のレイアウト
-  .max-w-2xl.mx-auto
+/ 自動保存コントローラーのスコープ（下書きの場合のみ）
+- autosave_data = @post.draft? ? { controller: "draft-autosave", "draft-autosave-url-value": thread_post_path(@thread.slug, @post) } : {}
+div data=autosave_data
+  - if @post.draft?
+    / 下書き編集時は new.html.slim と同じレイアウト
     .mb-6
       = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
 
     .flex.items-center.justify-between.mb-6
-      h1.text-xl 投稿を編集
-      = button_to "投稿を削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "投稿を削除しますか？この操作は取り消せません。" }
+      h1.text-xl 投稿する
+      = button_to "下書きを削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "下書きを削除しますか？この操作は取り消せません。" }
 
-    = render "form", form_url: thread_post_path(@thread.slug, @post), form_method: :patch
+    .flex.flex-col.md:flex-row.gap-6
+      / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）
+      - if @prev_post
+        .w-full.md:flex-1.md:min-w-0
+          = render "previous_post", prev_post: @prev_post
+
+      / 右: 投稿フォーム
+      .w-full.md:flex-1.md:min-w-0
+        = render "form", form_url: thread_post_path(@thread.slug, @post), form_method: :patch
+
+    / 自動保存ステータス（下書きの場合のみ、画面右下に固定表示）
+    .fixed.bottom-4.right-4.bg-white.rounded-full.shadow-lg.px-4.py-2.text-xs.text-gray-600.border.border-gray-200.z-50.transition-opacity data-draft-autosave-target="status"
+
+  - else
+    / 公開済み投稿の編集時は従来のレイアウト
+    .max-w-2xl.mx-auto
+      .mb-6
+        = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
+
+      .flex.items-center.justify-between.mb-6
+        h1.text-xl 投稿を編集
+        = button_to "投稿を削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "投稿を削除しますか？この操作は取り消せません。" }
+
+      = render "form", form_url: thread_post_path(@thread.slug, @post), form_method: :patch

@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ["title", "body", "status", "form"]
   static values = {
     url: String,
-    interval: { type: Number, default: 5000 } // 5秒間隔
+    interval: { type: Number, default: 3000 } // 3秒間隔
   }
 
   connect() {
@@ -22,6 +22,9 @@ export default class extends Controller {
 
     // debounce タイマー
     this.saveTimer = null
+
+    // 初期ステータス表示
+    this.updateStatus("入力内容は自動保存されます")
   }
 
   disconnect() {
@@ -39,7 +42,7 @@ export default class extends Controller {
     }
 
     // ステータス更新
-    this.updateStatus("未保存...")
+    this.updateStatus("自動保存中...")
 
     // 既存のタイマーをクリア
     if (this.saveTimer) {

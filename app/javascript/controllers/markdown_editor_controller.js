@@ -18,6 +18,9 @@ export default class extends Controller {
   adjustTextareaHeight() {
     const textarea = this.textareaTarget
 
+    // 現在の高さを保存（画面ジャンプ防止）
+    const currentHeight = textarea.offsetHeight
+
     // 一旦高さをリセットして、scrollHeightを正確に取得
     textarea.style.height = 'auto'
 
@@ -25,7 +28,13 @@ export default class extends Controller {
     const minHeight = 336 // rows: 14 の場合の高さ
     const newHeight = Math.max(minHeight, textarea.scrollHeight)
 
-    textarea.style.height = newHeight + 'px'
+    // 高さが変わる場合のみ更新（不要なリフローを防ぐ）
+    if (newHeight !== currentHeight) {
+      textarea.style.height = newHeight + 'px'
+    } else {
+      // 高さを戻す（画面ジャンプを防止）
+      textarea.style.height = currentHeight + 'px'
+    }
   }
 
   showEdit(event) {

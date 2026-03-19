@@ -1,7 +1,4 @@
-/ 自動保存用のコントローラーを設定（下書きの場合のみ）
-- autosave_data = @post.draft? ? { controller: "draft-autosave", draft_autosave_url_value: thread_post_path(@thread.slug, @post) } : {}
-
-= form_with model: @post, url: form_url, method: form_method, data: autosave_data.merge({ draft_autosave_target: "form" }) do |f|
+= form_with model: @post, url: form_url, method: form_method, data: { draft_autosave_target: "form" } do |f|
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
@@ -28,9 +25,6 @@
     .flex.flex-col.gap-1 data-controller="markdown-editor"
       .flex.justify-between.items-center.mb-2
         = f.label :body, "本文（必須）", class: "text-sm font-medium text-gray-700"
-        / 自動保存ステータス（下書きの場合のみ表示）
-        - if @post.draft?
-          span.text-xs.text-gray-500 data-draft-autosave-target="status"
 
       / タブ切り替え
       .flex.gap-2.border-b.border-gray-200.mb-3
