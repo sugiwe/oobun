@@ -19,6 +19,12 @@ RSpec.describe NotificationService, type: :service do
       # 購読者を追加
       create(:subscription, thread: thread, user: subscriber1)
       create(:subscription, thread: thread, user: subscriber2)
+
+      # notification_settingが作成されていることを確認
+      # (Userのafter_createコールバックで自動作成されるが、念のため確認)
+      [author, member1, member2, subscriber1, subscriber2, other_user].each do |user|
+        user.create_default_notification_setting unless user.notification_setting
+      end
     end
 
     context "公開済み投稿が作成された場合" do
@@ -28,25 +34,25 @@ RSpec.describe NotificationService, type: :service do
       it "メンバーと購読者に通知を作成する（投稿者自身を除く）" do
         expect {
           NotificationService.notify_new_post(post)
-        }.to change(Notification, :count).by(4)
+        }.to change { Notification.where(action: :new_post).count }.by(4)
 
         # 投稿者以外のメンバーと購読者が通知を受け取る
-        expect(member1.notifications.count).to eq(1)
-        expect(member2.notifications.count).to eq(1)
-        expect(subscriber1.notifications.count).to eq(1)
-        expect(subscriber2.notifications.count).to eq(1)
+        expect(member1.notifications.where(action: :new_post).count).to eq(1)
+        expect(member2.notifications.where(action: :new_post).count).to eq(1)
+        expect(subscriber1.notifications.where(action: :new_post).count).to eq(1)
+        expect(subscriber2.notifications.where(action: :new_post).count).to eq(1)
 
         # 投稿者自身は通知を受け取らない
-        expect(author.notifications.count).to eq(0)
+        expect(author.notifications.where(action: :new_post).count).to eq(0)
 
         # 関係のないユーザーは通知を受け取らない
-        expect(other_user.notifications.count).to eq(0)
+        expect(other_user.notifications.where(action: :new_post).count).to eq(0)
       end
 
       it "通知に正しいパラメータが設定される" do
         NotificationService.notify_new_post(post)
 
-        notification = member1.notifications.first
+        notification = member1.notifications.where(action: :new_post).first
         expect(notification.action).to eq("new_post")
         expect(notification.actor).to eq(author)
         # Postはdefault_scopeがあるため、notifiable_idとnotifiable_typeで確認
@@ -70,10 +76,10 @@ RSpec.describe NotificationService, type: :service do
       it "重複して通知が作成されない" do
         expect {
           NotificationService.notify_new_post(post)
-        }.to change(Notification, :count).by(4)
+        }.to change { Notification.where(action: :new_post).count }.by(4)
 
         # subscriber1は1つだけ通知を受け取る（重複しない）
-        expect(subscriber1.notifications.count).to eq(1)
+        expect(subscriber1.notifications.where(action: :new_post).count).to eq(1)
       end
     end
 
@@ -85,7 +91,7 @@ RSpec.describe NotificationService, type: :service do
       it "post_previewが100文字に切り詰められる" do
         NotificationService.notify_new_post(post)
 
-        notification = member1.notifications.first
+        notification = member1.notifications.where(action: :new_post).first
         expect(notification.params["post_preview"].length).to be <= 100
       end
     end
