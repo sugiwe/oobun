@@ -22,10 +22,10 @@ class NotificationsController < ApplicationController
     when "new_post"
       # 投稿詳細ページへ遷移
       if notification.notifiable.is_a?(Post)
-        "/#{notification.params['thread_slug']}/posts/#{notification.notifiable.id}"
+        thread_post_path(notification.params["thread_slug"], notification.notifiable)
       else
         # 投稿が削除されている場合はスレッド詳細へ
-        "/#{notification.params['thread_slug']}"
+        thread_path(notification.params["thread_slug"])
       end
     when "welcome"
       welcome_path

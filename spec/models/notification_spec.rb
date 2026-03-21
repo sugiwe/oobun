@@ -27,7 +27,7 @@ RSpec.describe Notification, type: :model do
   end
 
   describe "enums" do
-    it { should define_enum_for(:action).with_values(new_post: "new_post", invitation: "invitation").backed_by_column_of_type(:string) }
+    it { should define_enum_for(:action).with_values(new_post: "new_post", welcome: "welcome").backed_by_column_of_type(:string) }
   end
 
   describe "#mark_as_read!" do

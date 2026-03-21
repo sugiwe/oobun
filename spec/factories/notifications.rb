@@ -17,8 +17,10 @@ FactoryBot.define do
       read_at { Time.current }
     end
 
-    trait :invitation do
-      action { "invitation" }
+    trait :welcome do
+      action { "welcome" }
+      association :notifiable, factory: :user
+      actor { nil }
     end
   end
 end

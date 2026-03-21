@@ -15,13 +15,18 @@ RSpec.describe Post, type: :model do
 
     context "公開済み投稿が作成された場合" do
       it "通知が作成される" do
+        # notification_settingが作成されていることを確認（デバッグ用）
+        expect(member.notification_setting).to be_present
+        expect(subscriber.notification_setting).to be_present
+
         expect {
           create(:post, thread: thread, user: author, status: :published)
         }.to change(Notification, :count).by(2)
 
-        expect(member.notifications.count).to eq(1)
-        expect(subscriber.notifications.count).to eq(1)
-        expect(author.notifications.count).to eq(0)
+        # reload して最新のデータを取得
+        expect(member.reload.notifications.where(action: :new_post).count).to eq(1)
+        expect(subscriber.reload.notifications.where(action: :new_post).count).to eq(1)
+        expect(author.reload.notifications.where(action: :new_post).count).to eq(0)
       end
     end
 
@@ -34,12 +39,17 @@ RSpec.describe Post, type: :model do
     end
 
     context "下書きから公開に更新された場合" do
-      it "通知は作成されない（createのみトリガー）" do
+      it "通知が作成される" do
         post = create(:post, thread: thread, user: author, status: :draft)
 
         expect {
           post.update!(status: :published)
-        }.not_to change(Notification, :count)
+        }.to change(Notification, :count).by(2) # member と subscriber の2人
+
+        # reload して最新のデータを取得
+        expect(member.reload.notifications.where(action: :new_post).count).to eq(1)
+        expect(subscriber.reload.notifications.where(action: :new_post).count).to eq(1)
+        expect(author.reload.notifications.where(action: :new_post).count).to eq(0)
       end
     end
   end

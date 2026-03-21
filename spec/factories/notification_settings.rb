@@ -5,7 +5,6 @@ FactoryBot.define do
     # デフォルト値（マイグレーションと同じ）
     notify_member_posts { true }
     notify_subscription_posts { true }
-    notify_invitations { true }
     use_discord { false }
     use_slack { false }
     discord_webhook_url { nil }

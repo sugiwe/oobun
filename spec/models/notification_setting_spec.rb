@@ -90,10 +90,6 @@ RSpec.describe NotificationSetting, type: :model do
       expect(setting.notify_subscription_posts).to be true
     end
 
-    it "notify_invitationsはtrueがデフォルト" do
-      expect(setting.notify_invitations).to be true
-    end
-
     it "use_discordはfalseがデフォルト" do
       expect(setting.use_discord).to be false
     end

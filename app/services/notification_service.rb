@@ -11,8 +11,19 @@ class NotificationService
   end
 
   def notify_new_post
-    recipients.each do |recipient|
-      create_notification(recipient)
+    # N+1クエリを避けるためにnotification_settingをeager loadする
+    recipients.includes(:notification_setting).each do |recipient|
+      setting = recipient.notification_setting
+      # 安全のため、設定が見つからない場合は通知を送信しない
+      next unless setting
+
+      is_member = member_ids.include?(recipient.id)
+      is_subscriber = subscriber_ids.include?(recipient.id)
+
+      # ユーザーの通知設定を確認してから通知を送信
+      if (is_member && setting.notify_member_posts) || (is_subscriber && setting.notify_subscription_posts)
+        create_notification(recipient)
+      end
     end
   end
 
@@ -26,11 +37,11 @@ class NotificationService
   end
 
   def member_ids
-    @thread.memberships.pluck(:user_id)
+    @member_ids ||= @thread.memberships.pluck(:user_id)
   end
 
   def subscriber_ids
-    @thread.subscriptions.pluck(:user_id)
+    @subscriber_ids ||= @thread.subscriptions.pluck(:user_id)
   end
 
   def create_notification(recipient)
