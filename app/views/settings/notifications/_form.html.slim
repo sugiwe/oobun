@@ -1,4 +1,4 @@
-= form_with model: notification_setting, url: settings_notifications_path, method: :patch, local: false, class: "space-y-6" do |f|
+= form_with model: notification_setting, url: settings_notifications_path, method: :patch, local: true, class: "space-y-6" do |f|
   .bg-white.rounded-lg.border.border-gray-200.p-6
 
     .space-y-4
@@ -24,8 +24,3 @@
 
     .pt-6.mt-6.border-t.border-gray-200
       = f.submit "保存", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-
-  - if notification_setting.persisted? && notification_setting.updated_at
-    .mt-4.text-sm.text-gray-500.text-center
-      | 最終更新:
-      = notification_setting.updated_at.strftime("%Y年%-m月%-d日 %H:%M")

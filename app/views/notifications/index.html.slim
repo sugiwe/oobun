@@ -1,7 +1,9 @@
 - content_for :title, "通知"
 
 .mb-6
-  h1.text-2xl.font-bold 通知
+  .flex.items-center.justify-between
+    h1.text-2xl.font-bold 通知
+    = link_to "通知設定", settings_notifications_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
 
 - if @notifications.any?
   .space-y-2

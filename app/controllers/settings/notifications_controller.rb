@@ -9,16 +9,7 @@ class Settings::NotificationsController < ApplicationController
     @notification_setting = current_user.notification_setting || current_user.create_notification_setting!
 
     if @notification_setting.update(notification_setting_params)
-      respond_to do |format|
-        format.html { redirect_to settings_notifications_path, notice: "通知設定を保存しました" }
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "notification_setting_form",
-            partial: "settings/notifications/form",
-            locals: { notification_setting: @notification_setting }
-          )
-        end
-      end
+      redirect_to settings_notifications_path, notice: "通知設定を保存しました"
     else
       render :show, status: :unprocessable_entity
     end
