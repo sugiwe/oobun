@@ -80,8 +80,9 @@ class Post < ApplicationRecord
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
 
-  # 公開済み投稿作成時に通知を送信
-  after_commit :notify_subscribers, on: :create, if: :published?
+  # 投稿が公開状態になった時に通知を送信
+  # (create時だけでなく、draft→publishedへの更新時にも対応)
+  after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
 
   private
 
