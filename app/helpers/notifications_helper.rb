@@ -15,7 +15,7 @@ module NotificationsHelper
   def notification_preview(notification)
     case notification.action
     when "new_post"
-      notification.params['post_preview']
+      notification.params["post_preview"]
     when "welcome"
       "coconikkiの使い方を見てみましょう"
     else
