@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_000753) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_221147) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -97,6 +97,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_000753) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
+  create_table "notification_settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "discord_webhook_url"
+    t.boolean "notify_invitations", default: true
+    t.boolean "notify_member_posts", default: true
+    t.boolean "notify_subscription_posts", default: true
+    t.string "slack_webhook_url"
+    t.datetime "updated_at", null: false
+    t.boolean "use_discord", default: false
+    t.boolean "use_slack", default: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_notification_settings_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.datetime "created_at", null: false
+    t.bigint "notifiable_id", null: false
+    t.string "notifiable_type", null: false
+    t.json "params"
+    t.datetime "read_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "posts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -178,6 +209,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_000753) do
   add_foreign_key "login_invitations", "users", column: "created_by_id"
   add_foreign_key "memberships", "threads"
   add_foreign_key "memberships", "users"
+  add_foreign_key "notification_settings", "users"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "posts", "threads"
   add_foreign_key "posts", "users"
   add_foreign_key "skips", "threads"
