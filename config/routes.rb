@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   get  "/username/new", to: "usernames#new",    as: :new_username
   post "/username",     to: "usernames#create", as: :username
 
+  # ウェルカムページ
+  get "/welcome", to: "welcome#show", as: :welcome
+
   # 法務・サポートページ
   get "/about",   to: "pages#about",   as: :about
   get "/terms",   to: "pages#terms",   as: :terms

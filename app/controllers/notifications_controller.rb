@@ -27,6 +27,8 @@ class NotificationsController < ApplicationController
         # 投稿が削除されている場合はスレッド詳細へ
         "/#{notification.params['thread_slug']}"
       end
+    when "welcome"
+      welcome_path
     else
       notifications_path
     end

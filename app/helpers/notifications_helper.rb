@@ -5,6 +5,8 @@ module NotificationsHelper
     case notification.action
     when "new_post"
       "#{actor_name} が「#{notification.params['thread_title']}」に投稿しました"
+    when "welcome"
+      "coconikkiへようこそ！"
     else
       "通知"
     end
@@ -14,6 +16,8 @@ module NotificationsHelper
     case notification.action
     when "new_post"
       notification.params['post_preview']
+    when "welcome"
+      "coconikkiの使い方を見てみましょう"
     else
       nil
     end
