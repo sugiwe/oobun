@@ -1,0 +1,7 @@
+- content_for :title, "通知設定"
+
+.mb-6
+  h1.text-2xl.font-bold 通知設定
+
+= turbo_frame_tag "notification_setting_form" do
+  = render "settings/notifications/form", notification_setting: @notification_setting

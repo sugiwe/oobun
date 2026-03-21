@@ -99,7 +99,7 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :body, :thumbnail)
+    params.require(:post).permit(:title, :body, :thumbnail, :status)
   end
 
   def require_post_owner

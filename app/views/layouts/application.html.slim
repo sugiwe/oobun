@@ -27,10 +27,13 @@ html
     / メニューボタン（PC: 左下固定、スマホ: 右下固定）
     - if logged_in?
       div class="fixed bottom-0 left-0 md:left-0 right-0 md:right-auto z-50 p-6" data={"controller" => "dropdown"}
-        button class="flex items-center justify-center w-14 h-14 bg-white rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ml-auto md:ml-0" data={"action" => "click->dropdown#toggle"}
+        button class="flex items-center justify-center w-14 h-14 bg-white rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ml-auto md:ml-0 relative" data={"action" => "click->dropdown#toggle"}
           / ハンバーガーアイコン
           svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2 5h20M2 12h20M2 19h20"
+          / 未読バッジ（赤丸）
+          - if unread_notifications_count > 0
+            span class="absolute top-0 right-0 block h-3.5 w-3.5 rounded-full bg-red-500 border-2 border-white"
         / ドロップダウンメニュー（上に表示）
         div class="absolute w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden right-2.5 md:left-2.5 md:right-auto bottom-[calc(100%-4px)]" data={"dropdown-target" => "menu"}
           div class="px-4 py-3 border-b border-gray-100"
@@ -42,6 +45,13 @@ html
                 div class="text-xs text-gray-500 truncate" = "@#{current_user.username}"
           = link_to user_path(username: current_user.username), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
             | マイページ
+          = link_to notifications_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between" do
+            span 通知
+            - if unread_notifications_count > 0
+              span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded-full"
+                = unread_notifications_count
+          = link_to settings_notifications_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+            | 通知設定
           - if current_user.admin?
             = link_to admin_root_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
               | 管理者ダッシュボード

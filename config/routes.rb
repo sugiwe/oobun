@@ -23,6 +23,18 @@ Rails.application.routes.draw do
   get "/contact", to: "pages#contact", as: :contact
   get "/markdown-guide", to: "pages#markdown_guide", as: :markdown_guide
 
+  # 通知
+  resources :notifications, only: [ :index ] do
+    member do
+      patch :mark_as_read
+    end
+  end
+
+  # 設定
+  namespace :settings do
+    resource :notifications, only: [ :show, :update ]
+  end
+
   # ユーザーページ（最優先でマッチさせる）
   get    "/@:username",        to: "users#show",   as: :user
   get    "/@:username/edit",   to: "users#edit",   as: :edit_user
