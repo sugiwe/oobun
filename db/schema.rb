@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_221147) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_21_073715) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,7 +100,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_221147) do
   create_table "notification_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "discord_webhook_url"
-    t.boolean "notify_invitations", default: true
     t.boolean "notify_member_posts", default: true
     t.boolean "notify_subscription_posts", default: true
     t.string "slack_webhook_url"

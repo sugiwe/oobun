@@ -18,6 +18,9 @@ class User < ApplicationRecord
   has_one :notification_setting, dependent: :destroy
   has_one_attached :avatar
 
+  # Callbacks
+  after_create :create_default_notification_setting
+
   # Validations
   validates :username, presence: true, uniqueness: true,
     format: { with: /\A[a-zA-Z0-9_-]+\z/, message: "英数字、ハイフン、アンダースコアのみ使用できます" },
@@ -134,6 +137,14 @@ class User < ApplicationRecord
   end
 
   private
+
+  # 通知設定のデフォルト値を作成
+  def create_default_notification_setting
+    build_notification_setting(
+      notify_member_posts: true,
+      notify_subscription_posts: true
+    ).save!
+  end
 
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
   def fetch_my_turn_posts

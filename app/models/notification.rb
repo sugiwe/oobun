@@ -7,8 +7,7 @@ class Notification < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   enum :action, {
-    new_post: "new_post",
-    invitation: "invitation"
+    new_post: "new_post"
   }
 
   # Phase 2で有効化
