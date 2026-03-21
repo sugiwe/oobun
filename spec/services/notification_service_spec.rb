@@ -22,7 +22,7 @@ RSpec.describe NotificationService, type: :service do
 
       # notification_settingが作成されていることを確認
       # (Userのafter_createコールバックで自動作成されるが、念のため確認)
-      [author, member1, member2, subscriber1, subscriber2, other_user].each do |user|
+      [ author, member1, member2, subscriber1, subscriber2, other_user ].each do |user|
         user.create_default_notification_setting unless user.notification_setting
       end
     end
