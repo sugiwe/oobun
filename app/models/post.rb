@@ -9,6 +9,7 @@ class Post < ApplicationRecord
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :user
   has_one_attached :thumbnail
+  has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations
   validates :title, presence: true, length: { maximum: 100 }, if: :published?
@@ -79,6 +80,10 @@ class Post < ApplicationRecord
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
 
+  # 投稿が公開状態になった時に通知を送信
+  # (create時だけでなく、draft→publishedへの更新時にも対応)
+  after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
+
   private
 
   def check_auto_publish_thread
@@ -86,5 +91,9 @@ class Post < ApplicationRecord
     return unless thread.published_posts.count >= CorrespondenceThread::AUTO_PUBLISH_POSTS_THRESHOLD
 
     thread.auto_publish!
+  end
+
+  def notify_subscribers
+    NotificationService.notify_new_post(self)
   end
 end

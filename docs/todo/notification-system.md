@@ -37,12 +37,24 @@ coconikkiの通知システム実装ガイドです。
 
 ### データフロー
 
+#### Phase 1a（現在）
 ```
-Post作成
+Post作成（published のみ）
+  ↓
+after_commit :notify_subscribers (if: :published?)
   ↓
 NotificationService.notify_new_post(post)
   ↓
+受信者判定（メンバー + 購読者 - 投稿者）
+  ↓
 各受信者に対してNotification作成
+  ↓
+（Notification.after_create_commit は空実装）
+```
+
+#### Phase 2以降
+```
+Notification作成
   ↓
 Notification.after_create_commit
   ↓
@@ -72,31 +84,115 @@ NotificationSetting
 
 ## 📅 実装フェーズ
 
-### Phase 1: 基礎（アプリ内通知）
+### Phase 1a: 通知の基盤とデータ構造 🎯 現在のフェーズ
 
-**目標**: アプリ内で通知を確認できる
+**目標**: データ構造とビジネスロジックを確立（UIなし）
+
+**ブランチ**: `feature/in-app-notifications`
 
 #### タスク
 
-1. **モデル作成**
-   - `Notification`モデル + migration
-   - `NotificationSetting`モデル + migration
-   - User関連の追加
+1. **マイグレーション作成・実行**
+   - [ ] `notifications` テーブル作成
+   - [ ] `notification_settings` テーブル作成
+   - [ ] マイグレーション実行
 
-2. **通知生成ロジック**
-   - `NotificationService`作成
-   - Post作成時の通知生成
-   - 受信者判定ロジック（メンバー/購読者）
+2. **モデル作成**
+   - [ ] `Notification` モデル作成
+   - [ ] `NotificationSetting` モデル作成
+   - [ ] User への関連追加（`has_many :notifications`, `has_one :notification_setting`）
+   - [ ] Post への関連追加（`has_many :notifications`）
 
-3. **UI実装**
-   - ヘッダーに通知アイコン（未読数バッジ）
-   - 通知一覧ページ
-   - 既読/未読管理
+3. **通知生成ロジック**
+   - [ ] `NotificationService` 作成
+   - [ ] 受信者判定ロジック（メンバー + 購読者 - 投稿者本人）
+   - [ ] Post 作成時の通知生成（`after_commit :notify_subscribers, on: :create, if: :published?`）
+   - [ ] 通知パラメータ生成（thread_title, thread_slug, post_preview）
+
+4. **テスト作成**
+   - [ ] Notification モデルテスト（RSpec）
+   - [ ] NotificationSetting モデルテスト（RSpec）
+   - [ ] NotificationService テスト（RSpec）
+   - [ ] 統合テスト（Post作成 → Notification作成）
+
+5. **動作確認**
+   - [ ] Rails console で Post 作成 → Notification レコード確認
+   - [ ] 受信者の正しさを確認（メンバー + 購読者 - 投稿者）
+   - [ ] 通知パラメータの確認
 
 #### 成果物
-- アプリ内で通知が見れる
-- 新規投稿時に自動通知
-- 既読/未読管理
+- ✅ Notification/NotificationSetting モデルが作成される
+- ✅ 投稿すると自動的に Notification レコードが作成される
+- ✅ データ構造が確立される
+- ✅ テストで品質保証される
+- ⚠️ UIはまだない（Rails consoleで確認）
+
+#### 技術的改善ポイント
+
+**N+1問題の回避**:
+```ruby
+# recipients メソッドの実装
+def recipients
+  User.where(id: member_ids + subscriber_ids)
+      .where.not(id: @actor.id)
+      .distinct
+end
+
+def member_ids
+  @thread.memberships.pluck(:user_id)
+end
+
+def subscriber_ids
+  @thread.subscriptions.pluck(:user_id)
+end
+```
+
+**通知トリガー**:
+```ruby
+# Post モデル
+after_commit :notify_subscribers, on: :create, if: :published?
+
+# 理由:
+# - 下書き投稿では通知不要
+# - draft → published への移行時にも通知したい場合は別途検討
+```
+
+---
+
+### Phase 1b: アプリ内通知UI
+
+**目標**: ユーザーがブラウザで通知を確認できる
+
+**前提**: Phase 1a が完了していること
+
+#### タスク
+
+1. **コントローラー作成**
+   - [ ] `NotificationsController` 作成
+     - `index`: 通知一覧
+     - `show`: 通知詳細 → 対象ページへリダイレクト
+     - `mark_as_read`: 個別既読
+     - `mark_all_as_read`: 一括既読
+
+2. **ビュー作成**
+   - [ ] 通知一覧ページ（`app/views/notifications/index.html.slim`）
+   - [ ] ヘッダーに通知アイコン追加（未読数バッジ）
+   - [ ] 既読/未読の視覚的区別
+
+3. **ルーティング追加**
+   - [ ] `resources :notifications` 追加
+   - [ ] カスタムアクション追加
+
+4. **UI/UXの調整**
+   - [ ] ページネーション（kaminari）
+   - [ ] Turbo対応
+   - [ ] レスポンシブデザイン
+
+#### 成果物
+- ✅ ブラウザで通知一覧が見れる
+- ✅ ヘッダーに未読数バッジが表示される
+- ✅ 既読/未読管理ができる
+- ✅ 通知クリックで対象ページへ遷移
 
 ---
 
@@ -247,7 +343,8 @@ class Notification < ApplicationRecord
     invitation: "invitation"
   }
 
-  after_create_commit :deliver_notifications
+  # Phase 2で有効化
+  # after_create_commit :deliver_notifications
 
   def mark_as_read!
     update(read_at: Time.current)
@@ -259,17 +356,18 @@ class Notification < ApplicationRecord
 
   private
 
-  def deliver_notifications
-    # Discord通知（非同期）
-    if user.notification_setting&.use_discord?
-      DiscordNotificationJob.perform_later(id)
-    end
-
-    # Slack通知（非同期）
-    if user.notification_setting&.use_slack?
-      SlackNotificationJob.perform_later(id)
-    end
-  end
+  # Phase 2で実装
+  # def deliver_notifications
+  #   # Discord通知（非同期）
+  #   if user.notification_setting&.use_discord?
+  #     DiscordNotificationJob.perform_later(id)
+  #   end
+  #
+  #   # Slack通知（非同期）
+  #   if user.notification_setting&.use_slack?
+  #     SlackNotificationJob.perform_later(id)
+  #   end
+  # end
 end
 ```
 
@@ -325,7 +423,8 @@ class Post < ApplicationRecord
   belongs_to :user
   has_many :notifications, as: :notifiable, dependent: :destroy
 
-  after_create_commit :notify_subscribers
+  # published な投稿のみ通知する
+  after_commit :notify_subscribers, on: :create, if: :published?
 
   private
 
@@ -371,10 +470,18 @@ class NotificationService
   private
 
   def recipients
-    # メンバーと購読者を取得（投稿者自身は除外）
-    members = @thread.members.where.not(id: @actor.id)
-    subscribers = @thread.subscribers.where.not(id: @actor.id)
-    (members + subscribers).uniq
+    # N+1問題を回避：distinctで重複排除、一度のクエリで取得
+    User.where(id: member_ids + subscriber_ids)
+        .where.not(id: @actor.id)
+        .distinct
+  end
+
+  def member_ids
+    @thread.memberships.pluck(:user_id)
+  end
+
+  def subscriber_ids
+    @thread.subscriptions.pluck(:user_id)
   end
 
   def should_notify?(user)
@@ -872,16 +979,28 @@ bin/rails solid_queue:status
 
 ## ✅ チェックリスト
 
-### Phase 1完了時
+### Phase 1a完了時 🎯
 
-- [ ] Notification/NotificationSettingモデル作成
-- [ ] マイグレーション実行
-- [ ] NotificationService実装
+- [ ] notifications/notification_settings テーブル作成
+- [ ] Notification/NotificationSetting モデル作成
+- [ ] User/Post モデルへの関連追加
+- [ ] NotificationService 実装
+- [ ] Post作成時の通知生成（published のみ）
+- [ ] N+1問題の回避
+- [ ] RSpec テスト作成（モデル + サービス）
+- [ ] Rails console で動作確認
+- [ ] コミット・プッシュ
+
+### Phase 1b完了時
+
+- [ ] NotificationsController 実装
 - [ ] 通知一覧ページ実装
 - [ ] ヘッダーに通知アイコン追加
-- [ ] 既読/未読管理実装
-- [ ] テスト作成
-- [ ] 動作確認
+- [ ] 既読/未読管理UI実装
+- [ ] ページネーション追加
+- [ ] テスト作成（コントローラー + 統合）
+- [ ] ブラウザで動作確認
+- [ ] PR作成・マージ
 
 ### Phase 2完了時
 
@@ -903,4 +1022,7 @@ bin/rails solid_queue:status
 ---
 
 **作成日**: 2026年3月15日
-**最終更新**: 2026年3月15日
+**最終更新**: 2026年3月21日
+
+**更新履歴**:
+- 2026-03-21: Phase 1を1aと1bに分割、技術的改善提案を反映

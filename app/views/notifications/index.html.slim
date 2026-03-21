@@ -1,0 +1,41 @@
+- content_for :title, "通知"
+
+.mb-6
+  .flex.items-center.justify-between
+    h1.text-2xl.font-bold 通知
+    = link_to "通知設定", settings_notifications_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
+
+- if @notifications.any?
+  .space-y-2
+    - @notifications.each do |notification|
+      = button_to mark_as_read_notification_path(notification), method: :patch, form: { data: { turbo: false } }, class: "w-full text-left border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer #{notification.unread? ? 'bg-blue-50 border-blue-200' : 'bg-white'}" do
+        .flex.items-start.gap-3
+          / 未読/既読インジケーター
+          .shrink-0.mt-1
+            - if notification.unread?
+              .w-2.h-2.rounded-full.bg-blue-500
+            - else
+              .w-2.h-2.rounded-full.bg-gray-300
+
+          .flex-1.min-w-0
+            / 通知テキスト
+            .text-sm.font-medium.text-gray-900.mb-1
+              = notification_text(notification)
+
+            / プレビュー（new_postの場合）
+            - if preview = notification_preview(notification)
+              .text-sm.text-gray-600.line-clamp-2.mb-2
+                = preview
+
+            / 時刻
+            .text-xs.text-gray-500
+              = notification_time_ago(notification)
+
+  / ページネーション
+  - if @notifications.total_pages > 1
+    .mt-6.flex.justify-center
+      = paginate @notifications
+
+- else
+  .text-center.py-12.text-gray-500
+    p 通知はありません

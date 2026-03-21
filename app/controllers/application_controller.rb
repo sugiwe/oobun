@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_login
 
-  helper_method :current_user, :logged_in?
+  helper_method :current_user, :logged_in?, :unread_notifications_count
 
   private
 
@@ -17,6 +17,11 @@ class ApplicationController < ActionController::Base
 
   def logged_in?
     current_user.present?
+  end
+
+  def unread_notifications_count
+    return 0 unless logged_in?
+    @unread_notifications_count ||= current_user.notifications.unread.count
   end
 
   def require_login

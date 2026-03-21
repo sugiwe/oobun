@@ -1,0 +1,36 @@
+- content_for :title, "coconikkiへようこそ - coconikki"
+
+.max-w-3xl.mx-auto
+  article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
+    h1.text-2xl.mb-6 coconikkiへようこそ！
+
+    .prose.prose-sm.text-gray-700
+      p.mb-8 coconikkiに参加していただき、ありがとうございます。まずは次の3つのステップから始めてみましょう。
+
+      section.mb-8
+        h2.text-lg.font-semibold.mb-3 1. 交換日記を探してみる
+        p 他のユーザーが書いている交換日記を読んでみましょう。気に入った交換日記があれば「購読する」ボタンで購読できます。
+        .mt-4
+          = link_to browse_threads_path, class: "inline-block bg-white text-gray-700 px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition" do
+            | 交換日記一覧を見る →
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 2. 交換日記を作ってみる
+        p 友達と一緒に交換日記を始めてみましょう。作成後、招待URLで友達を招待できます。
+        .mt-4
+          = link_to new_thread_path, class: "inline-block bg-white text-gray-700 px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition" do
+            | 新しい交換日記を作る →
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 3. 通知機能を確認する
+        p 参加している交換日記に新しい投稿があったときに通知が届きます。通知が届くと、画面下部のメニューボタンに赤丸が付きます。
+
+      section.mb-8.mt-14
+        h2.text-lg.font-semibold.mb-3 もっと詳しく知りたい方へ
+        ul.list-disc.list-inside.space-y-2
+          li
+            = link_to "coconikkiについて", about_path, class: "text-blue-600 hover:underline"
+            | - サービスの詳しい説明や使い方を見る
+          li
+            = link_to "マークダウン記法ガイド", markdown_guide_path, class: "text-blue-600 hover:underline"
+            | - 投稿の書き方を学ぶ

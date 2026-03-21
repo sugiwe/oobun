@@ -1,0 +1,26 @@
+= form_with model: notification_setting, url: settings_notifications_path, method: :patch, local: true, class: "space-y-6" do |f|
+  .bg-white.rounded-lg.border.border-gray-200.p-6
+
+    .space-y-4
+      / メンバーからの投稿通知
+      .flex.items-start
+        .flex.items-center.h-5
+          = f.check_box :notify_member_posts, class: "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+        .ml-3
+          = f.label :notify_member_posts, class: "text-sm font-medium text-gray-900" do
+            | メンバーからの投稿
+          .text-sm.text-gray-500
+            | 参加している交換日記に新しい投稿があったときに通知します
+
+      / 購読スレッドからの投稿通知
+      .flex.items-start
+        .flex.items-center.h-5
+          = f.check_box :notify_subscription_posts, class: "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+        .ml-3
+          = f.label :notify_subscription_posts, class: "text-sm font-medium text-gray-900" do
+            | 購読スレッドからの投稿
+          .text-sm.text-gray-500
+            | 購読している交換日記に新しい投稿があったときに通知します
+
+    .pt-6.mt-6.border-t.border-gray-200
+      = f.submit "保存", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"

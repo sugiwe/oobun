@@ -14,7 +14,13 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_threads, through: :subscriptions, source: :thread
   has_many :skips, dependent: :destroy
+  has_many :notifications, dependent: :destroy
+  has_one :notification_setting, dependent: :destroy
   has_one_attached :avatar
+
+  # Callbacks
+  after_create :create_default_notification_setting
+  after_create :send_welcome_notification
 
   # Validations
   validates :username, presence: true, uniqueness: true,
@@ -132,6 +138,23 @@ class User < ApplicationRecord
   end
 
   private
+
+  # 通知設定のデフォルト値を作成
+  def create_default_notification_setting
+    build_notification_setting(
+      notify_member_posts: true,
+      notify_subscription_posts: true
+    ).save!
+  end
+
+  # ウェルカム通知を送信
+  def send_welcome_notification
+    notifications.create!(
+      actor: nil,
+      notifiable: self,
+      action: :welcome
+    )
+  end
 
   # 1. 自分のターンの交換日記の最新投稿を取得（N+1問題を解決）
   def fetch_my_turn_posts
