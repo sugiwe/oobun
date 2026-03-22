@@ -69,12 +69,12 @@
             / 公開/非公開切り替えボタン
             - if @thread.free? || @thread.paid?
               - if @thread.can_be_privatized?
-                = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+                = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を非公開にしますか？非公開にすると、メンバー以外は閲覧できなくなります。" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
               - else
                 button.text-xs.text-gray-400.border.border-gray-200.rounded.px-2.py-1.cursor-not-allowed disabled=true title="強制公開条件（5投稿以上、または30日経過）を満たしているため非公開にできません"
                   | 非公開にできません
             - else
-              = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
+              = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を公開しますか？公開すると、誰でも閲覧できるようになります。" }, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
             / 招待ボタン
             div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
               button class="text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1" data={"action" => "click->invite#generate", "invite-target" => "button"}
