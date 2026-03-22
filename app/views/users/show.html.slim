@@ -14,7 +14,7 @@
           - if logged_in? && @user == current_user
             = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
         - if @user.bio.present?
-          p.text-gray-700.text-sm.mt-3.whitespace-pre-wrap = @user.bio
+          .text-gray-700.text-sm.mt-3 = auto_link_bio(@user.bio)
 
   / 使用状況ダッシュボード（自分のページのみ表示）
   - if logged_in? && @user == current_user
