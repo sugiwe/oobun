@@ -23,4 +23,8 @@
             | 購読している交換日記に新しい投稿があったときに通知します
 
     .pt-6.mt-6.border-t.border-gray-200
-      = f.submit "保存", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+      = f.submit "保存", class: "px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+
+/ テスト通知（フォームの外に配置）
+.mt-6.flex.justify-end
+  = button_to "テスト通知を送る", send_test_settings_notifications_path, method: :post, class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"

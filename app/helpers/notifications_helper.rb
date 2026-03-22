@@ -7,6 +7,8 @@ module NotificationsHelper
       "#{actor_name} が「#{notification.params['thread_title']}」に投稿しました"
     when "welcome"
       "coconikkiへようこそ！"
+    when "test_notification"
+      "テスト通知"
     else
       "通知"
     end
@@ -18,6 +20,8 @@ module NotificationsHelper
       notification.params["post_preview"]
     when "welcome"
       "coconikkiの使い方を見てみましょう"
+    when "test_notification"
+      notification.params["message"]
     else
       nil
     end
