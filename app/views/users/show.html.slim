@@ -14,7 +14,7 @@
           - if logged_in? && @user == current_user
             = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
         - if @user.bio.present?
-          p.text-gray-700.text-sm.mt-3.whitespace-pre-wrap = @user.bio
+          .text-gray-700.text-sm.mt-3 = auto_link_bio(@user.bio)
 
   / 使用状況ダッシュボード（自分のページのみ表示）
   - if logged_in? && @user == current_user
@@ -22,6 +22,16 @@
       summary.cursor-pointer.px-6.py-4.hover:bg-gray-100.rounded-lg 📊 使用状況
       .px-6.pb-6.pt-2
         .grid.grid-cols-1.md:grid-cols-2.gap-4
+          / 交換日記制限
+          = render "users/usage_stat", \
+            icon: "📚", \
+            title: "参加中の交換日記", \
+            description: "#{@user.correspondence_threads.count} / #{User::MAX_THREADS_PER_USER}個", \
+            current_value: @user.correspondence_threads.count, \
+            max_value: User::MAX_THREADS_PER_USER, \
+            bar_color_normal: "bg-purple-500", \
+            remaining_text: "残り #{@user.threads_remaining}個"
+
           / ストレージ
           = render "users/usage_stat", \
             icon: "💾", \
@@ -51,16 +61,6 @@
             max_value: User::MAX_POSTS_PER_DAY, \
             bar_color_normal: "bg-green-500", \
             remaining_text: "残り #{User::MAX_POSTS_PER_DAY - @user.posts_today}投稿"
-
-          / 交換日記制限
-          = render "users/usage_stat", \
-            icon: "📚", \
-            title: "参加中の交換日記", \
-            description: "#{@user.correspondence_threads.count} / #{User::MAX_THREADS_PER_USER}個", \
-            current_value: @user.correspondence_threads.count, \
-            max_value: User::MAX_THREADS_PER_USER, \
-            bar_color_normal: "bg-purple-500", \
-            remaining_text: "残り #{@user.threads_remaining}個"
 
   / 参加中の交換日記
   .mb-8

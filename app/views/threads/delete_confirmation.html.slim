@@ -1,0 +1,42 @@
+- content_for :title, "交換日記の削除確認 - #{@thread.title} - coconikki"
+
+.max-w-2xl.mx-auto
+  .mb-6
+    = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
+
+  .border.border-red-300.rounded-lg.p-8.bg-red-50
+    h1.text-2xl.font-semibold.text-red-900.mb-6 交換日記の削除確認
+
+    .mb-6
+      h2.text-lg.font-semibold.text-red-900.mb-3 削除すると以下が失われます：
+      ul.list-disc.list-inside.text-sm.text-red-800.space-y-2.ml-4
+        li すべての投稿内容（タイトル・本文・画像）
+        li メンバーシップ情報
+        li 招待リンク
+        li 購読者情報
+
+    - if @members.size > 1
+      .mb-6
+        h2.text-lg.font-semibold.text-red-900.mb-3 この交換日記のメンバー：
+        .flex.flex-wrap.gap-2
+          - @members.each do |membership|
+            .text-sm.text-red-800
+              = membership.user.display_name
+              span.text-gray-600.ml-1 = "@#{membership.user.username}"
+
+    .bg-red-100.border.border-red-400.rounded-md.p-4.mb-6
+      p.text-sm.text-red-900.font-semibold
+        | ⚠️ この操作は取り消すことができません
+
+    = form_with url: thread_path(@thread.slug), method: :delete, local: true do |f|
+      .mb-6
+        = f.label :slug_confirmation, "削除するには、交換日記のスラッグを入力してください：", class: "text-sm font-medium text-red-900 block mb-2"
+        .mb-2
+          .text-sm.text-gray-600.mb-1
+            | スラッグ:
+            span.font-mono.bg-gray-100.px-2.py-1.rounded = @thread.slug
+        = f.text_field :slug_confirmation, placeholder: @thread.slug, class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+
+      .flex.gap-3
+        = link_to "キャンセル", thread_path(@thread.slug), class: "flex-1 text-center bg-white border border-gray-300 text-gray-700 rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-50"
+        = f.submit "削除する", class: "flex-1 bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700 cursor-pointer"
