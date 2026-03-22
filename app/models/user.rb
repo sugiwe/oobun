@@ -144,7 +144,7 @@ class User < ApplicationRecord
     build_notification_setting(
       notify_member_posts: true,
       notify_subscription_posts: true
-    ).save!
+    ).tap(&:save!)
   end
 
   # ウェルカム通知を送信
