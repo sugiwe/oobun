@@ -35,7 +35,9 @@ Rails.application.routes.draw do
 
   # 設定
   namespace :settings do
-    resource :notifications, only: [ :show, :update ]
+    resource :notifications, only: [ :show, :update ] do
+      post :send_test
+    end
   end
 
   # ユーザーページ（最優先でマッチさせる）

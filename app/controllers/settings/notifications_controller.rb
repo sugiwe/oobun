@@ -1,13 +1,15 @@
 class Settings::NotificationsController < ApplicationController
   before_action :require_login
+  before_action :ensure_notification_setting, only: [ :show, :update ]
 
   def show
-    @notification_setting = current_user.notification_setting || current_user.build_notification_setting
+    # ensure_notification_settingで作成された場合、@setting_just_createdフラグが立つ
+    if @setting_just_created
+      flash.now[:notice] = "通知設定を初期化しました。デフォルトで通知はONになっています。"
+    end
   end
 
   def update
-    @notification_setting = current_user.notification_setting || current_user.create_notification_setting!
-
     if @notification_setting.update(notification_setting_params)
       redirect_to settings_notifications_path, notice: "通知設定を保存しました"
     else
@@ -15,7 +17,28 @@ class Settings::NotificationsController < ApplicationController
     end
   end
 
+  def send_test
+    current_user.notifications.create!(
+      actor: current_user,
+      notifiable: current_user,
+      action: :test_notification,
+      params: {
+        message: "これはテスト通知です。実際の通知はこのように表示されます。"
+      }
+    )
+    redirect_to settings_notifications_path, notice: "テスト通知を送信しました。通知一覧を確認してください。"
+  end
+
   private
+
+  def ensure_notification_setting
+    @notification_setting = current_user.notification_setting
+
+    unless @notification_setting
+      @notification_setting = current_user.create_default_notification_setting
+      @setting_just_created = true
+    end
+  end
 
   def notification_setting_params
     params.require(:notification_setting).permit(

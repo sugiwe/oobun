@@ -8,7 +8,8 @@ class Notification < ApplicationRecord
 
   enum :action, {
     new_post: "new_post",
-    welcome: "welcome"
+    welcome: "welcome",
+    test_notification: "test_notification"
   }
 
   # Phase 2で有効化
