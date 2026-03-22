@@ -78,11 +78,12 @@ Rails.application.routes.draw do
   resources :threads, path: "", param: :slug, except: [ :index ] do
     # 招待発行（POST /:slug/invitation）
     resource :invitation, only: [ :create ], controller: "threads/invitations"
-    # 公開/非公開切り替え & エクスポート
+    # 公開/非公開切り替え & エクスポート & 削除確認
     member do
       patch :toggle_published
       get :export
       get :export_with_images
+      get :delete, to: "threads#delete_confirmation", as: :delete_confirmation
     end
     # ネストされたリソース
     resources :posts, except: [ :index ], controller: "threads/posts" do

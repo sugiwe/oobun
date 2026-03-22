@@ -1,7 +1,7 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
-  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
-  before_action :require_membership, only: [ :edit, :update, :destroy, :toggle_published, :export, :export_with_images ]
+  before_action :set_thread, only: [ :show, :edit, :update, :destroy, :delete_confirmation, :toggle_published, :export, :export_with_images ]
+  before_action :require_membership, only: [ :edit, :update, :destroy, :delete_confirmation, :toggle_published, :export, :export_with_images ]
   before_action :require_viewable, only: [ :show ]
   before_action :set_sample_threads, only: [ :index, :browse ]
 
@@ -84,7 +84,18 @@ class ThreadsController < ApplicationController
     end
   end
 
+  # GET /:slug/delete - 削除確認ページ
+  def delete_confirmation
+    @members = @thread.memberships.includes(:user).order(:position)
+  end
+
   def destroy
+    # スラッグ確認
+    if params[:slug_confirmation] != @thread.slug
+      redirect_to delete_confirmation_thread_path(@thread.slug), alert: "スラッグが一致しません"
+      return
+    end
+
     @thread.destroy!
     redirect_to root_path, notice: "交換日記を削除しました"
   rescue ActiveRecord::RecordNotDestroyed

@@ -7,3 +7,10 @@
   h1.text-xl.mb-6 交換日記を編集
 
   = render "form", form_url: thread_path(@thread.slug), form_method: :patch, cancel_path: thread_path(@thread.slug), submit_text: "更新する"
+
+  / Danger Zone
+  .mt-16.border.border-red-300.rounded-lg.p-6.bg-red-50
+    h2.text-lg.font-semibold.text-red-900.mb-3 交換日記の削除
+    p.text-sm.text-red-800.mb-4
+      | この交換日記を削除すると、すべての投稿内容、メンバーシップ情報、招待リンクが削除されます。この操作は取り消せません。
+    = link_to "削除する", delete_confirmation_thread_path(@thread.slug), class: "inline-block bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700"
