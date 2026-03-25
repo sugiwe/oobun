@@ -1,7 +1,8 @@
 - content_for :title, "#{@thread.title} - coconikki"
 
 - turn_user = @thread.current_turn_user
-- is_member = logged_in? && @thread.memberships.exists?(user: current_user)
+- is_member = logged_in? && @thread.member?(current_user)
+- is_admin = logged_in? && @thread.admin_by?(current_user)
 - my_turn = logged_in? && @thread.my_turn?(current_user)
 - is_subscribing = logged_in? && @thread.subscriptions.exists?(user: current_user)
 
@@ -48,6 +49,10 @@
                   = button_to "除外", thread_remove_membership_path(@thread.slug, m.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？投稿は残り続けます。" }, class: "text-xs text-gray-500 hover:text-gray-700 underline ml-1"
               - else
                 span.text-sm.text-gray-600 = "@#{m.user.username}"
+                - if m.owner?
+                  span.text-xs.bg-purple-100.text-purple-700.rounded.px-1.5.py-0.5.ml-1 オーナー
+                - elsif m.admin?
+                  span.text-xs.bg-blue-100.text-blue-700.rounded.px-1.5.py-0.5.ml-1 管理者
           span.text-xs.text-gray-400 ·
           / RSSドロップダウンメニュー
           div class="relative inline-block" data-controller="rss" data-rss-url-value="#{thread_url(@thread.slug, format: :rss)}"
@@ -63,20 +68,27 @@
         / 管理ボタン（メンバー向け）
         - if is_member
           .flex.flex-wrap.items-center.gap-2.mt-4
-            = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+            / 管理者以上のみ表示
+            - if is_admin
+              = link_to "編集", edit_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+            / すべてのメンバーが可能
             = link_to "エクスポート", export_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = link_to "画像付きでエクスポート", export_with_images_thread_path(@thread.slug), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
-            / 公開/非公開切り替えボタン
-            - if @thread.free? || @thread.paid?
-              - if @thread.can_be_privatized?
-                = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を非公開にしますか？非公開にすると、メンバー以外は閲覧できなくなります。" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+            / 管理者以上のみ公開/非公開を切り替え
+            - if is_admin
+              / 公開/非公開切り替えボタン
+              - if @thread.free? || @thread.paid?
+                - if @thread.can_be_privatized?
+                  = button_to "非公開にする", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を非公開にしますか？非公開にすると、メンバー以外は閲覧できなくなります。" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+                - else
+                  button.text-xs.text-gray-400.border.border-gray-200.rounded.px-2.py-1.cursor-not-allowed disabled=true title="強制公開条件（5投稿以上、または30日経過）を満たしているため非公開にできません"
+                    | 非公開にできません
               - else
-                button.text-xs.text-gray-400.border.border-gray-200.rounded.px-2.py-1.cursor-not-allowed disabled=true title="強制公開条件（5投稿以上、または30日経過）を満たしているため非公開にできません"
-                  | 非公開にできません
-            - else
-              = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を公開しますか？公開すると、誰でも閲覧できるようになります。" }, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
-            / 招待ボタン
-            div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
+                = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を公開しますか？公開すると、誰でも閲覧できるようになります。" }, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
+            / 管理者以上のみ招待リンク生成
+            - if is_admin
+              / 招待ボタン
+              div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
               button class="text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1" data={"action" => "click->invite#generate", "invite-target" => "button"}
                 | 招待URLを発行
               div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}

@@ -1,11 +1,18 @@
 class Threads::MembershipsController < ApplicationController
   before_action :require_login
   before_action :set_thread
-  before_action :require_member
+  before_action :require_member, only: [ :destroy ]
+  before_action :require_admin_permission, only: [ :remove_member ]
 
   # DELETE /:slug/membership - 自分が抜ける
   def destroy
     @membership = @thread.memberships.find_by!(user: current_user)
+
+    # オーナーは抜けられない
+    if @membership.owner?
+      redirect_to thread_path(@thread.slug), alert: "オーナーは交換日記から抜けることができません。交換日記を削除する場合は削除ボタンをご利用ください。"
+      return
+    end
 
     # 最後の1人の場合は抜けられない
     # TODO: 将来的に同時アクセスが増えた場合、競合状態対策としてトランザクション内でlockを検討
@@ -66,6 +73,12 @@ class Threads::MembershipsController < ApplicationController
   def require_member
     unless @thread.member?(current_user)
       redirect_to root_path, alert: "この交換日記のメンバーではありません"
+    end
+  end
+
+  def require_admin_permission
+    unless @thread.admin_by?(current_user)
+      redirect_to thread_path(@thread.slug), alert: "管理者権限が必要です"
     end
   end
 end

@@ -1,7 +1,7 @@
 class Threads::InvitationsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
   skip_before_action :set_thread, only: [ :show, :accept ]
-  before_action :require_membership, only: [ :create ]
+  before_action :require_admin, only: [ :create ]
   before_action :set_invitation, only: [ :show, :accept ]
   before_action :check_invitation_status, only: [ :show, :accept ]
 

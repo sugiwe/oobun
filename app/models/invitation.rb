@@ -27,7 +27,7 @@ class Invitation < ApplicationRecord
 
     ActiveRecord::Base.transaction do
       next_position = thread.memberships.maximum(:position).to_i + 1
-      thread.memberships.create!(user: user, position: next_position, role: "writer")
+      thread.memberships.create!(user: user, position: next_position, role: "member")
       update!(accepted_at: Time.current)
     end
     true
