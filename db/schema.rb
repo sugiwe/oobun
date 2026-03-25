@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_204412) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_25_205203) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,7 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_204412) do
   create_table "invitations", force: :cascade do |t|
     t.datetime "accepted_at"
     t.datetime "created_at", null: false
-    t.datetime "expires_at", null: false
+    t.datetime "expires_at"
     t.string "expiry_type", default: "seven_days", null: false
     t.string "invitation_type", default: "single_use", null: false
     t.bigint "invited_by_id", null: false
