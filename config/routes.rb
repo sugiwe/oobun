@@ -76,8 +76,9 @@ Rails.application.routes.draw do
 
   # Thread リソース（path: '' でプレフィックスなし）
   resources :threads, path: "", param: :slug, except: [ :index ] do
-    # 招待発行（POST /:slug/invitation）
+    # 招待発行と削除
     resource :invitation, only: [ :create ], controller: "threads/invitations"
+    delete "invitations/:token", to: "threads/invitations#destroy", as: :delete_invitation
     # 公開/非公開切り替え & エクスポート & 削除確認
     member do
       patch :toggle_published
