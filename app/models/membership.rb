@@ -5,9 +5,9 @@ class Membership < ApplicationRecord
 
   # Role enum
   enum :role, {
-    member: "member",  # 参加者（投稿のみ）
-    admin: "admin",    # 管理者（メンバー管理、設定変更、招待権限）
-    owner: "owner"     # オーナー（全権限、脱退不可）
+    member: "member",      # 参加者（投稿のみ）
+    moderator: "moderator", # 管理者（メンバー管理、設定変更、招待権限）
+    owner: "owner"         # オーナー（全権限、脱退不可）
   }
 
   # Validations
@@ -17,22 +17,22 @@ class Membership < ApplicationRecord
 
   # 権限チェックメソッド
   def can_invite?
-    admin? || owner?
+    moderator? || owner?
   end
 
   def can_manage_members?
-    admin? || owner?
+    moderator? || owner?
   end
 
   def can_edit_settings?
-    admin? || owner?
+    moderator? || owner?
   end
 
   def can_delete_thread?
     owner?
   end
 
-  def can_promote_to_admin?
+  def can_promote_to_moderator?
     owner?
   end
 

@@ -47,7 +47,7 @@ class CorrespondenceThread < ApplicationRecord
   # 権限チェック
   def admin_by?(user)
     membership = membership_for(user)
-    membership&.admin? || membership&.owner?
+    membership&.moderator? || membership&.owner?
   end
 
   def owner_by?(user)

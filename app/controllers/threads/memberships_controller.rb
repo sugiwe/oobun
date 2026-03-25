@@ -77,12 +77,12 @@ class Threads::MembershipsController < ApplicationController
     end
 
     # 既に管理者の場合
-    if target_membership.admin?
+    if target_membership.moderator?
       redirect_to edit_thread_path(@thread.slug), alert: "既に管理者です"
       return
     end
 
-    target_membership.update!(role: "admin")
+    target_membership.update!(role: "moderator")
     redirect_to edit_thread_path(@thread.slug), notice: "#{target_user.username}を管理者に昇格しました"
   end
 
