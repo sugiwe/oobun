@@ -167,7 +167,7 @@ GEM
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (2.19.1)
+    json (2.19.3)
     jwt (3.1.2)
       base64
     kamal (2.10.1)
@@ -375,8 +375,8 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.16.8)
     securerandom (0.4.1)
-    shoulda-matchers (6.5.0)
-      activesupport (>= 5.2.0)
+    shoulda-matchers (7.0.1)
+      activesupport (>= 7.1)
     signet (0.21.0)
       addressable (~> 2.8)
       faraday (>= 0.17.5, < 3.a)
@@ -493,7 +493,7 @@ DEPENDENCIES
   rubocop-rails-omakase
   rubyzip
   sanitize
-  shoulda-matchers (~> 6.0)
+  shoulda-matchers (~> 7.0)
   simplecov
   slim-rails
   solid_cable
