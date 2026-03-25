@@ -95,5 +95,7 @@ Rails.application.routes.draw do
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
     resource :membership,   only: [ :destroy ], controller: "threads/memberships"
     delete "memberships/:user_id", to: "threads/memberships#remove_member", as: :remove_membership
+    patch "memberships/:user_id/promote", to: "threads/memberships#promote_to_admin", as: :promote_membership
+    patch "memberships/:user_id/demote", to: "threads/memberships#demote_to_member", as: :demote_membership
   end
 end

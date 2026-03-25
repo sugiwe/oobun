@@ -3,6 +3,7 @@ class Threads::MembershipsController < ApplicationController
   before_action :set_thread
   before_action :require_member, only: [ :destroy ]
   before_action :require_admin_permission, only: [ :remove_member ]
+  before_action :require_owner_permission, only: [ :promote_to_admin, :demote_to_member ]
 
   # DELETE /:slug/membership - 自分が抜ける
   def destroy
@@ -64,6 +65,48 @@ class Threads::MembershipsController < ApplicationController
     redirect_to thread_path(@thread.slug), notice: "退会済みユーザーを除外しました"
   end
 
+  # PATCH /:slug/memberships/:user_id/promote - メンバーを管理者に昇格
+  def promote_to_admin
+    target_user = User.find(params[:user_id])
+    target_membership = @thread.memberships.find_by!(user: target_user)
+
+    # オーナーは昇格できない
+    if target_membership.owner?
+      redirect_to edit_thread_path(@thread.slug), alert: "オーナーは昇格できません"
+      return
+    end
+
+    # 既に管理者の場合
+    if target_membership.admin?
+      redirect_to edit_thread_path(@thread.slug), alert: "既に管理者です"
+      return
+    end
+
+    target_membership.update!(role: "admin")
+    redirect_to edit_thread_path(@thread.slug), notice: "#{target_user.username}を管理者に昇格しました"
+  end
+
+  # PATCH /:slug/memberships/:user_id/demote - 管理者をメンバーに降格
+  def demote_to_member
+    target_user = User.find(params[:user_id])
+    target_membership = @thread.memberships.find_by!(user: target_user)
+
+    # オーナーは降格できない
+    if target_membership.owner?
+      redirect_to edit_thread_path(@thread.slug), alert: "オーナーは降格できません"
+      return
+    end
+
+    # 既にメンバーの場合
+    if target_membership.member?
+      redirect_to edit_thread_path(@thread.slug), alert: "既にメンバーです"
+      return
+    end
+
+    target_membership.update!(role: "member")
+    redirect_to edit_thread_path(@thread.slug), notice: "#{target_user.username}をメンバーに降格しました"
+  end
+
   private
 
   def set_thread
@@ -79,6 +122,12 @@ class Threads::MembershipsController < ApplicationController
   def require_admin_permission
     unless @thread.admin_by?(current_user)
       redirect_to thread_path(@thread.slug), alert: "管理者権限が必要です"
+    end
+  end
+
+  def require_owner_permission
+    unless @thread.owner_by?(current_user)
+      redirect_to edit_thread_path(@thread.slug), alert: "オーナー権限が必要です"
     end
   end
 end

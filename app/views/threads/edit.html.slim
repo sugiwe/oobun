@@ -8,6 +8,48 @@
 
   = render "form", form_url: thread_path(@thread.slug), form_method: :patch, cancel_path: thread_path(@thread.slug), submit_text: "更新する"
 
+  / メンバー管理セクション
+  .mt-12.border.border-gray-300.rounded-lg.p-6
+    h2.text-lg.font-semibold.text-gray-900.mb-4 メンバー管理
+
+    .space-y-3
+      - @thread.memberships.includes(:user).order(:position).each do |membership|
+        .flex.items-center.justify-between.p-3.bg-gray-50.rounded.border.border-gray-200
+          .flex.items-center.gap-3
+            / アバター
+            .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+              = render "shared/avatar", user: membership.user, show_fallback: true
+
+            / ユーザー情報
+            .flex-1
+              - if membership.user.deleted?
+                span.text-sm.text-gray-400 退会済みユーザー
+              - else
+                .flex.items-center.gap-2
+                  span.text-sm.font-medium.text-gray-900 = "@#{membership.user.username}"
+                  - if membership.owner?
+                    span.text-xs.bg-purple-100.text-purple-700.rounded.px-2.py-0.5 オーナー
+                  - elsif membership.admin?
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 管理者
+                  - else
+                    span.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-0.5 メンバー
+
+              / 順番表示
+              span.text-xs.text-gray-500 = "順番: #{membership.position}"
+
+          / アクションボタン（オーナーのみ表示）
+          - if @thread.owner_by?(current_user) && !membership.owner?
+            .flex.items-center.gap-2
+              / 管理者に昇格・降格ボタン
+              - if membership.admin?
+                = button_to "メンバーに降格", thread_demote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "管理者権限を削除してメンバーに降格しますか？" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+              - else
+                = button_to "管理者に昇格", thread_promote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "このメンバーを管理者に昇格しますか？" }, class: "text-xs text-blue-600 hover:text-blue-900 border border-blue-300 rounded px-2 py-1"
+
+              / メンバー削除ボタン（退会済みユーザー or 管理者以上）
+              - if membership.user.deleted?
+                = button_to "除外", thread_remove_membership_path(@thread.slug, membership.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+
   / Danger Zone
   .mt-16.border.border-red-300.rounded-lg.p-6.bg-red-50
     h2.text-lg.font-semibold.text-red-900.mb-3 交換日記の削除
