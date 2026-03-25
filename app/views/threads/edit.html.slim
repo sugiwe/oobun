@@ -48,14 +48,14 @@
                 / タイプと状態
                 .flex.items-center.gap-2.mb-1
                   - if invitation.invitation_type_single_use?
-                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 1回限り
+                    span.text-xs.bg-green-100.text-green-700.rounded.px-2.py-0.5 1回限り
                   - else
-                    span.text-xs.bg-green-100.text-green-700.rounded.px-2.py-0.5 無制限
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 回数無制限
 
                   - if invitation.expiry_type_seven_days?
-                    span.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-0.5 7日間有効
+                    span.text-xs.bg-green-100.text-green-700.rounded.px-2.py-0.5 7日間有効
                   - else
-                    span.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-0.5 無期限
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 期間無制限
 
                   - if invitation.expired?
                     span.text-xs.bg-red-100.text-red-700.rounded.px-2.py-0.5 期限切れ
