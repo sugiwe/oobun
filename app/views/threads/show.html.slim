@@ -87,16 +87,6 @@
                     | 非公開にできません
               - else
                 = button_to "公開する", toggle_published_thread_path(@thread.slug), method: :patch, data: { turbo_confirm: "この交換日記を公開しますか？公開すると、誰でも閲覧できるようになります。" }, class: "text-xs text-green-600 hover:text-green-900 border border-gray-300 rounded px-2 py-1"
-            / 管理者以上のみ招待リンク生成
-            - if is_admin
-              / 招待ボタン
-              div data={"controller" => "invite", "invite-create-url-value" => thread_invitation_path(@thread.slug)}
-              button class="text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1" data={"action" => "click->invite#generate", "invite-target" => "button"}
-                | 招待URLを発行
-              div class="mt-2 flex items-center gap-2" data={"invite-target" => "urlBox"}
-                input class="text-xs border border-gray-300 rounded px-2 py-1.5 w-64 bg-gray-50" type="text" readonly=true data={"invite-target" => "urlInput"}
-                button class="text-xs text-gray-500 hover:text-gray-700" data={"action" => "click->invite#copy", "invite-target" => "copyButton"}
-                  | コピー
             / 脱退ボタン
             - if @thread.memberships.count > 1
               - draft = @thread.draft_for(current_user)
