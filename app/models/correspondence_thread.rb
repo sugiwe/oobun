@@ -42,10 +42,6 @@ class CorrespondenceThread < ApplicationRecord
     when "free"
       # 自由投稿: 常にOK
       true
-    else
-      # デフォルトは relay と同じ動作
-      return true unless turn_based?
-      current_turn_user == user
     end
   end
 
