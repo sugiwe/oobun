@@ -28,8 +28,25 @@ class CorrespondenceThread < ApplicationRecord
   end
 
   def my_turn?(user)
-    return true unless turn_based?
-    current_turn_user == user
+    return false unless user
+    return false unless member?(user)
+
+    case posting_mode
+    when "relay"
+      # 順番制: turn_basedフラグも考慮して、現在のターンのユーザーかチェック
+      return true unless turn_based?
+      current_turn_user == user
+    when "rotation"
+      # 交代制: 最後の投稿者が自分でなければOK
+      last_post_user_id != user.id
+    when "free"
+      # 自由投稿: 常にOK
+      true
+    else
+      # デフォルトは relay と同じ動作
+      return true unless turn_based?
+      current_turn_user == user
+    end
   end
 
   # メンバーかどうか
@@ -98,6 +115,13 @@ class CorrespondenceThread < ApplicationRecord
     free: "free",    # 無料公開
     paid: "paid"     # 有料公開（Phase 3で実装予定）
   }
+
+  # posting_mode の enum 定義
+  enum :posting_mode, {
+    relay: "relay",       # 順番制（決められた順番で投稿）
+    rotation: "rotation", # 交代制（誰でも投稿できるが連続投稿NG）
+    free: "free"          # 自由投稿（誰でもいつでも投稿可能）
+  }, prefix: true
 
   # 公開/非公開を切り替え（draft ⇄ free）
   def toggle_published!
