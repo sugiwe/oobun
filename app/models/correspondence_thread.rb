@@ -28,7 +28,6 @@ class CorrespondenceThread < ApplicationRecord
   end
 
   def my_turn?(user)
-    return false unless user
     return false unless member?(user)
 
     if posting_mode_relay?
