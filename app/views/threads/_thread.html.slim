@@ -6,11 +6,13 @@
 
   / カード本文
   .p-4.flex.flex-col.gap-1
-    / タイトルと非公開バッジ
+    / タイトルとバッジ
     .flex.items-start.gap-2.mb-1
       h3.text-base.text-gray-900.line-clamp-2.flex-1 = thread.title
       - if thread.draft?
         span.text-base.flex-shrink-0 🔒
+      - elsif !thread.show_in_list?
+        span.text-base.flex-shrink-0 🙈
 
     / 説明
     - if thread.description.present?

@@ -11,13 +11,13 @@
           div
             h1.text-2xl = @user.display_name
             p.text-gray-500.text-sm = "@#{@user.username}"
-          - if logged_in? && @user == current_user
+          - if @is_own_profile
             = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
         - if @user.bio.present?
           .text-gray-700.text-sm.mt-3 = auto_link_bio(@user.bio)
 
   / 使用状況ダッシュボード（自分のページのみ表示）
-  - if logged_in? && @user == current_user
+  - if @is_own_profile
     details.bg-gray-50.border.border-gray-200.rounded-lg.mb-8 data-controller="usage-stats"
       summary.cursor-pointer.px-6.py-4.hover:bg-gray-100.rounded-lg 📊 使用状況
       .px-6.pb-6.pt-2
@@ -66,11 +66,15 @@
   .mb-8
     .flex.items-center.justify-between.mb-4
       h2.text-lg ✍️ 参加中の交換日記
-      - if logged_in? && @user == current_user && @threads.present?
+      - if @is_own_profile && @threads.present?
         = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
 
+    / 自分のプロフィールの場合のみ表示する補足説明
+    - if @is_own_profile
+      p.text-xs.text-gray-500.mb-4 「🔒 非公開」「🙈 一覧非表示」の交換日記は、この一覧ではあなただけに表示されています
+
     - if @threads.empty?
-      - if logged_in? && @user == current_user
+      - if @is_own_profile
         .text-center.py-12
           p.text-gray-400.mb-4 まだ交換日記に参加していません
           = link_to "最初の交換日記を作成する", new_thread_path, class: "inline-block bg-gray-900 text-white rounded-md px-6 py-3 hover:bg-gray-700 font-medium"
