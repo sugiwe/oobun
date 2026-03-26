@@ -45,6 +45,31 @@ class CorrespondenceThread < ApplicationRecord
     end
   end
 
+  # 投稿可能時のメッセージ（投稿モード別）
+  def turn_message(user)
+    case posting_mode
+    when "relay"
+      "あなたのターンです"
+    when "rotation"
+      "投稿できます"
+    when "free"
+      "誰でも投稿できます"
+    end
+  end
+
+  # 投稿待機時のメッセージ（投稿モード別）
+  def waiting_message
+    case posting_mode
+    when "relay"
+      turn_user = current_turn_user
+      turn_user ? "@#{turn_user.username} のターンです" : nil
+    when "rotation"
+      "他のメンバーの投稿をお待ちください"
+    when "free"
+      "誰でも投稿できます"
+    end
+  end
+
   # メンバーかどうか
   def member?(user)
     return false unless user

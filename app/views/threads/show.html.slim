@@ -126,15 +126,17 @@
     .flex.items-center.justify-between.bg-gray-50.rounded-lg.px-4.py-3
       .text-sm
         - if my_turn
-          span.font-medium.text-gray-900 あなたのターンです
+          span.font-medium.text-gray-900 = @thread.turn_message(current_user)
           - if has_draft
             span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
-        - elsif turn_user
-          span.text-gray-500 = "@#{turn_user.username} のターンです"
-          - if has_draft
-            span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
-        - elsif has_draft
-          span.text-gray-500 ✍️ 下書きあり
+        - else
+          - waiting_msg = @thread.waiting_message
+          - if waiting_msg
+            span.text-gray-500 = waiting_msg
+            - if has_draft
+              span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
+          - elsif has_draft
+            span.text-gray-500 ✍️ 下書きあり
       - if my_turn
         .flex.items-center.gap-2
           - if has_draft
