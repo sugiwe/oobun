@@ -65,9 +65,9 @@
                 .text-xs.text-gray-500
                   | 使用回数: #{invitation.use_count}回
                   - if invitation.expires_at.present?
-                    |  · 期限: #{invitation.expires_at.strftime('%Y/%m/%d %H:%M')}
+                    |  · 期限: #{l invitation.expires_at, format: :short}
                   - if invitation.last_used_at.present?
-                    |  · 最終使用: #{invitation.last_used_at.strftime('%Y/%m/%d %H:%M')}
+                    |  · 最終使用: #{l invitation.last_used_at, format: :short}
 
                 / URL
                 .text-xs.text-gray-400.mt-1.break-all = invitation_url(invitation.token)

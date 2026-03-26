@@ -10,8 +10,8 @@ class Threads::InvitationsController < Threads::ApplicationController
   def create
     invitation = @thread.invitations.create!(
       invited_by: current_user,
-      invitation_type: params[:invitation_type] || "single_use",
-      expiry_type: params[:expiry_type] || "seven_days"
+      invitation_type: invitation_params[:invitation_type] || "single_use",
+      expiry_type: invitation_params[:expiry_type] || "seven_days"
     )
     url = invitation_url(invitation.token)
 
@@ -77,5 +77,9 @@ class Threads::InvitationsController < Threads::ApplicationController
     @invitation = Invitation.includes(:thread).find_by!(token: params[:token])
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: "招待URLが見つかりません"
+  end
+
+  def invitation_params
+    params.permit(:invitation_type, :expiry_type)
   end
 end
