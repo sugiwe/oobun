@@ -31,41 +31,38 @@ class CorrespondenceThread < ApplicationRecord
     return false unless user
     return false unless member?(user)
 
-    case posting_mode
-    when "relay"
+    if posting_mode_relay?
       # 順番制: turn_basedフラグも考慮して、現在のターンのユーザーかチェック
       return true unless turn_based?
       current_turn_user == user
-    when "rotation"
+    elsif posting_mode_rotation?
       # 交代制: 最後の投稿者が自分でなければOK
       last_post_user_id != user.id
-    when "free"
+    elsif posting_mode_free?
       # 自由投稿: 常にOK
       true
     end
   end
 
   # 投稿可能時のメッセージ（投稿モード別）
-  def turn_message(user)
-    case posting_mode
-    when "relay"
+  def turn_message
+    if posting_mode_relay?
       "あなたのターンです"
-    when "rotation"
+    elsif posting_mode_rotation?
       "投稿できます"
-    when "free"
+    elsif posting_mode_free?
       "誰でも投稿できます"
     end
   end
 
   # 投稿待機時のメッセージ（投稿モード別）
   def waiting_message
-    case posting_mode
-    when "relay"
+    if posting_mode_relay?
       turn_user = current_turn_user
       turn_user ? "@#{turn_user.username} のターンです" : nil
-    when "rotation"
+    elsif posting_mode_rotation?
       "他のメンバーの投稿をお待ちください"
-    when "free"
+    elsif posting_mode_free?
       "誰でも投稿できます"
     end
   end
@@ -143,6 +140,13 @@ class CorrespondenceThread < ApplicationRecord
     rotation: "rotation", # 交代制（誰でも投稿できるが連続投稿NG）
     free: "free"          # 自由投稿（誰でもいつでも投稿可能）
   }, prefix: true
+
+  # 投稿モードの選択肢（フォーム表示用）
+  POSTING_MODE_OPTIONS = {
+    relay: { title: "順番制", description: "📝 決められた順番で投稿していきます（2〜3人向け）" },
+    rotation: { title: "交代制", description: "🔄 誰でも投稿できますが、連続投稿は不可（4人以上向け）" },
+    free: { title: "自由投稿", description: "✨誰でもいつでも投稿できます（掲示板のように使いたい場合）" }
+  }.freeze
 
   # 公開/非公開を切り替え（draft ⇄ free）
   def toggle_published!

@@ -75,29 +75,14 @@
           | メンバーがどのように投稿できるかを設定します
 
       .flex.flex-col.gap-3
-        label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
-          = f.radio_button :posting_mode, "relay", class: "mt-1"
-          .flex-1
-            .text-sm.font-medium.text-gray-900
-              | 順番制
-            .text-xs.text-gray-500.mt-1
-              | 📝 決められた順番で投稿していきます（2〜3人向け）
-
-        label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
-          = f.radio_button :posting_mode, "rotation", class: "mt-1"
-          .flex-1
-            .text-sm.font-medium.text-gray-900
-              | 交代制
-            .text-xs.text-gray-500.mt-1
-              | 🔄 誰でも投稿できますが、連続投稿は不可（4人以上向け）
-
-        label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
-          = f.radio_button :posting_mode, "free", class: "mt-1"
-          .flex-1
-            .text-sm.font-medium.text-gray-900
-              | 自由投稿
-            .text-xs.text-gray-500.mt-1
-              | ✨ 誰でもいつでも投稿できます（掲示板のように使いたい場合）
+        - CorrespondenceThread::POSTING_MODE_OPTIONS.each do |mode, options|
+          label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
+            = f.radio_button :posting_mode, mode, class: "mt-1"
+            .flex-1
+              .text-sm.font-medium.text-gray-900
+                = options[:title]
+              .text-xs.text-gray-500.mt-1
+                = options[:description]
 
     - if @thread.errors.any?
       ul.text-red-500.text-sm.list-disc.list-inside.bg-red-50.rounded-md.p-3

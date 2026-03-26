@@ -126,7 +126,7 @@
     .flex.items-center.justify-between.bg-gray-50.rounded-lg.px-4.py-3
       .text-sm
         - if my_turn
-          span.font-medium.text-gray-900 = @thread.turn_message(current_user)
+          span.font-medium.text-gray-900 = @thread.turn_message
           - if has_draft
             span.text-xs.text-gray-500.ml-2 ✍️ 下書きあり
         - else

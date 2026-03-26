@@ -36,23 +36,16 @@ class Post < ApplicationRecord
 
   # 投稿ルールチェック
   def check_posting_rules
-    return unless thread
-    return unless user
+    return unless thread && user
+    return if thread.my_turn?(user)
 
-    case thread.posting_mode
-    when "relay"
-      # 順番制: turn_basedフラグも考慮してターンチェック
-      if thread.turn_based? && !thread.my_turn?(user)
-        errors.add(:base, "今はあなたのターンではありません")
-      end
-    when "rotation"
-      # 交代制: 連続投稿チェック
-      if thread.last_post_user_id == user.id
-        errors.add(:base, "連続投稿はできません。他のメンバーが投稿するまでお待ちください")
-      end
-    when "free"
-      # 自由投稿: 制限なし
+    message = if thread.posting_mode_relay?
+      "今はあなたのターンではありません"
+    elsif thread.posting_mode_rotation?
+      "連続投稿はできません。他のメンバーが投稿するまでお待ちください"
     end
+
+    errors.add(:base, message) if message
   end
 
   # Scopes
