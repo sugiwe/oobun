@@ -37,7 +37,7 @@ html
         / ドロップダウンメニュー（上に表示）
         div class="absolute w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden right-2.5 md:left-2.5 md:right-auto bottom-[calc(100%-4px)]" data={"dropdown-target" => "menu"}
           div class="px-4 py-3 border-b border-gray-100"
-            .flex.items-center.gap-3
+            = link_to user_path(username: current_user.username), class: "flex items-center gap-3 transition-opacity hover:opacity-70" do
               div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0"
                 = render "shared/avatar", user: current_user, show_fallback: true
               .flex-1.min-w-0
