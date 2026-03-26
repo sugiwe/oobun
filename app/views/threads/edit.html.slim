@@ -86,17 +86,13 @@
       - @thread.memberships.includes(:user).order(:position).each do |membership|
         .flex.items-center.justify-between.p-3.bg-gray-50.rounded.border.border-gray-200
           .flex.items-center.gap-3
-            / アバター
-            .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-              = render "shared/avatar", user: membership.user, show_fallback: true
+            / アバター＆ユーザー名
+            = render "shared/user_link", user: membership.user, avatar_size_class: "w-8 h-8", text_size_class: "text-sm font-medium", text_color_class: "text-gray-900"
 
-            / ユーザー情報
+            / ロールバッジと順番
             .flex-1
-              - if membership.user.deleted?
-                span.text-sm.text-gray-400 退会済みユーザー
-              - else
+              - unless membership.user.deleted?
                 .flex.items-center.gap-2
-                  span.text-sm.font-medium.text-gray-900 = "@#{membership.user.username}"
                   - if membership.owner?
                     span.text-xs.bg-purple-100.text-purple-700.rounded.px-2.py-0.5 オーナー
                   - elsif membership.moderator?

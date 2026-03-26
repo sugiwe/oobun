@@ -42,10 +42,10 @@
             = link_to "編集", edit_thread_post_path(@thread.slug, @post), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = button_to "削除", thread_post_path(@thread.slug, @post), method: :delete, data: { turbo_confirm: "この投稿を削除しますか？この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
       .flex.items-center.gap-3
-        .w-10.h-10.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+        = link_to user_path(@post.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
           = render "shared/avatar", user: @post.user, show_fallback: true
         .flex.flex-col
-          span.text-base.font-medium.text-gray-700 = @post.user.display_name
+          = link_to @post.user.display_name, user_path(@post.user.username), class: "text-base font-medium text-gray-700 transition-opacity hover:opacity-70"
           span.text-sm.text-gray-400 = @post.created_at.strftime("%Y年%m月%d日 %H:%M")
 
     / 本文（手紙の内容）

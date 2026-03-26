@@ -1,0 +1,35 @@
+/ ユーザーリンクの共通パーシャル
+/ 引数:
+/   user: 表示するユーザー（必須）
+/   show_avatar: アバターを表示するか（デフォルト: true）
+/   show_username: ユーザー名を表示するか（デフォルト: true）
+/   use_display_name: display_nameを使う（デフォルト: false、falseの場合は @username）
+/   avatar_size_class: アバターのサイズクラス（デフォルト: "w-6 h-6"）
+/   text_size_class: テキストのサイズクラス（デフォルト: "text-sm"）
+/   text_color_class: テキストの色クラス（デフォルト: "text-gray-600"）
+/   show_fallback: アバターがない場合にイニシャルを表示するか（デフォルト: true）
+
+- show_avatar = local_assigns.fetch(:show_avatar, true)
+- show_username = local_assigns.fetch(:show_username, true)
+- use_display_name = local_assigns.fetch(:use_display_name, false)
+- avatar_size_class = local_assigns.fetch(:avatar_size_class, "w-6 h-6")
+- text_size_class = local_assigns.fetch(:text_size_class, "text-sm")
+- text_color_class = local_assigns.fetch(:text_color_class, "text-gray-600")
+- show_fallback = local_assigns.fetch(:show_fallback, true)
+
+- if user.deleted?
+  / 退会済みユーザーはリンクなし
+  .flex.items-center.gap-1.5
+    - if show_avatar
+      .rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden class=avatar_size_class
+        = render "shared/avatar", user: user, show_fallback: show_fallback
+    - if show_username
+      span class="#{text_size_class} text-gray-400" 退会済みユーザー
+- else
+  / 通常のユーザーはリンク付き
+  = link_to user_path(user.username), class: "flex items-center gap-1.5 transition-opacity hover:opacity-70" do
+    - if show_avatar
+      .rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden class=avatar_size_class
+        = render "shared/avatar", user: user, show_fallback: show_fallback
+    - if show_username
+      span class="#{text_size_class} #{text_color_class}" = use_display_name ? user.display_name : "@#{user.username}"

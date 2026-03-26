@@ -8,13 +8,14 @@
   / 基本情報
   .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
     .flex.items-start.gap-4.mb-6
-      div class="w-16 h-16 rounded-full bg-gray-200 overflow-hidden shrink-0"
+      = link_to user_path(@user.username), class: "w-16 h-16 rounded-full bg-gray-200 overflow-hidden shrink-0 transition-opacity hover:opacity-70" do
         = render "shared/avatar", user: @user, show_fallback: true
       div.flex-1
-        h2.text-xl.text-gray-900 = @user.display_name
-        .text-gray-500.mb-2
-          | @
-          = @user.username
+        = link_to user_path(@user.username), class: "block mb-2 transition-opacity hover:opacity-70" do
+          h2.text-xl.text-gray-900 = @user.display_name
+          .text-gray-500
+            | @
+            = @user.username
         - if @user.admin?
           span.inline-flex.items-center.px-2.py-1.rounded.text-xs.bg-purple-100.text-purple-800
             | 管理者
