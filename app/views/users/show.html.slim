@@ -69,6 +69,10 @@
       - if logged_in? && @user == current_user && @threads.present?
         = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
 
+    / 自分のプロフィールの場合のみ表示する補足説明
+    - if logged_in? && @user == current_user
+      p.text-xs.text-gray-500.mb-4 「🔒 非公開」「🙈 一覧非表示」の交換日記は、本人だけに表示されています
+
     - if @threads.empty?
       - if logged_in? && @user == current_user
         .text-center.py-12
