@@ -11,9 +11,12 @@
       p.text-sm.text-gray-500.mt-1 = @invitation.thread.description
 
     .mt-6.text-xs.text-gray-400
-      | 有効期限：
-      = @invitation.expires_at.strftime("%Y年%m月%d日")
-      | まで
+      - if @invitation.expires_at.present?
+        | 有効期限：
+        = @invitation.expires_at.strftime("%Y年%m月%d日")
+        | まで
+      - else
+        | 有効期限：無期限
 
   - if logged_in?
     = form_with url: accept_invitation_path(@invitation.token), method: :post do |f|
