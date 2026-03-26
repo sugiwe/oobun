@@ -41,14 +41,10 @@
         .flex.items-center.gap-3.mt-4.flex-wrap
           - @members.each do |m|
             .flex.items-center.gap-1.5
-              .w-6.h-6.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
-                = render "shared/avatar", user: m.user, show_fallback: true
-              - if m.user.deleted?
-                span.text-sm.text-gray-400 退会済みユーザー
-                - if is_member
-                  = button_to "除外", thread_remove_membership_path(@thread.slug, m.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？投稿は残り続けます。" }, class: "text-xs text-gray-500 hover:text-gray-700 underline ml-1"
-              - else
-                span.text-sm.text-gray-600 = "@#{m.user.username}"
+              = render "shared/user_link", user: m.user, text_color_class: "text-gray-600"
+              - if m.user.deleted? && is_member
+                = button_to "除外", thread_remove_membership_path(@thread.slug, m.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？投稿は残り続けます。" }, class: "text-xs text-gray-500 hover:text-gray-700 underline ml-1"
+              - unless m.user.deleted?
                 / ロールバッジは管理者以上にのみ表示
                 - if is_admin
                   - if m.owner?
