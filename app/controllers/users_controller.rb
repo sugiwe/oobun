@@ -4,12 +4,15 @@ class UsersController < ApplicationController
   before_action :require_own_profile, only: [ :edit, :update, :delete_confirmation, :destroy ]
 
   def show
+    # ログインユーザーが自分のページを見ているかどうか
+    @is_own_profile = logged_in? && @user == current_user
+
     # ログインユーザーが自分のページを見る場合は全て表示
     # 他人のページを見る場合は公開かつ一覧に表示する設定のスレッドのみ表示
     threads_scope = @user.correspondence_threads
                          .includes(:users, :memberships)
 
-    @threads = if logged_in? && @user == current_user
+    @threads = if @is_own_profile
       threads_scope.recent_order
     else
       threads_scope.discoverable.recent_order
