@@ -4,6 +4,8 @@ class Threads::MembershipsController < ApplicationController
   before_action :require_member, only: [ :destroy ]
   before_action :require_admin_permission, only: [ :remove_member ]
   before_action :require_owner_permission, only: [ :promote_to_admin, :demote_to_member ]
+  before_action :set_target_membership, only: [ :promote_to_admin, :demote_to_member, :remove_member ]
+  before_action :require_target_not_owner, only: [ :promote_to_admin, :demote_to_member ]
 
   # DELETE /:slug/membership - 自分が抜ける
   def destroy
@@ -42,21 +44,18 @@ class Threads::MembershipsController < ApplicationController
 
   # DELETE /:slug/membership/:user_id - 他のメンバーを除外（退会済みユーザーのみ）
   def remove_member
-    target_user = User.find(params[:user_id])
-    target_membership = @thread.memberships.find_by!(user: target_user)
-
     # 退会済みユーザーのみ除外可能
-    unless target_user.deleted?
+    unless @target_membership.user.deleted?
       redirect_to thread_path(@thread.slug), alert: "退会済みユーザーのみ除外できます"
       return
     end
 
     ActiveRecord::Base.transaction do
       # メンバーシップを削除
-      target_membership.destroy!
+      @target_membership.destroy!
 
       # ターン順の位置を詰める
-      @thread.memberships.where("position > ?", target_membership.position).update_all("position = position - 1")
+      @thread.memberships.where("position > ?", @target_membership.position).update_all("position = position - 1")
 
       # 最終投稿メタデータを更新
       @thread.update_last_post_metadata!
@@ -67,44 +66,26 @@ class Threads::MembershipsController < ApplicationController
 
   # PATCH /:slug/memberships/:user_id/promote - メンバーを管理者に昇格
   def promote_to_admin
-    target_user = User.find(params[:user_id])
-    target_membership = @thread.memberships.find_by!(user: target_user)
-
-    # オーナーは昇格できない
-    if target_membership.owner?
-      redirect_to edit_thread_path(@thread.slug), alert: "オーナーは昇格できません"
-      return
-    end
-
     # 既に管理者の場合
-    if target_membership.moderator?
+    if @target_membership.moderator?
       redirect_to edit_thread_path(@thread.slug), alert: "既に管理者です"
       return
     end
 
-    target_membership.update!(role: "moderator")
-    redirect_to edit_thread_path(@thread.slug), notice: "#{target_user.username}を管理者に昇格しました"
+    @target_membership.update!(role: "moderator")
+    redirect_to edit_thread_path(@thread.slug), notice: "#{@target_membership.user.username}を管理者に昇格しました"
   end
 
   # PATCH /:slug/memberships/:user_id/demote - 管理者をメンバーに降格
   def demote_to_member
-    target_user = User.find(params[:user_id])
-    target_membership = @thread.memberships.find_by!(user: target_user)
-
-    # オーナーは降格できない
-    if target_membership.owner?
-      redirect_to edit_thread_path(@thread.slug), alert: "オーナーは降格できません"
-      return
-    end
-
     # 既にメンバーの場合
-    if target_membership.member?
+    if @target_membership.member?
       redirect_to edit_thread_path(@thread.slug), alert: "既にメンバーです"
       return
     end
 
-    target_membership.update!(role: "member")
-    redirect_to edit_thread_path(@thread.slug), notice: "#{target_user.username}をメンバーに降格しました"
+    @target_membership.update!(role: "member")
+    redirect_to edit_thread_path(@thread.slug), notice: "#{@target_membership.user.username}をメンバーに降格しました"
   end
 
   private
@@ -128,6 +109,17 @@ class Threads::MembershipsController < ApplicationController
   def require_owner_permission
     unless @thread.owner_by?(current_user)
       redirect_to edit_thread_path(@thread.slug), alert: "オーナー権限が必要です"
+    end
+  end
+
+  def set_target_membership
+    target_user = User.find(params[:user_id])
+    @target_membership = @thread.memberships.find_by!(user: target_user)
+  end
+
+  def require_target_not_owner
+    if @target_membership.owner?
+      redirect_to edit_thread_path(@thread.slug), alert: "オーナーの権限は変更できません"
     end
   end
 end

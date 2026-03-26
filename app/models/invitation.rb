@@ -47,12 +47,13 @@ class Invitation < ApplicationRecord
       next_position = thread.memberships.maximum(:position).to_i + 1
       thread.memberships.create!(user: user, position: next_position, role: "member")
 
-      # 使用回数と最終使用日時を更新
+      # 使用回数をアトミックにインクリメント
       increment!(:use_count)
-      update!(last_used_at: Time.current)
 
-      # single_use の場合のみ accepted_at を設定（後方互換性）
-      update!(accepted_at: Time.current) if invitation_type_single_use?
+      # 日時関連の更新を1つのクエリにまとめる
+      updates = { last_used_at: Time.current }
+      updates[:accepted_at] = Time.current if invitation_type_single_use?
+      update!(updates)
     end
     true
   end

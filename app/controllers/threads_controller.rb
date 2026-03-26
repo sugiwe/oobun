@@ -70,6 +70,7 @@ class ThreadsController < ApplicationController
   end
 
   def edit
+    @invitations = @thread.invitations.order(created_at: :desc)
   end
 
   def update

@@ -16,16 +16,20 @@ class Membership < ApplicationRecord
   validates :user_id, uniqueness: { scope: :thread_id, message: "はすでにこのスレッドのメンバーです" }
 
   # 権限チェックメソッド
-  def can_invite?
+  def has_admin_permissions?
     moderator? || owner?
+  end
+
+  def can_invite?
+    has_admin_permissions?
   end
 
   def can_manage_members?
-    moderator? || owner?
+    has_admin_permissions?
   end
 
   def can_edit_settings?
-    moderator? || owner?
+    has_admin_permissions?
   end
 
   def can_delete_thread?
