@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_215725) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_070509) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -176,6 +176,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_215725) do
     t.integer "last_post_user_id"
     t.datetime "last_posted_at"
     t.boolean "noindex", default: false, null: false
+    t.string "posting_mode", default: "relay", null: false
     t.boolean "show_in_list", default: true, null: false
     t.string "slug", null: false
     t.string "status", default: "draft", null: false

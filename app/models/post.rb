@@ -19,6 +19,7 @@ class Post < ApplicationRecord
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
+  validate :check_posting_rules, on: :create, if: :published?
 
   # ストレージ容量チェック
   # NOTE: 複数同時アップロードによる競合状態で100MBを若干超過する可能性があるが、
@@ -31,6 +32,20 @@ class Post < ApplicationRecord
     unless user.can_upload?(new_file_size)
       errors.add(:thumbnail, "ストレージ容量の上限（#{User::MAX_STORAGE_PER_USER / 1.megabyte}MB）を超えています")
     end
+  end
+
+  # 投稿ルールチェック
+  def check_posting_rules
+    return unless thread && user
+    return if thread.my_turn?(user)
+
+    message = if thread.posting_mode_relay?
+      "今はあなたのターンではありません"
+    elsif thread.posting_mode_rotation?
+      "連続投稿はできません。他のメンバーが投稿するまでお待ちください"
+    end
+
+    errors.add(:base, message) if message
   end
 
   # Scopes
