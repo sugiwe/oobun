@@ -8,6 +8,118 @@
 
   = render "form", form_url: thread_path(@thread.slug), form_method: :patch, cancel_path: thread_path(@thread.slug), submit_text: "更新する"
 
+  / 招待リンク管理セクション（管理者以上のみ）
+  - if @thread.admin_by?(current_user)
+    .mt-12.border.border-gray-300.rounded-lg.p-6
+      h2.text-lg.font-semibold.text-gray-900.mb-4 招待リンク管理
+
+      / 新規招待リンク作成フォーム
+      = form_with url: thread_invitation_path(@thread.slug), method: :post, class: "mb-6 p-4 bg-gray-50 rounded border border-gray-200" do |f|
+        .mb-4
+          label.block.text-sm.font-medium.text-gray-700.mb-2 招待タイプ
+          .flex.gap-4
+            label.flex.items-center
+              = f.radio_button :invitation_type, "single_use", checked: true, class: "mr-2"
+              span.text-sm 1回限り
+            label.flex.items-center
+              = f.radio_button :invitation_type, "unlimited", class: "mr-2"
+              span.text-sm 無制限
+
+        .mb-4
+          label.block.text-sm.font-medium.text-gray-700.mb-2 有効期限
+          .flex.gap-4
+            label.flex.items-center
+              = f.radio_button :expiry_type, "seven_days", checked: true, class: "mr-2"
+              span.text-sm 7日間
+            label.flex.items-center
+              = f.radio_button :expiry_type, "unlimited", class: "mr-2"
+              span.text-sm 無制限
+
+        = f.submit "招待リンクを作成", class: "bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-blue-700"
+
+      / 既存の招待リンク一覧
+      h3.text-sm.font-semibold.text-gray-900.mb-3 既存の招待リンク
+      - if @invitations.any?
+        .space-y-2
+          - @invitations.each do |invitation|
+            .flex.items-center.justify-between.p-3.bg-gray-50.rounded.border.border-gray-200
+              .flex-1
+                / タイプと状態
+                .flex.items-center.gap-2.mb-1
+                  - if invitation.invitation_type_single_use?
+                    span.text-xs.bg-green-100.text-green-700.rounded.px-2.py-0.5 1回限り
+                  - else
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 回数無制限
+
+                  - if invitation.expiry_type_seven_days?
+                    span.text-xs.bg-green-100.text-green-700.rounded.px-2.py-0.5 7日間有効
+                  - else
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 期間無制限
+
+                  - if invitation.expired?
+                    span.text-xs.bg-red-100.text-red-700.rounded.px-2.py-0.5 期限切れ
+                  - elsif !invitation.usable?
+                    span.text-xs.bg-gray-100.text-gray-500.rounded.px-2.py-0.5 使用済み
+
+                / 使用回数と期限
+                .text-xs.text-gray-500
+                  | 使用回数: #{invitation.use_count}回
+                  - if invitation.expires_at.present?
+                    |  · 期限: #{l invitation.expires_at, format: :short}
+                  - if invitation.last_used_at.present?
+                    |  · 最終使用: #{l invitation.last_used_at, format: :short}
+
+                / URL
+                .text-xs.text-gray-400.mt-1.break-all = invitation_url(invitation.token)
+
+              / アクションボタン
+              .flex.items-center.gap-2
+                = button_to "削除", thread_delete_invitation_path(@thread.slug, invitation.token), method: :delete, data: { turbo_confirm: "この招待リンクを削除しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+      - else
+        p.text-sm.text-gray-500 招待リンクはまだ作成されていません
+
+  / メンバー管理セクション
+  .mt-12.border.border-gray-300.rounded-lg.p-6
+    h2.text-lg.font-semibold.text-gray-900.mb-4 メンバー管理
+
+    .space-y-3
+      - @thread.memberships.includes(:user).order(:position).each do |membership|
+        .flex.items-center.justify-between.p-3.bg-gray-50.rounded.border.border-gray-200
+          .flex.items-center.gap-3
+            / アバター
+            .w-8.h-8.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
+              = render "shared/avatar", user: membership.user, show_fallback: true
+
+            / ユーザー情報
+            .flex-1
+              - if membership.user.deleted?
+                span.text-sm.text-gray-400 退会済みユーザー
+              - else
+                .flex.items-center.gap-2
+                  span.text-sm.font-medium.text-gray-900 = "@#{membership.user.username}"
+                  - if membership.owner?
+                    span.text-xs.bg-purple-100.text-purple-700.rounded.px-2.py-0.5 オーナー
+                  - elsif membership.moderator?
+                    span.text-xs.bg-blue-100.text-blue-700.rounded.px-2.py-0.5 管理者
+                  - else
+                    span.text-xs.bg-gray-100.text-gray-600.rounded.px-2.py-0.5 メンバー
+
+              / 順番表示
+              span.text-xs.text-gray-500 = "順番: #{membership.position}"
+
+          / アクションボタン（オーナーのみ表示）
+          - if @thread.owner_by?(current_user) && !membership.owner?
+            .flex.items-center.gap-2
+              / 管理者に昇格・降格ボタン
+              - if membership.moderator?
+                = button_to "メンバーに降格", thread_demote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "管理者権限を削除してメンバーに降格しますか？" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+              - else
+                = button_to "管理者に昇格", thread_promote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "このメンバーを管理者に昇格しますか？" }, class: "text-xs text-blue-600 hover:text-blue-900 border border-blue-300 rounded px-2 py-1"
+
+              / メンバー削除ボタン（退会済みユーザー or 管理者以上）
+              - if membership.user.deleted?
+                = button_to "除外", thread_remove_membership_path(@thread.slug, membership.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+
   / Danger Zone
   .mt-16.border.border-red-300.rounded-lg.p-6.bg-red-50
     h2.text-lg.font-semibold.text-red-900.mb-3 交換日記の削除

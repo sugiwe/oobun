@@ -38,9 +38,26 @@ class CorrespondenceThread < ApplicationRecord
     memberships.exists?(user: user)
   end
 
-  # メンバーによって編集可能
+  # 特定ユーザーのメンバーシップを取得
+  def membership_for(user)
+    return nil unless user
+    memberships.find_by(user: user)
+  end
+
+  # 権限チェック
+  def admin_by?(user)
+    membership = membership_for(user)
+    membership&.moderator? || membership&.owner?
+  end
+
+  def owner_by?(user)
+    membership = membership_for(user)
+    membership&.owner?
+  end
+
+  # メンバーによって編集可能（管理者以上）
   def editable_by?(user)
-    member?(user)
+    admin_by?(user)
   end
 
   # 特定ユーザーの下書きを取得

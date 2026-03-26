@@ -1,7 +1,8 @@
 class ThreadsController < ApplicationController
   skip_before_action :require_login, only: [ :index, :show, :browse ]
   before_action :set_thread, only: [ :show, :edit, :update, :destroy, :delete_confirmation, :toggle_published, :export, :export_with_images ]
-  before_action :require_membership, only: [ :edit, :update, :destroy, :delete_confirmation, :toggle_published, :export, :export_with_images ]
+  before_action :require_membership, only: [ :export, :export_with_images ]
+  before_action :require_admin, only: [ :edit, :update, :destroy, :delete_confirmation, :toggle_published ]
   before_action :require_viewable, only: [ :show ]
   before_action :set_sample_threads, only: [ :index, :browse ]
 
@@ -60,7 +61,7 @@ class ThreadsController < ApplicationController
       end
 
       @thread.save!
-      @thread.memberships.create!(user: current_user, position: 1, role: "writer")
+      @thread.memberships.create!(user: current_user, position: 1, role: "owner")
     end
 
     redirect_to thread_path(@thread.slug), notice: "交換日記を作成しました"
@@ -69,6 +70,7 @@ class ThreadsController < ApplicationController
   end
 
   def edit
+    @invitations = @thread.invitations.order(created_at: :desc)
   end
 
   def update
@@ -182,8 +184,14 @@ class ThreadsController < ApplicationController
   end
 
   def require_membership
-    unless @thread.memberships.exists?(user: current_user)
+    unless @thread.member?(current_user)
       redirect_to thread_path(@thread.slug), alert: "権限がありません"
+    end
+  end
+
+  def require_admin
+    unless @thread.admin_by?(current_user)
+      redirect_to thread_path(@thread.slug), alert: "管理者権限が必要です"
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_21_220333) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_25_215725) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,11 +61,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_220333) do
   create_table "invitations", force: :cascade do |t|
     t.datetime "accepted_at"
     t.datetime "created_at", null: false
-    t.datetime "expires_at", null: false
+    t.datetime "expires_at"
+    t.string "expiry_type", default: "seven_days", null: false
+    t.string "invitation_type", default: "single_use", null: false
     t.bigint "invited_by_id", null: false
+    t.datetime "last_used_at"
     t.bigint "thread_id", null: false
     t.string "token", null: false
     t.datetime "updated_at", null: false
+    t.integer "use_count", default: 0, null: false
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["thread_id"], name: "index_invitations_on_thread_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true

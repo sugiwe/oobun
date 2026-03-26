@@ -1,16 +1,24 @@
 class Threads::InvitationsController < Threads::ApplicationController
   skip_before_action :require_login, only: [ :show ]
   skip_before_action :set_thread, only: [ :show, :accept ]
-  before_action :require_membership, only: [ :create ]
-  before_action :set_invitation, only: [ :show, :accept ]
+  before_action :require_admin, only: [ :create, :destroy ]
+  before_action :set_invitation, only: [ :show, :accept, :destroy ]
   before_action :check_invitation_status, only: [ :show, :accept ]
 
   # POST /:thread_slug/invitation
   # 交換日記メンバーが招待URLを発行する
   def create
-    invitation = @thread.invitations.create!(invited_by: current_user)
+    invitation = @thread.invitations.create!(
+      invited_by: current_user,
+      invitation_type: invitation_params[:invitation_type] || "single_use",
+      expiry_type: invitation_params[:expiry_type] || "seven_days"
+    )
     url = invitation_url(invitation.token)
-    render json: { url: url }
+
+    respond_to do |format|
+      format.json { render json: { url: url } }
+      format.html { redirect_to edit_thread_path(@thread.slug), notice: "招待リンクを作成しました" }
+    end
   end
 
   # GET /invite/:token
@@ -19,6 +27,13 @@ class Threads::InvitationsController < Threads::ApplicationController
     # 招待トークンをセッションに保存（ログイン許可に使用）
     session[:invitation_token] = @invitation.token
     # 未ログイン時も招待画面を表示（show.html.slimで分岐）
+  end
+
+  # DELETE /:thread_slug/invitations/:token
+  # 招待リンクを削除
+  def destroy
+    @invitation.destroy!
+    redirect_to edit_thread_path(@invitation.thread.slug), notice: "招待リンクを削除しました"
   end
 
   # POST /invite/:token
@@ -62,5 +77,9 @@ class Threads::InvitationsController < Threads::ApplicationController
     @invitation = Invitation.includes(:thread).find_by!(token: params[:token])
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: "招待URLが見つかりません"
+  end
+
+  def invitation_params
+    params.permit(:invitation_type, :expiry_type)
   end
 end

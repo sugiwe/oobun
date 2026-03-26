@@ -10,8 +10,14 @@ class Threads::ApplicationController < ApplicationController
   end
 
   def require_membership
-    unless @thread.memberships.exists?(user: current_user)
+    unless @thread.member?(current_user)
       redirect_to thread_path(@thread.slug), alert: "この交換日記のメンバーではありません"
+    end
+  end
+
+  def require_admin
+    unless @thread.admin_by?(current_user)
+      redirect_to thread_path(@thread.slug), alert: "管理者権限が必要です"
     end
   end
 

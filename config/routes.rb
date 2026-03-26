@@ -76,8 +76,9 @@ Rails.application.routes.draw do
 
   # Thread リソース（path: '' でプレフィックスなし）
   resources :threads, path: "", param: :slug, except: [ :index ] do
-    # 招待発行（POST /:slug/invitation）
+    # 招待発行と削除
     resource :invitation, only: [ :create ], controller: "threads/invitations"
+    delete "invitations/:token", to: "threads/invitations#destroy", as: :delete_invitation
     # 公開/非公開切り替え & エクスポート & 削除確認
     member do
       patch :toggle_published
@@ -95,5 +96,7 @@ Rails.application.routes.draw do
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
     resource :membership,   only: [ :destroy ], controller: "threads/memberships"
     delete "memberships/:user_id", to: "threads/memberships#remove_member", as: :remove_membership
+    patch "memberships/:user_id/promote", to: "threads/memberships#promote_to_admin", as: :promote_membership
+    patch "memberships/:user_id/demote", to: "threads/memberships#demote_to_member", as: :demote_membership
   end
 end
