@@ -4,8 +4,11 @@ details.border.border-gray-200.rounded-lg.bg-gray-50 open=true
   article.p-6.bg-white.rounded-b-lg.border-t.border-gray-200 data-controller="previous-post"
     / ヘッダー（著者・日付）
     .flex.items-center.gap-3.mb-6
-      = render "shared/user_link", user: prev_post.user, use_display_name: true, avatar_size_class: "w-8 h-8", text_size_class: "text-sm font-medium", text_color_class: "text-gray-700"
-      span.text-xs.text-gray-400 = prev_post.created_at.strftime("%Y年%m月%d日")
+      = link_to user_path(prev_post.user.username), class: "w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
+        = render "shared/avatar", user: prev_post.user, show_fallback: true
+      .flex.flex-col
+        = link_to prev_post.user.display_name, user_path(prev_post.user.username), class: "text-sm font-medium text-gray-700 transition-opacity hover:opacity-70"
+        span.text-xs.text-gray-400 = prev_post.created_at.strftime("%Y年%m月%d日")
 
     / サムネイル画像（あれば）
     - if prev_post.thumbnail.attached?
