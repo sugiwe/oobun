@@ -22,6 +22,59 @@
           .text-sm.text-gray-500
             | 購読している交換日記に新しい投稿があったときに通知します
 
+  / メール通知設定
+  .bg-white.rounded-lg.border.border-gray-200.p-6.mt-6
+    h3.text-base.font-semibold.text-gray-900.mb-4 メール通知設定
+
+    .space-y-4
+      / 配信モード選択
+      .space-y-3
+        / ダイジェスト配信（推奨・デフォルト）
+        label.border.border-gray-200.rounded-lg.p-4.bg-gray-50.flex.items-start.gap-3.cursor-pointer
+          = f.radio_button :email_mode, :digest, class: "mt-1"
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | ダイジェスト配信（推奨）
+            .text-xs.text-gray-500.mt-1
+              | 1日1回まとめて通知。通知がない日は配信されません。
+
+        / ダイジェスト配信時のみ配信時刻設定を表示
+        - if notification_setting.email_mode_digest?
+          .ml-9.mt-2.p-3.bg-gray-50.rounded
+            = f.label :digest_time, "配信時刻", class: "block text-xs font-medium text-gray-700 mb-1"
+            .flex.items-center.gap-2
+              = f.time_field :digest_time, step: 900, class: "border border-gray-300 rounded px-3 py-2 text-sm"
+              span.text-xs.text-gray-500 15分刻みで設定できます
+
+        / 即時配信
+        label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
+          = f.radio_button :email_mode, :realtime, class: "mt-1"
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | 即時配信
+            .text-xs.text-gray-500.mt-1
+              | 投稿があるたびにすぐメールで通知（100通/月まで）
+
+        / 即時配信時のみ残数表示
+        - if notification_setting.email_mode_realtime?
+          .ml-9.mt-2.p-3.bg-blue-50.rounded
+            .text-xs.text-gray-700
+              | 今月の残り:
+              strong.text-blue-700 = notification_setting.remaining_emails_this_month
+              |  通 / 100通
+            - if notification_setting.email_count_this_month >= NotificationSetting::REALTIME_MONTHLY_LIMIT
+              .mt-2.text-xs.text-amber-700
+                | ⚠️ 上限に達したため、ダイジェスト配信に切り替わりました
+
+        / メール通知OFF
+        label.border.border-gray-200.rounded-lg.p-4.bg-white.flex.items-start.gap-3.cursor-pointer
+          = f.radio_button :email_mode, :off, class: "mt-1"
+          .flex-1
+            .text-sm.font-medium.text-gray-900
+              | メール通知なし
+            .text-xs.text-gray-500.mt-1
+              | アプリ内通知のみ
+
     .pt-6.mt-6.border-t.border-gray-200
       = f.submit "保存", class: "px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
 

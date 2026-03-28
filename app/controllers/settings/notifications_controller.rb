@@ -43,7 +43,9 @@ class Settings::NotificationsController < ApplicationController
   def notification_setting_params
     params.require(:notification_setting).permit(
       :notify_member_posts,
-      :notify_subscription_posts
+      :notify_subscription_posts,
+      :email_mode,
+      :digest_time
     )
   end
 end

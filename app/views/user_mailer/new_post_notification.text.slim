@@ -1,0 +1,25 @@
+| coconikki
+|
+| ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+|
+= "こんにちは、@#{@user.username} さん"
+|
+|
+= "#{@actor.display_name}（@#{@actor.username}）さんが「#{@thread_title}」に投稿しました。"
+|
+|
+| ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+= @post_preview
+| ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+|
+|
+| 投稿を見る:
+= thread_url(@thread_slug)
+|
+|
+| ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+|
+| このメールは coconikki からの通知メールです。
+|
+= "通知設定を変更: #{edit_notification_settings_url}"
+= "coconikki について: #{about_url}"

@@ -63,6 +63,9 @@ gem "redcarpet"
 # HTML sanitization [https://github.com/rgrove/sanitize]
 gem "sanitize"
 
+# Email delivery via Postmark [https://github.com/ActiveCampaign/postmark-rails]
+gem "postmark-rails"
+
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 8.0"
