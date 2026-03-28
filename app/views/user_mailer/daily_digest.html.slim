@@ -1,0 +1,115 @@
+doctype html
+html
+  head
+    meta content="text/html; charset=UTF-8" http-equiv="Content-Type"
+    style
+      |
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .header {
+          border-bottom: 2px solid #e5e7eb;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+        .content {
+          background-color: #f9fafb;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+        .thread-section {
+          background-color: white;
+          border-radius: 6px;
+          padding: 16px;
+          margin-bottom: 16px;
+          border-left: 4px solid #6b7280;
+        }
+        .thread-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 12px;
+          color: #111827;
+        }
+        .notification-item {
+          padding: 8px 0;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        .notification-item:last-child {
+          border-bottom: none;
+        }
+        .author {
+          font-size: 13px;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+        .preview {
+          font-size: 14px;
+          color: #374151;
+        }
+        .button {
+          display: inline-block;
+          background-color: #111827;
+          color: white !important;
+          text-decoration: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          margin-top: 12px;
+          font-size: 14px;
+        }
+        .footer {
+          border-top: 1px solid #e5e7eb;
+          padding-top: 20px;
+          margin-top: 20px;
+          font-size: 12px;
+          color: #6b7280;
+        }
+        a {
+          color: #111827;
+        }
+
+  body
+    .header
+      h1 style="margin: 0; font-size: 24px;" coconikki
+
+    .content
+      p
+        | こんにちは、
+        strong = "@#{@user.username}"
+        | さん
+
+      p
+        | 参加・購読している交換日記に
+        strong = "#{@total_count}件"
+        | の新しい投稿がありました。
+
+      / スレッドごとにグループ化して表示
+      - @notifications_by_thread.each do |thread, thread_notifications|
+        .thread-section
+          .thread-title
+            | 📝 「#{thread.title}」に#{thread_notifications.count}件の新着
+
+          - thread_notifications.each do |notification|
+            .notification-item
+              .author
+                | #{notification.actor.display_name}（@#{notification.actor.username}）
+              .preview
+                = notification.params["post_preview"]
+
+          = link_to "すべて見る", thread_url(thread.slug), class: "button"
+
+      p style="margin-top: 20px;"
+        = link_to "すべての通知を確認", notifications_url, style: "color: #111827;"
+
+    .footer
+      p
+        | このメールは coconikki からの通知メールです。
+      p
+        = link_to "通知設定を変更", settings_notifications_url
+        |  ｜
+        = link_to "coconikki について", about_url

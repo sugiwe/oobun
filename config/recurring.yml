@@ -23,3 +23,8 @@ production:
   auto_delete_empty_threads:
     class: AutoDeleteEmptyThreadsJob
     schedule: at 4am every day
+
+  # ダイジェストメール配信（15分ごと）
+  daily_digest:
+    class: DailyDigestJob
+    schedule: every 15 minutes

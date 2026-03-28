@@ -17,4 +17,21 @@ class UserMailer < ApplicationMailer
       subject: "#{@actor.display_name} が「#{@thread_title}」に投稿しました - coconikki"
     )
   end
+
+  # ダイジェストメール（1日1回まとめて通知）
+  def daily_digest(user, notifications)
+    @user = user
+    @notifications = notifications
+
+    # スレッドごとにグループ化
+    @notifications_by_thread = notifications.group_by { |n| n.notifiable.thread }
+
+    # 総通知数
+    @total_count = notifications.count
+
+    mail(
+      to: @user.email,
+      subject: "coconikki - #{@total_count}件の新着投稿があります"
+    )
+  end
 end
