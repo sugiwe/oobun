@@ -8,10 +8,10 @@ class EmailNotificationJob < ApplicationJob
     setting = user.notification_setting
 
     # メール通知がOFFの場合はスキップ
-    return if setting.email_mode_off?
+    return if setting&.email_mode_off?
 
     # 即時配信モードの場合は制限チェック
-    if setting.email_mode_realtime?
+    if setting&.email_mode_realtime?
       # 悲観的ロックで競合を防止（複数の通知が同時発生した場合）
       setting.with_lock do
         # 月初のカウンターリセットを明示的に実行
