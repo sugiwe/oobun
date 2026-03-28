@@ -20,6 +20,15 @@ class NotificationSetting < ApplicationRecord
   # webhook URLが設定されていない場合は、use_discord/use_slackをfalseにする
   before_save :disable_webhooks_if_urls_blank
 
+  # カスタムセッター: "HH:MM:SS"形式の文字列をTime型に変換
+  def digest_time=(value)
+    if value.is_a?(String) && value.match?(/\A\d{2}:\d{2}:\d{2}\z/)
+      super(Time.zone.parse(value))
+    else
+      super(value)
+    end
+  end
+
   # ダイジェスト配信時刻（時と分を返す）
   def digest_hour
     digest_time&.hour || 8
@@ -46,19 +55,20 @@ class NotificationSetting < ApplicationRecord
   def increment_email_count!
     return unless email_mode_realtime?
 
-    increment!(:email_count_this_month)
-    reload  # increment!後に最新の値を取得
-
-    # 上限到達時にダイジェストに自動切り替え
+    # with_lockブロック内で実行されるため、直接代入 + save!でアトミックに更新
+    self.email_count_this_month += 1
     if email_count_this_month >= REALTIME_MONTHLY_LIMIT
-      update!(email_mode: :digest)
+      self.email_mode = :digest
     end
+    save!
   end
 
-  # 残り配信数
+  # 残り配信数（月初のリセットを考慮）
   def remaining_emails_this_month
     return nil unless email_mode_realtime?
-    [ REALTIME_MONTHLY_LIMIT - email_count_this_month, 0 ].max
+
+    current_count = counter_needs_reset? ? 0 : email_count_this_month
+    [ REALTIME_MONTHLY_LIMIT - current_count, 0 ].max
   end
 
   private
@@ -68,14 +78,18 @@ class NotificationSetting < ApplicationRecord
     self.use_slack = false if slack_webhook_url.blank?
   end
 
+  # カウンターがリセット必要かチェック
+  def counter_needs_reset?
+    current_month = Date.current.beginning_of_month
+    email_count_reset_at.nil? || email_count_reset_at < current_month
+  end
+
   # 月が変わっていたらカウンターをリセット
   def reset_counter_if_needed!
-    current_month = Date.current.beginning_of_month
-
-    if email_count_reset_at.nil? || email_count_reset_at < current_month
+    if counter_needs_reset?
       update!(
         email_count_this_month: 0,
-        email_count_reset_at: current_month
+        email_count_reset_at: Date.current.beginning_of_month
       )
     end
   end

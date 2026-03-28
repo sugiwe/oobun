@@ -10,13 +10,7 @@ class Settings::NotificationsController < ApplicationController
   end
 
   def update
-    # digest_timeが"HH:MM:SS"形式の文字列で来た場合、Time型に変換
-    params_hash = notification_setting_params.to_h
-    if params_hash[:digest_time].is_a?(String) && params_hash[:digest_time].match?(/\A\d{2}:\d{2}:\d{2}\z/)
-      params_hash[:digest_time] = Time.zone.parse(params_hash[:digest_time])
-    end
-
-    if @notification_setting.update(params_hash)
+    if @notification_setting.update(notification_setting_params)
       redirect_to settings_notifications_path, notice: "通知設定を保存しました"
     else
       render :show, status: :unprocessable_entity
