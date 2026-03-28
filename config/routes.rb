@@ -7,9 +7,10 @@ Rails.application.routes.draw do
   post "/session", to: "sessions#create",  as: :session
   delete "/session", to: "sessions#destroy", as: :logout
 
-  # 開発環境専用：簡易ログイン
+  # 開発環境専用：簡易ログイン・メールプレビュー
   if Rails.env.development?
     post "/dev_login/:username", to: "sessions#dev_login", as: :dev_login
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 
   # username 設定（新規ユーザーの Google ログイン後）
