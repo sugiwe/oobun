@@ -1,20 +1,19 @@
 class DailyDigestJob < ApplicationJob
   queue_as :default
 
-  # 15分ごとに実行される（Solid Queue recurringで設定）
+  # 1時間ごとに実行される（Solid Queue recurringで設定）
   # 現在時刻にマッチするユーザーにダイジェストメールを送信
   def perform
     current_time = Time.current
     current_hour = current_time.hour
-    current_minute = (current_time.min / 15) * 15  # 0, 15, 30, 45 に丸める
 
-    Rails.logger.info "DailyDigestJob: Running at #{current_hour}:#{current_minute.to_s.rjust(2, '0')}"
+    Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00"
 
-    # この時刻にダイジェスト配信を希望しているユーザーを取得
+    # この時刻にダイジェスト配信を希望しているユーザーを取得（時間のみでマッチング、分は00のみ）
     NotificationSetting
       .email_mode_digest
       .where("EXTRACT(HOUR FROM digest_time) = ?", current_hour)
-      .where("EXTRACT(MINUTE FROM digest_time) = ?", current_minute)
+      .where("EXTRACT(MINUTE FROM digest_time) = ?", 0)
       .includes(:user)
       .find_each do |setting|
         send_digest_email(setting.user)

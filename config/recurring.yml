@@ -10,10 +10,10 @@
 #     schedule: at 5am every day
 
 development:
-  # ダイジェストメール配信（15分ごと）- 開発環境でもテスト可能にする
+  # ダイジェストメール配信（1時間ごと）- 開発環境でもテスト可能にする
   daily_digest:
     class: DailyDigestJob
-    schedule: every 15 minutes
+    schedule: every hour
 
 production:
   clear_solid_queue_finished_jobs:
@@ -30,7 +30,7 @@ production:
     class: AutoDeleteEmptyThreadsJob
     schedule: at 4am every day
 
-  # ダイジェストメール配信（15分ごと）
+  # ダイジェストメール配信（1時間ごと）
   daily_digest:
     class: DailyDigestJob
-    schedule: every 15 minutes
+    schedule: every hour
