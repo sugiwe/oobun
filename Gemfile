@@ -95,6 +95,12 @@ group :test do
 
   # Code coverage analysis [https://github.com/simplecov-ruby/simplecov]
   gem "simplecov", require: false
+
+  # System testing with browser automation [https://github.com/teamcapybara/capybara]
+  gem "capybara"
+
+  # WebDriver for browser automation [https://github.com/SeleniumHQ/selenium/tree/trunk/rb]
+  gem "selenium-webdriver"
 end
 
 group :development do
