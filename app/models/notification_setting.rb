@@ -58,7 +58,7 @@ class NotificationSetting < ApplicationRecord
   # 残り配信数
   def remaining_emails_this_month
     return nil unless email_mode_realtime?
-    [REALTIME_MONTHLY_LIMIT - email_count_this_month, 0].max
+    [ REALTIME_MONTHLY_LIMIT - email_count_this_month, 0 ].max
   end
 
   private
