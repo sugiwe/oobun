@@ -4,10 +4,12 @@ class DailyDigestJob < ApplicationJob
   # 1時間ごとに実行される（Solid Queue recurringで設定）
   # 現在時刻にマッチするユーザーにダイジェストメールを送信
   def perform
+    # Time.currentは設定されたタイムゾーン（Tokyo）で時刻を返す
+    # digest_timeもTime.zone.parseで同じタイムゾーンで保存されているため、一致判定は正しく動作する
     current_time = Time.current
     current_hour = current_time.hour
 
-    Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00"
+    Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00 (#{Time.zone.name})"
 
     # この時刻にダイジェスト配信を希望しているユーザーを取得（時間のみでマッチング、分は00のみ）
     NotificationSetting

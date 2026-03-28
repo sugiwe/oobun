@@ -12,14 +12,17 @@ class EmailNotificationJob < ApplicationJob
 
     # 即時配信モードの場合は制限チェック
     if setting.email_mode_realtime?
-      # 配信可能かチェック
-      return unless setting.can_send_realtime_email?
+      # 悲観的ロックで競合を防止（複数の通知が同時発生した場合）
+      setting.with_lock do
+        # 配信可能かチェック
+        return unless setting.can_send_realtime_email?
 
-      # メール送信
-      UserMailer.new_post_notification(notification).deliver_now
+        # メール送信
+        UserMailer.new_post_notification(notification).deliver_now
 
-      # カウンターをインクリメント（上限到達時は自動的にダイジェストに切り替わる）
-      setting.increment_email_count!
+        # カウンターをインクリメント（上限到達時は自動的にダイジェストに切り替わる）
+        setting.increment_email_count!
+      end
     end
 
     # ダイジェストモードの場合はここでは何もしない（DailyDigestJobで処理）

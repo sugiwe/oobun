@@ -47,6 +47,7 @@ class NotificationSetting < ApplicationRecord
     return unless email_mode_realtime?
 
     increment!(:email_count_this_month)
+    reload  # increment!後に最新の値を取得
 
     # 上限到達時にダイジェストに自動切り替え
     if email_count_this_month >= REALTIME_MONTHLY_LIMIT
