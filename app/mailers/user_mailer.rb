@@ -7,9 +7,9 @@ class UserMailer < ApplicationMailer
     @post = notification.notifiable
     @thread = @post.thread
 
-    # メールパラメータから情報を取得
-    @thread_title = notification.params["thread_title"]
-    @thread_slug = notification.params["thread_slug"]
+    # スレッド情報は常に最新のものを使用（paramsはスナップショット）
+    @thread_title = @thread.title
+    @thread_slug = @thread.slug
     @post_preview = notification.params["post_preview"]
 
     mail(

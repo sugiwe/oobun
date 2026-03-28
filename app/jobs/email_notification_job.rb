@@ -14,6 +14,9 @@ class EmailNotificationJob < ApplicationJob
     if setting.email_mode_realtime?
       # 悲観的ロックで競合を防止（複数の通知が同時発生した場合）
       setting.with_lock do
+        # 月初のカウンターリセットを明示的に実行
+        setting.reset_counter_if_needed!
+
         # 配信可能かチェック
         return unless setting.can_send_realtime_email?
 
@@ -27,7 +30,7 @@ class EmailNotificationJob < ApplicationJob
 
     # ダイジェストモードの場合はここでは何もしない（DailyDigestJobで処理）
   rescue => e
-    Rails.logger.error("Email notification failed for notification #{notification_id}: #{e.message}")
+    Rails.logger.error("Email notification failed for notification #{notification_id}: #{e.message}\n#{e.backtrace.join("\n")}")
     # 失敗してもアプリ内通知は残る
     raise # リトライするために再raiseする
   end

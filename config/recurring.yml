@@ -9,11 +9,15 @@
 #     priority: 2
 #     schedule: at 5am every day
 
+# 共通ジョブ定義（YAMLアンカー）
+_daily_digest_job: &daily_digest_job
+  class: DailyDigestJob
+  schedule: every hour
+
 development:
   # ダイジェストメール配信（1時間ごと）- 開発環境でもテスト可能にする
   daily_digest:
-    class: DailyDigestJob
-    schedule: every hour
+    <<: *daily_digest_job
 
 production:
   clear_solid_queue_finished_jobs:
@@ -32,5 +36,4 @@ production:
 
   # ダイジェストメール配信（1時間ごと）
   daily_digest:
-    class: DailyDigestJob
-    schedule: every hour
+    <<: *daily_digest_job

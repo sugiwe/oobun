@@ -43,6 +43,6 @@ class DailyDigestJob < ApplicationJob
     # 送信後、通知を既読にする（オプション - 好みによる）
     # unread_notifications.update_all(read_at: Time.current)
   rescue => e
-    Rails.logger.error("DailyDigestJob: Failed to send digest to #{user.username}: #{e.message}")
+    Rails.logger.error("DailyDigestJob: Failed to send digest to #{user.username}: #{e.message}\n#{e.backtrace.join("\n")}")
   end
 end

@@ -43,12 +43,12 @@ class NotificationSetting < ApplicationRecord
     digest_time&.strftime("%H:%M") || "08:00"
   end
 
-  # 即時配信が可能かチェック
+  # 即時配信が可能かチェック（副作用なし、CQS原則に準拠）
   def can_send_realtime_email?
     return false unless email_mode_realtime?
 
-    reset_counter_if_needed!
-    email_count_this_month < REALTIME_MONTHLY_LIMIT
+    current_count = counter_needs_reset? ? 0 : email_count_this_month
+    current_count < REALTIME_MONTHLY_LIMIT
   end
 
   # 即時配信後にカウンターをインクリメント
@@ -71,6 +71,16 @@ class NotificationSetting < ApplicationRecord
     [ REALTIME_MONTHLY_LIMIT - current_count, 0 ].max
   end
 
+  # 月が変わっていたらカウンターをリセット（public: ジョブから明示的に呼び出す）
+  def reset_counter_if_needed!
+    if counter_needs_reset?
+      update!(
+        email_count_this_month: 0,
+        email_count_reset_at: Date.current.beginning_of_month
+      )
+    end
+  end
+
   private
 
   def disable_webhooks_if_urls_blank
@@ -82,15 +92,5 @@ class NotificationSetting < ApplicationRecord
   def counter_needs_reset?
     current_month = Date.current.beginning_of_month
     email_count_reset_at.nil? || email_count_reset_at < current_month
-  end
-
-  # 月が変わっていたらカウンターをリセット
-  def reset_counter_if_needed!
-    if counter_needs_reset?
-      update!(
-        email_count_this_month: 0,
-        email_count_reset_at: Date.current.beginning_of_month
-      )
-    end
   end
 end
