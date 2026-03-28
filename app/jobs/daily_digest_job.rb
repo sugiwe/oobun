@@ -25,23 +25,20 @@ class DailyDigestJob < ApplicationJob
   private
 
   def send_digest_email(user)
-    # 未読通知を取得（new_post のみ）
-    unread_notifications = user.notifications
-                                .unread
-                                .where(action: :new_post)
-                                .includes(:actor, notifiable: :thread)
-                                .order(created_at: :desc)
+    # 過去24時間以内に作成された通知を取得（既読・未読問わず、new_post のみ）
+    notifications_last_24h = user.notifications
+                                  .where(action: :new_post)
+                                  .where("created_at >= ?", 24.hours.ago)
+                                  .includes(:actor, notifiable: :thread)
+                                  .order(created_at: :desc)
 
-    # 未読通知がなければスキップ
-    return if unread_notifications.empty?
+    # 通知がなければスキップ
+    return if notifications_last_24h.empty?
 
-    Rails.logger.info "DailyDigestJob: Sending digest to #{user.username} (#{unread_notifications.count} notifications)"
+    Rails.logger.info "DailyDigestJob: Sending digest to #{user.username} (#{notifications_last_24h.count} notifications from last 24 hours)"
 
     # ダイジェストメール送信
-    UserMailer.daily_digest(user, unread_notifications).deliver_now
-
-    # 送信後、通知を既読にする（オプション - 好みによる）
-    # unread_notifications.update_all(read_at: Time.current)
+    UserMailer.daily_digest(user, notifications_last_24h).deliver_now
   rescue => e
     Rails.logger.error("DailyDigestJob: Failed to send digest to #{user.username}: #{e.message}\n#{e.backtrace.join("\n")}")
   end

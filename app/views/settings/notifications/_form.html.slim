@@ -36,7 +36,7 @@
             .text-sm.font-medium.text-gray-900
               | ダイジェスト配信（推奨）
             .text-xs.text-gray-500.mt-1
-              | 1日1回まとめて通知。通知がない日は配信されません。
+              | 過去24時間の通知を1日1回配信。通知がない日は配信されません。
 
         / ダイジェスト配信時のみ配信時刻設定を表示
         .ml-9.mt-2.p-3.bg-gray-50.rounded data-email-mode-target="digestSettings" class=(notification_setting.email_mode_digest? ? "" : "hidden")

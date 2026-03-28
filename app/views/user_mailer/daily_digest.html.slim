@@ -84,9 +84,9 @@ html
         | さん
 
       p
-        | 参加・購読している交換日記に
+        | 過去24時間で、参加・購読している交換日記に
         strong = "#{@total_count}件"
-        | の新しい投稿がありました。
+        | の投稿がありました。
 
       / スレッドごとにグループ化して表示
       - @notifications_by_thread.each do |thread, thread_notifications|
