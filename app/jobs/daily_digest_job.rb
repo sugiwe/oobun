@@ -11,10 +11,10 @@ class DailyDigestJob < ApplicationJob
     Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00 (#{Time.zone.name})"
 
     # この時刻にダイジェスト配信を希望しているユーザーを取得
-    # digest_timeは時刻型なので、EXTRACT(HOUR)で時のみを比較
+    # 時間範囲での検索により、digest_timeカラムのインデックスを活用
     NotificationSetting
       .email_mode_digest
-      .where("EXTRACT(HOUR FROM digest_time) = ?", current_hour)
+      .where(digest_time: current_time.beginning_of_hour..current_time.end_of_hour)
       .includes(:user)
       .find_each do |setting|
         send_digest_email(setting.user)
