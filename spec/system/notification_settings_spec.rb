@@ -19,7 +19,7 @@ RSpec.describe "NotificationSettings", type: :system do
     it "デフォルトでダイジェスト配信が選択されている" do
       visit settings_notifications_path
 
-      expect(page).to have_checked_field("ダイジェスト配信（推奨）")
+      expect(page).to have_checked_field("ダイジェスト配信")
       expect(page).to have_select("notification_setting[digest_time]")
     end
   end
@@ -37,7 +37,7 @@ RSpec.describe "NotificationSettings", type: :system do
       visit settings_notifications_path
 
       # ダイジェストを選択
-      choose "ダイジェスト配信（推奨）"
+      choose "ダイジェスト配信"
 
       # 時刻選択が表示される
       expect(page).to have_select("notification_setting[digest_time]")

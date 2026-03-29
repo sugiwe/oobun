@@ -5,17 +5,16 @@ class DailyDigestJob < ApplicationJob
   # 現在時刻にマッチするユーザーにダイジェストメールを送信
   def perform
     # Time.currentは設定されたタイムゾーン（Tokyo）で時刻を返す
-    # digest_timeもTime.zone.parseで同じタイムゾーンで保存されているため、一致判定は正しく動作する
     current_time = Time.current
     current_hour = current_time.hour
-    current_digest_time = current_time.strftime("%H:00:00")
 
     Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00 (#{Time.zone.name})"
 
-    # この時刻にダイジェスト配信を希望しているユーザーを取得（インデックスを活用）
+    # この時刻にダイジェスト配信を希望しているユーザーを取得
+    # 時間範囲での検索により、digest_timeカラムのインデックスを活用
     NotificationSetting
       .email_mode_digest
-      .where(digest_time: current_digest_time)
+      .where(digest_time: current_time.beginning_of_hour..current_time.end_of_hour)
       .includes(:user)
       .find_each do |setting|
         send_digest_email(setting.user)
