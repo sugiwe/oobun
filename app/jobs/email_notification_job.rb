@@ -10,6 +10,24 @@ class EmailNotificationJob < ApplicationJob
     # メール通知がOFFの場合はスキップ
     return if setting.email_mode_off?
 
+    # test_notification の場合は即時配信モードのみメール送信
+    if notification.action == "test_notification"
+      if setting.email_mode_realtime?
+        # テスト通知は残数を消費するが、カウンター処理は通常通り
+        can_send = setting.with_lock do
+          setting.reset_counter_if_needed!
+          next false unless setting.can_send_realtime_email?
+          setting.increment_email_count!
+          true
+        end
+
+        UserMailer.test_notification(notification).deliver_later if can_send
+      end
+      # ダイジェストモード・OFFモードではメール送信しない
+      return
+    end
+
+    # 通常の投稿通知（new_post）の処理
     # 即時配信モードの場合は制限チェック
     if setting.email_mode_realtime?
       # 悲観的ロックで競合を防止（複数の通知が同時発生した場合）

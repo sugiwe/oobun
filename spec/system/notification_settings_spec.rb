@@ -136,4 +136,99 @@ RSpec.describe "NotificationSettings", type: :system do
       expect(user.notification_setting.email_mode_off?).to be true
     end
   end
+
+  describe "テスト通知の送信" do
+    context "即時配信モード" do
+      before do
+        user.create_notification_setting(
+          email_mode: :realtime,
+          digest_time: Time.zone.parse("08:00:00"),
+          email_count_this_month: 0,
+          email_count_reset_at: Date.current.beginning_of_month
+        )
+      end
+
+      it "テスト通知を送信すると、アプリ内通知とメール通知の両方が作成される" do
+        visit settings_notifications_path
+
+        # 即時配信モードの案内が表示される
+        expect(page).to have_content("テスト通知について（即時配信モード）")
+        expect(page).to have_content("残り配信数が1つ減ります")
+
+        # テスト通知を送信（ジョブを同期実行してテストを簡潔にする）
+        perform_enqueued_jobs do
+          expect {
+            click_button "テスト通知を送る"
+          }.to change { user.notifications.count }.by(1)
+        end
+
+        expect(page).to have_content("テスト通知を送信しました")
+
+        # 通知が作成されたことを確認
+        notification = user.notifications.last
+        expect(notification.action).to eq("test_notification")
+        expect(notification.params["message"]).to be_present
+
+        # 残数が1減ることを確認（ジョブが同期実行されたので即座に確認可能）
+        user.notification_setting.reload
+        expect(user.notification_setting.remaining_emails_this_month).to eq(99)
+      end
+    end
+
+    context "ダイジェスト配信モード" do
+      before do
+        user.create_notification_setting(
+          email_mode: :digest,
+          digest_time: Time.zone.parse("08:00:00")
+        )
+      end
+
+      it "テスト通知を送信すると、アプリ内通知のみ作成される" do
+        visit settings_notifications_path
+
+        # ダイジェスト配信モードの案内が表示される
+        expect(page).to have_content("テスト通知について（ダイジェスト配信モード）")
+        expect(page).to have_content("テスト通知はアプリ内通知のみ送信されます")
+
+        # テスト通知を送信
+        expect {
+          click_button "テスト通知を送る"
+        }.to change { user.notifications.count }.by(1)
+
+        expect(page).to have_content("テスト通知を送信しました")
+
+        # 通知が作成されたことを確認
+        notification = user.notifications.last
+        expect(notification.action).to eq("test_notification")
+      end
+    end
+
+    context "メール通知なしモード" do
+      before do
+        user.create_notification_setting(
+          email_mode: :off,
+          digest_time: Time.zone.parse("08:00:00")
+        )
+      end
+
+      it "テスト通知を送信すると、アプリ内通知のみ作成される" do
+        visit settings_notifications_path
+
+        # メール通知なしモードの案内が表示される
+        expect(page).to have_content("テスト通知について（メール通知なし）")
+        expect(page).to have_content("テスト通知はアプリ内通知のみ送信されます")
+
+        # テスト通知を送信
+        expect {
+          click_button "テスト通知を送る"
+        }.to change { user.notifications.count }.by(1)
+
+        expect(page).to have_content("テスト通知を送信しました")
+
+        # 通知が作成されたことを確認
+        notification = user.notifications.last
+        expect(notification.action).to eq("test_notification")
+      end
+    end
+  end
 end

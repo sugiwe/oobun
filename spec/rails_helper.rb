@@ -46,6 +46,9 @@ RSpec.configure do |config|
   # Include time helpers for specs
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # Include ActiveJob test helpers for job testing
+  config.include ActiveJob::TestHelper
+
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
 
