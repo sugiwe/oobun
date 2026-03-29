@@ -78,22 +78,26 @@
     .pt-6.mt-6.border-t.border-gray-200
       = f.submit "保存", class: "px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
 
-/ テスト通知（フォームの外に配置）
+/ テスト通知（フォームの外だが、上のフォームのラジオボタン変更を検知）
 .mt-6
-  .bg-blue-50.rounded-lg.p-4.mb-4
-    .text-sm.text-gray-700
-      - if notification_setting.email_mode_realtime?
-        p.font-medium.mb-1 テスト通知について（即時配信モード）
-        p テスト通知を送ると、アプリ内通知とメール通知の両方が届きます。
-        p.mt-1.text-blue-700 ※ 残り配信数が1つ減ります
-      - elsif notification_setting.email_mode_digest?
-        p.font-medium.mb-1 テスト通知について（ダイジェスト配信モード）
-        p テスト通知はアプリ内通知のみ送信されます。
-        p.mt-1 メール配信をテストしたい場合は、一時的に即時配信に切り替えてお試しください。
-        p.mt-1.text-gray-600 ダイジェストメールは設定した時間に毎日配信されます。
-      - else
-        p.font-medium.mb-1 テスト通知について（メール通知なし）
-        p テスト通知はアプリ内通知のみ送信されます。
+  .bg-blue-50.rounded-lg.p-4.mb-4 data-controller="test-notification-info"
+    / 即時配信モードの案内
+    .text-sm.text-gray-700 data-test-notification-info-target="info" data-email-mode="realtime" class=(notification_setting.email_mode_realtime? ? "" : "hidden")
+      p.font-medium.mb-1 テスト通知について（即時配信モード）
+      p テスト通知を送ると、アプリ内通知とメール通知の両方が届きます。
+      p.mt-1.text-blue-700 ※ 残り配信数が1つ減ります
+
+    / ダイジェスト配信モードの案内
+    .text-sm.text-gray-700 data-test-notification-info-target="info" data-email-mode="digest" class=(notification_setting.email_mode_digest? ? "" : "hidden")
+      p.font-medium.mb-1 テスト通知について（ダイジェスト配信モード）
+      p テスト通知はアプリ内通知のみ送信されます。
+      p.mt-1 メール配信をテストしたい場合は、一時的に即時配信に切り替えてお試しください。
+      p.mt-1.text-gray-600 ダイジェストメールは設定した時間に毎日配信されます。
+
+    / メール通知なしモードの案内
+    .text-sm.text-gray-700 data-test-notification-info-target="info" data-email-mode="off" class=(notification_setting.email_mode_off? ? "" : "hidden")
+      p.font-medium.mb-1 テスト通知について（メール通知なし）
+      p テスト通知はアプリ内通知のみ送信されます。
 
   .flex.justify-end
     = button_to "テスト通知を送る", send_test_settings_notifications_path, method: :post, class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
