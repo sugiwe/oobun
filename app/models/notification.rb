@@ -12,8 +12,8 @@ class Notification < ApplicationRecord
     test_notification: "test_notification"
   }
 
-  # Phase 2で有効化
-  # after_create_commit :deliver_notifications
+  # 通知作成後に各種配信を実行
+  after_create_commit :deliver_notifications
 
   def mark_as_read!
     update(read_at: Time.current)
@@ -23,16 +23,20 @@ class Notification < ApplicationRecord
     read_at.nil?
   end
 
-  # Phase 2で実装
-  # def deliver_notifications
-  #   # Discord通知（非同期）
-  #   if user.notification_setting&.use_discord?
-  #     DiscordNotificationJob.perform_later(id)
-  #   end
-  #
-  #   # Slack通知（非同期）
-  #   if user.notification_setting&.use_slack?
-  #     SlackNotificationJob.perform_later(id)
-  #   end
-  # end
+  private
+
+  def deliver_notifications
+    # メール通知（非同期）
+    EmailNotificationJob.perform_later(id)
+
+    # Discord通知（非同期）- Phase 2で実装予定
+    # if user.notification_setting&.use_discord?
+    #   DiscordNotificationJob.perform_later(id)
+    # end
+
+    # Slack通知（非同期）- Phase 2で実装予定
+    # if user.notification_setting&.use_slack?
+    #   SlackNotificationJob.perform_later(id)
+    # end
+  end
 end

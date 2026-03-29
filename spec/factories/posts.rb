@@ -12,6 +12,13 @@ FactoryBot.define do
     created_at { Time.current }
     updated_at { Time.current }
 
+    # ユーザーをスレッドのメンバーにする
+    after(:build) do |post|
+      unless post.thread.memberships.exists?(user: post.user)
+        create(:membership, user: post.user, thread: post.thread)
+      end
+    end
+
     # Trait: 下書き
     trait :draft do
       status { :draft }

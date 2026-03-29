@@ -63,6 +63,9 @@ gem "redcarpet"
 # HTML sanitization [https://github.com/rgrove/sanitize]
 gem "sanitize"
 
+# Email delivery via Postmark [https://github.com/ActiveCampaign/postmark-rails]
+gem "postmark-rails"
+
 group :development, :test do
   # RSpec for testing [https://github.com/rspec/rspec-rails]
   gem "rspec-rails", "~> 8.0"
@@ -92,9 +95,18 @@ group :test do
 
   # Code coverage analysis [https://github.com/simplecov-ruby/simplecov]
   gem "simplecov", require: false
+
+  # System testing with browser automation [https://github.com/teamcapybara/capybara]
+  gem "capybara"
+
+  # WebDriver for browser automation [https://github.com/SeleniumHQ/selenium/tree/trunk/rb]
+  gem "selenium-webdriver"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Preview emails in browser [https://github.com/fgrehm/letter_opener_web]
+  gem "letter_opener_web"
 end
