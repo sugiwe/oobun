@@ -5,13 +5,13 @@ class EmailNotificationJob < ApplicationJob
   def perform(notification_id)
     notification = Notification.find(notification_id)
     user = notification.user
-    setting = user.notification_setting
+    setting = user.notification_setting || user.create_notification_setting
 
     # メール通知がOFFの場合はスキップ
-    return if setting&.email_mode_off?
+    return if setting.email_mode_off?
 
     # 即時配信モードの場合は制限チェック
-    if setting&.email_mode_realtime?
+    if setting.email_mode_realtime?
       # 悲観的ロックで競合を防止（複数の通知が同時発生した場合）
       can_send = setting.with_lock do
         # 月初のカウンターリセットを明示的に実行

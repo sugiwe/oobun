@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_015717) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_052608) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -116,6 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_015717) do
     t.boolean "use_discord", default: false
     t.boolean "use_slack", default: false
     t.bigint "user_id", null: false
+    t.index ["email_mode", "digest_time"], name: "index_notification_settings_on_email_mode_and_digest_time"
     t.index ["user_id"], name: "index_notification_settings_on_user_id"
   end
 

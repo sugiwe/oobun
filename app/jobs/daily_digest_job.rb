@@ -8,14 +8,14 @@ class DailyDigestJob < ApplicationJob
     # digest_timeもTime.zone.parseで同じタイムゾーンで保存されているため、一致判定は正しく動作する
     current_time = Time.current
     current_hour = current_time.hour
+    current_digest_time = current_time.strftime("%H:00:00")
 
     Rails.logger.info "DailyDigestJob: Running at #{current_hour}:00 (#{Time.zone.name})"
 
-    # この時刻にダイジェスト配信を希望しているユーザーを取得（時間のみでマッチング、分は00のみ）
+    # この時刻にダイジェスト配信を希望しているユーザーを取得（インデックスを活用）
     NotificationSetting
       .email_mode_digest
-      .where("EXTRACT(HOUR FROM digest_time) = ?", current_hour)
-      .where("EXTRACT(MINUTE FROM digest_time) = ?", 0)
+      .where(digest_time: current_digest_time)
       .includes(:user)
       .find_each do |setting|
         send_digest_email(setting.user)
@@ -42,10 +42,13 @@ class DailyDigestJob < ApplicationJob
 
     Rails.logger.info "DailyDigestJob: Sending digest to #{user.username} (#{notifications.count} notifications since #{since_time})"
 
-    # 配信時刻を先に記録（リトライ時の重複送信を防ぐ）
-    setting&.update!(last_digest_sent_at: Time.current)
+    # 配信時刻の更新とメール送信ジョブのエンキューをトランザクション内で実行し、原子性を保証します
+    ActiveRecord::Base.transaction do
+      # 配信時刻を先に記録（リトライ時の重複送信を防ぐ）
+      setting&.update!(last_digest_sent_at: Time.current)
 
-    # ダイジェストメール送信（非同期）
-    UserMailer.daily_digest(user, notifications).deliver_later
+      # ダイジェストメール送信（非同期）
+      UserMailer.daily_digest(user, notifications).deliver_later
+    end
   end
 end

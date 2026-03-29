@@ -55,12 +55,13 @@ class NotificationSetting < ApplicationRecord
   def increment_email_count!
     return unless email_mode_realtime?
 
-    # with_lockブロック内で実行されるため、直接代入 + save!でアトミックに更新
-    self.email_count_this_month += 1
-    if email_count_this_month >= REALTIME_MONTHLY_LIMIT
-      self.email_mode = :digest
+    # with_lockブロック内で実行されるため、update!でアトミックに更新
+    new_count = email_count_this_month + 1
+    attrs_to_update = { email_count_this_month: new_count }
+    if new_count >= REALTIME_MONTHLY_LIMIT
+      attrs_to_update[:email_mode] = :digest
     end
-    save!
+    update!(attrs_to_update)
   end
 
   # 残り配信数（月初のリセットを考慮）

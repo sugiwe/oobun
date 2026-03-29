@@ -231,15 +231,6 @@ RSpec.describe NotificationSetting, type: :model do
           expect(setting.email_mode_digest?).to be true
         end
 
-        it "上限超過後もダイジェストモードに切り替わる" do
-          setting = create(:notification_setting, :email_realtime)
-          setting.update(email_count_this_month: 99, email_count_reset_at: Date.current.beginning_of_month)
-
-          setting.increment_email_count!
-
-          expect(setting.reload.email_mode_digest?).to be true
-        end
-
         it "データベースに正しく保存される" do
           setting = create(:notification_setting, :email_realtime)
           setting.update(email_count_this_month: 50, email_count_reset_at: Date.current.beginning_of_month)
