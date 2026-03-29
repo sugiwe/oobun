@@ -42,10 +42,10 @@ class DailyDigestJob < ApplicationJob
 
     Rails.logger.info "DailyDigestJob: Sending digest to #{user.username} (#{notifications.count} notifications since #{since_time})"
 
+    # 配信時刻を先に記録（リトライ時の重複送信を防ぐ）
+    setting&.update!(last_digest_sent_at: Time.current)
+
     # ダイジェストメール送信（非同期）
     UserMailer.daily_digest(user, notifications).deliver_later
-
-    # 配信時刻を記録
-    setting&.update!(last_digest_sent_at: Time.current)
   end
 end
