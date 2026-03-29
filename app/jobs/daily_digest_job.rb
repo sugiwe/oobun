@@ -47,7 +47,8 @@ class DailyDigestJob < ApplicationJob
       setting&.update!(last_digest_sent_at: Time.current)
 
       # ダイジェストメール送信（非同期）
-      UserMailer.daily_digest(user, notifications).deliver_later
+      # ActiveJobはRelationをシリアライズできないため、配列に変換
+      UserMailer.daily_digest(user, notifications.to_a).deliver_later
     end
   end
 end
