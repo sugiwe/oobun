@@ -29,12 +29,12 @@
     .space-y-4
       / 配信モード選択
       .space-y-3
-        / ダイジェスト配信（推奨・デフォルト）
+        / ダイジェスト配信
         label.border.border-gray-200.rounded-lg.p-4.bg-gray-50.flex.items-start.gap-3.cursor-pointer
           = f.radio_button :email_mode, :digest, class: "mt-1", data: { action: "change->email-mode#toggle" }
           .flex-1
             .text-sm.font-medium.text-gray-900
-              | ダイジェスト配信（推奨）
+              | ダイジェスト配信
             .text-xs.text-gray-500.mt-1
               | 過去24時間の通知を1日1回配信。通知がない日は配信されません。
 
