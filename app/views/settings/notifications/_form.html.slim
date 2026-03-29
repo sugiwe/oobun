@@ -64,7 +64,7 @@
             | 今月の残り:
             strong.text-blue-700 = notification_setting.remaining_emails_this_month
             |  通 / 100通
-          - if notification_setting.email_count_this_month >= NotificationSetting::REALTIME_MONTHLY_LIMIT
+          - if notification_setting.email_mode_realtime? && notification_setting.remaining_emails_this_month&.zero?
             .mt-2.text-xs.text-amber-700
               | ⚠️ 上限に達したため、ダイジェスト配信に切り替わりました
 
