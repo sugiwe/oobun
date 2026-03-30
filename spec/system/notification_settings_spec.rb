@@ -60,7 +60,7 @@ RSpec.describe "NotificationSettings", type: :system do
       choose "メール通知なし"
 
       # 設定項目が非表示（JavaScriptで制御）
-      expect(page).to have_no_select("notification_setting[digest_time]")
+      expect(page).to have_select("notification_setting[digest_time]", visible: :hidden)
     end
   end
 
