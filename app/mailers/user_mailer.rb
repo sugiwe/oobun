@@ -34,4 +34,16 @@ class UserMailer < ApplicationMailer
       subject: "coconikki - #{@total_count}件の新着投稿があります"
     )
   end
+
+  # テスト通知メール（即時配信モード時のみ送信）
+  def test_notification(notification)
+    @notification = notification
+    @user = notification.user
+    @message = notification.params["message"]
+
+    mail(
+      to: @user.email,
+      subject: "coconikki - テスト通知"
+    )
+  end
 end
