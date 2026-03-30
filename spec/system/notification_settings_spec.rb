@@ -59,8 +59,8 @@ RSpec.describe "NotificationSettings", type: :system do
       # 初期状態ではダイジェスト配信が選択されており、時刻選択が表示されている
       expect(page).to have_select("notification_setting[digest_time]", visible: :visible)
 
-      # メール通知なしを選択
-      choose "メール通知なし"
+      # メール通知なしを選択 - ラジオボタンを直接クリック
+      find("input[value='off']").click
 
       # 設定項目が非表示（JavaScriptで制御）
       expect(page).to have_no_selector("select[name='notification_setting[digest_time]']", visible: :visible)
