@@ -53,22 +53,19 @@ RSpec.describe "NotificationSettings", type: :system do
       expect(page).to have_content("今月の残り:")
     end
 
-    # TODO: CI環境でJavaScriptによる非表示化が動作しない問題を調査中
-    # https://github.com/sugiwe/oobun/issues/XX
-    xit "メール通知なしを選択すると設定項目が非表示になる" do
+    it "メール通知なしを選択すると設定項目が非表示になる" do
       visit settings_notifications_path
 
-      # 初期状態ではダイジェスト配信が選択されており、時刻選択が表示されている
-      expect(page).to have_select("notification_setting[digest_time]", visible: :visible)
+      # 初期状態では「配信時刻」ラベルが表示されている
+      expect(page).to have_content("配信時刻")
 
-      # メール通知なしを選択 - ラジオボタンを直接クリック
-      find("input[value='off']").click
+      # メール通知なしを選択
+      choose "メール通知なし"
 
-      # JavaScriptの実行を待つために少し待機
-      sleep 0.5
-
-      # 設定項目が非表示（JavaScriptで制御）
-      expect(page).to have_no_selector("select[name='notification_setting[digest_time]']", visible: :visible)
+      # ダイジェスト固有の「配信時刻」ラベルが非表示になる（JavaScriptで制御）
+      expect(page).to have_no_content("配信時刻")
+      # 即時配信固有の「今月の残り:」も表示されない
+      expect(page).to have_no_content("今月の残り:")
     end
   end
 
