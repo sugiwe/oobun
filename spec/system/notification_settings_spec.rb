@@ -62,6 +62,9 @@ RSpec.describe "NotificationSettings", type: :system do
       # メール通知なしを選択 - ラジオボタンを直接クリック
       find("input[value='off']").click
 
+      # JavaScriptの実行を待つために少し待機
+      sleep 0.5
+
       # 設定項目が非表示（JavaScriptで制御）
       expect(page).to have_no_selector("select[name='notification_setting[digest_time]']", visible: :visible)
     end
