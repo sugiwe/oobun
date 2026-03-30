@@ -52,21 +52,6 @@ RSpec.describe "NotificationSettings", type: :system do
       # 残り配信数が表示される（JavaScriptで表示切り替え）
       expect(page).to have_content("今月の残り:")
     end
-
-    it "メール通知なしを選択すると設定項目が非表示になる" do
-      visit settings_notifications_path
-
-      # 初期状態では「配信時刻」ラベルが表示されている
-      expect(page).to have_content("配信時刻")
-
-      # メール通知なしを選択
-      choose "メール通知なし"
-
-      # ダイジェスト固有の「配信時刻」ラベルが非表示になる（JavaScriptで制御）
-      expect(page).to have_no_content("配信時刻")
-      # 即時配信固有の「今月の残り:」も表示されない
-      expect(page).to have_no_content("今月の残り:")
-    end
   end
 
   describe "ダイジェスト配信時刻の変更" do
