@@ -6,14 +6,24 @@ export default class extends Controller {
   static targets = ["info"]
 
   connect() {
+    // イベントリスナーをバインド（disconnect時のクリーンアップ用）
+    this.boundUpdateInfo = this.updateInfo.bind(this)
+
     // ページ内のメール配信モードラジオボタンを監視
-    const radioButtons = document.querySelectorAll('input[name="notification_setting[email_mode]"]')
-    radioButtons.forEach(radio => {
-      radio.addEventListener('change', () => this.updateInfo())
+    this.radioButtons = document.querySelectorAll('input[name="notification_setting[email_mode]"]')
+    this.radioButtons.forEach(radio => {
+      radio.addEventListener('change', this.boundUpdateInfo)
     })
 
     // 初期表示
     this.updateInfo()
+  }
+
+  disconnect() {
+    // メモリリーク防止：イベントリスナーをクリーンアップ
+    this.radioButtons.forEach(radio => {
+      radio.removeEventListener('change', this.boundUpdateInfo)
+    })
   }
 
   updateInfo() {
