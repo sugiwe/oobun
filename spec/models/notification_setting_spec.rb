@@ -102,9 +102,10 @@ RSpec.describe NotificationSetting, type: :model do
       expect(setting.email_mode).to eq("digest")
     end
 
-    it "digest_timeは08:00:00がデフォルト" do
-      expect(setting.digest_time.hour).to eq(8)
-      expect(setting.digest_time.min).to eq(0)
+    it "digest_timeは08:00がデフォルト" do
+      expect(setting.digest_time).to eq("08:00")
+      expect(setting.digest_hour).to eq(8)
+      expect(setting.digest_minute).to eq(0)
     end
 
     it "email_count_this_monthは0がデフォルト" do
@@ -141,18 +142,32 @@ RSpec.describe NotificationSetting, type: :model do
     describe "#digest_time=" do
       let(:setting) { create(:notification_setting) }
 
-      it "文字列形式の時刻を正しくパースする" do
+      it "HH:MM:SS形式の文字列をHH:MM形式に正規化する" do
         setting.digest_time = "15:30:00"
-        expect(setting.digest_time.hour).to eq(15)
-        expect(setting.digest_time.min).to eq(30)
+        expect(setting.digest_time).to eq("15:30")
+        expect(setting.digest_hour).to eq(15)
+        expect(setting.digest_minute).to eq(30)
       end
 
-      it "Time型の値をそのまま受け入れる" do
-        time = Time.zone.parse("18:45:00")
-        setting.digest_time = time
-        # time型は時刻のみを保持するため、時・分で比較
-        expect(setting.digest_time.hour).to eq(18)
-        expect(setting.digest_time.min).to eq(45)
+      it "HH:MM形式の文字列をそのまま受け入れる" do
+        setting.digest_time = "18:45"
+        expect(setting.digest_time).to eq("18:45")
+        expect(setting.digest_hour).to eq(18)
+        expect(setting.digest_minute).to eq(45)
+      end
+
+      it "1桁の時間を2桁に正規化する" do
+        setting.digest_time = "8:05"
+        expect(setting.digest_time).to eq("08:05")
+        expect(setting.digest_hour).to eq(8)
+        expect(setting.digest_minute).to eq(5)
+      end
+
+      it "1桁の時間（秒付き）も正規化する" do
+        setting.digest_time = "9:30:00"
+        expect(setting.digest_time).to eq("09:30")
+        expect(setting.digest_hour).to eq(9)
+        expect(setting.digest_minute).to eq(30)
       end
 
       it "不正な形式の文字列はそのまま渡す" do

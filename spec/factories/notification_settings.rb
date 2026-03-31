@@ -12,7 +12,7 @@ FactoryBot.define do
 
     # メール通知のデフォルト値
     email_mode { "digest" }
-    digest_time { Time.zone.parse("08:00:00") }
+    digest_time { "08:00" }
     email_count_this_month { 0 }
     email_count_reset_at { nil }
 
@@ -32,7 +32,7 @@ FactoryBot.define do
 
     trait :email_digest do
       email_mode { "digest" }
-      digest_time { Time.zone.parse("08:00:00") }
+      digest_time { "08:00" }
     end
 
     trait :email_realtime do

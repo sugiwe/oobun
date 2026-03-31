@@ -74,7 +74,8 @@ RSpec.describe "NotificationSettings", type: :system do
 
       # 設定が保存されたことを確認
       user.notification_setting.reload
-      expect(user.notification_setting.digest_time.hour).to eq(18)
+      expect(user.notification_setting.digest_time).to eq("18:00")
+      expect(user.notification_setting.digest_hour).to eq(18)
     end
   end
 

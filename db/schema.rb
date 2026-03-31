@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_29_052608) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_004210) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,7 +103,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_29_052608) do
 
   create_table "notification_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.time "digest_time", default: "2000-01-01 08:00:00", null: false
+    t.string "digest_time", default: "08:00", null: false
     t.string "discord_webhook_url"
     t.date "email_count_reset_at"
     t.integer "email_count_this_month", default: 0, null: false

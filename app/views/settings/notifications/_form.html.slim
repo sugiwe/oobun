@@ -42,8 +42,8 @@
         .ml-9.mt-2.p-3.bg-gray-50.rounded data-email-mode-target="digestSettings" class=(notification_setting.email_mode_digest? ? "" : "hidden")
           = f.label :digest_time, "配信時刻", class: "block text-xs font-medium text-gray-700 mb-1"
           .flex.items-center.gap-2
-            - options = (0..23).map { |h| [sprintf("%02d:00", h), sprintf("%02d:00:00", h)] }
-            - selected = notification_setting.digest_time&.strftime("%H:00:00") || "08:00:00"
+            - options = (0..23).map { |h| [sprintf("%02d:00", h), sprintf("%02d:00", h)] }
+            - selected = notification_setting.digest_time.presence || "08:00"
             = f.select :digest_time, options_for_select(options, selected), {}, { class: "border border-gray-300 rounded px-3 py-2 text-sm bg-white" }
             span.text-xs.text-gray-500 毎日この時刻に配信されます
 

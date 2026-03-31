@@ -143,7 +143,9 @@ class User < ApplicationRecord
   def create_default_notification_setting
     build_notification_setting(
       notify_member_posts: true,
-      notify_subscription_posts: true
+      notify_subscription_posts: true,
+      email_mode: :digest,
+      digest_time: "08:00"
     ).tap(&:save!)
   end
 
