@@ -20,10 +20,11 @@ class NotificationSetting < ApplicationRecord
   # webhook URLが設定されていない場合は、use_discord/use_slackをfalseにする
   before_save :disable_webhooks_if_urls_blank
 
-  # カスタムセッター: "HH:MM:SS"形式の文字列をTime型に変換
+  # カスタムセッター: "HH:MM:SS"形式を"HH:MM"形式に正規化
   def digest_time=(value)
-    if value.is_a?(String) && value.match?(/\A\d{2}:\d{2}:\d{2}\z/)
-      super(Time.zone.parse(value))
+    if value.is_a?(String) && value.match?(/\A\d{2}:\d{2}(:\d{2})?\z/)
+      # "HH:MM:SS" または "HH:MM" 形式を "HH:MM" に統一
+      super(value.split(":")[0..1].join(":"))
     else
       super(value)
     end
@@ -31,16 +32,18 @@ class NotificationSetting < ApplicationRecord
 
   # ダイジェスト配信時刻（時と分を返す）
   def digest_hour
-    digest_time&.hour || 8
+    return 8 if digest_time.blank?
+    digest_time.split(":").first.to_i
   end
 
   def digest_minute
-    digest_time&.min || 0
+    return 0 if digest_time.blank?
+    digest_time.split(":").last.to_i
   end
 
   # 配信時刻の文字列表現（UI表示用）
   def digest_time_display
-    digest_time&.strftime("%H:%M") || "08:00"
+    digest_time.presence || "08:00"
   end
 
   # 即時配信が可能かチェック（副作用なし、CQS原則に準拠）
