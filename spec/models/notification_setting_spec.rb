@@ -156,6 +156,20 @@ RSpec.describe NotificationSetting, type: :model do
         expect(setting.digest_minute).to eq(45)
       end
 
+      it "1桁の時間を2桁に正規化する" do
+        setting.digest_time = "8:05"
+        expect(setting.digest_time).to eq("08:05")
+        expect(setting.digest_hour).to eq(8)
+        expect(setting.digest_minute).to eq(5)
+      end
+
+      it "1桁の時間（秒付き）も正規化する" do
+        setting.digest_time = "9:30:00"
+        expect(setting.digest_time).to eq("09:30")
+        expect(setting.digest_hour).to eq(9)
+        expect(setting.digest_minute).to eq(30)
+      end
+
       it "不正な形式の文字列はそのまま渡す" do
         expect { setting.digest_time = "invalid" }.not_to raise_error
       end

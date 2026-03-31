@@ -25,9 +25,11 @@ class NotificationSetting < ApplicationRecord
     # Timeオブジェクトの場合は "HH:MM" 形式に変換
     value = value.strftime("%H:%M") if value.respond_to?(:strftime)
 
-    if value.is_a?(String) && value.match?(/\A\d{2}:\d{2}(:\d{2})?\z/)
-      # "HH:MM:SS" または "HH:MM" 形式を "HH:MM" に統一
-      super(value.split(":")[0..1].join(":"))
+    if value.is_a?(String) && value.match?(/\A\d{1,2}:\d{1,2}(:\d{1,2})?\z/)
+      # "H:MM:SS", "HH:MM:SS", "H:MM", "HH:MM" を "HH:MM" に統一
+      parts = value.split(":")
+      normalized = format("%02d:%02d", parts[0].to_i, parts[1].to_i)
+      super(normalized)
     else
       super(value)
     end
