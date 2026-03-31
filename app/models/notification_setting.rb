@@ -22,6 +22,9 @@ class NotificationSetting < ApplicationRecord
 
   # カスタムセッター: "HH:MM:SS"形式を"HH:MM"形式に正規化
   def digest_time=(value)
+    # Timeオブジェクトの場合は "HH:MM" 形式に変換
+    value = value.strftime("%H:%M") if value.respond_to?(:strftime)
+
     if value.is_a?(String) && value.match?(/\A\d{2}:\d{2}(:\d{2})?\z/)
       # "HH:MM:SS" または "HH:MM" 形式を "HH:MM" に統一
       super(value.split(":")[0..1].join(":"))
@@ -38,7 +41,7 @@ class NotificationSetting < ApplicationRecord
 
   def digest_minute
     return 0 if digest_time.blank?
-    digest_time.split(":").last.to_i
+    digest_time.split(":")[1].to_i
   end
 
   # 配信時刻の文字列表現（UI表示用）
