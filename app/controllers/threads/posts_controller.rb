@@ -80,14 +80,17 @@ class Threads::PostsController < Threads::ApplicationController
       return
     end
 
-    ActiveRecord::Base.transaction do
-      @post.publish!
-      @thread.update_last_post_metadata!
+    @post.status = "published"
+    if @post.valid?
+      ActiveRecord::Base.transaction do
+        @post.save!
+        @thread.update_last_post_metadata!
+      end
+      redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
+    else
+      set_prev_post
+      render :edit, status: :unprocessable_entity
     end
-
-    redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
-  rescue ActiveRecord::RecordInvalid
-    redirect_to edit_thread_post_path(@thread.slug, @post), alert: "投稿に失敗しました"
   end
 
   private
