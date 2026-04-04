@@ -49,8 +49,8 @@ class Post < ApplicationRecord
   end
 
   # Scopes
-  # published_at 順（nil の場合は created_at をフォールバック）
-  scope :published_posts, -> { where(status: [ "published", "anonymized" ]).order(Arel.sql("COALESCE(published_at, created_at) ASC")) }
+  # published_at 順（バックフィル済みのため published_at を直接使用）
+  scope :published_posts, -> { where(status: [ "published", "anonymized" ]).order(published_at: :asc) }
   scope :draft_posts, -> { where(status: "draft") }
 
   # Default scope: 公開済み投稿と匿名化済み投稿を表示（下書きは除外）
@@ -60,16 +60,16 @@ class Post < ApplicationRecord
   def prev
     thread.posts.unscope(where: :status)
           .where(status: "published")
-          .where("COALESCE(published_at, created_at) < ?", published_at || created_at)
-          .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
+          .where("published_at < ?", published_at)
+          .reorder(published_at: :desc)
           .first
   end
 
   def next
     thread.posts.unscope(where: :status)
           .where(status: "published")
-          .where("COALESCE(published_at, created_at) > ?", published_at || created_at)
-          .reorder(Arel.sql("COALESCE(published_at, created_at) ASC"))
+          .where("published_at > ?", published_at)
+          .reorder(published_at: :asc)
           .first
   end
 

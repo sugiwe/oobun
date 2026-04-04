@@ -210,7 +210,7 @@ class User < ApplicationRecord
         .where(status: "published")
         .includes(:user, :thread)
         .where(thread_id: subscribed_threads.public_threads.select(:id))
-        .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
+        .reorder(published_at: :desc)
         .limit(limit)
   end
 end

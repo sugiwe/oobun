@@ -40,7 +40,7 @@ class ThreadsController < ApplicationController
                 .where(status: "published")
                 .includes(:user, :thread)
                 .where(thread_id: current_user.subscribed_threads.public_threads.select(:id))
-                .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
+                .reorder(published_at: :desc)
                 .page(params[:page])
                 .per(20)
   end
@@ -51,7 +51,7 @@ class ThreadsController < ApplicationController
     order_direction = @current_sort == "oldest" ? :asc : :desc
     @posts = @thread.visible_posts_for(current_user)
                     .includes(:user)
-                    .reorder(Arel.sql("COALESCE(published_at, created_at) #{order_direction.to_s.upcase}"))
+                    .reorder(published_at: order_direction)
                     .page(params[:page])
                     .per(10)
     @members = @thread.memberships.includes(:user).order(:position)

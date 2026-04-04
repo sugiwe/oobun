@@ -81,8 +81,8 @@ class Threads::PostsController < Threads::ApplicationController
     end
 
     @post.status = "published"
-    @post.published_at = Time.current
     if @post.valid?
+      @post.published_at = Time.current
       ActiveRecord::Base.transaction do
         @post.save!
         @thread.update_last_post_metadata!
@@ -123,7 +123,7 @@ class Threads::PostsController < Threads::ApplicationController
     # 前回の投稿（最新の公開済み投稿）を取得
     @prev_post = @thread.posts.published
                         .includes(:user, thumbnail_attachment: :blob)
-                        .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
+                        .reorder(published_at: :desc)
                         .first
   end
 
