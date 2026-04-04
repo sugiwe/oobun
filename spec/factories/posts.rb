@@ -11,6 +11,7 @@ FactoryBot.define do
     # タイムスタンプ
     created_at { Time.current }
     updated_at { Time.current }
+    published_at { Time.current }
 
     # ユーザーをスレッドのメンバーにする
     after(:build) do |post|
@@ -24,6 +25,7 @@ FactoryBot.define do
       status { :draft }
       title { nil }
       body { Faker::Lorem.paragraph }
+      published_at { nil }
     end
 
     # Trait: 匿名化済み

@@ -28,13 +28,31 @@ class ThreadsController < ApplicationController
     @threads = fetch_user_threads(paginate: true)
   end
 
+  def subscription_posts
+    # ログイン必須
+    unless logged_in?
+      redirect_to login_path, alert: "ログインが必要です"
+      return
+    end
+
+    # フォロー中交換日記の新着投稿をページネーション付きで取得
+    # unscope: default_scopeは["published", "anonymized"]だが、ここでは"published"のみを取得したいため
+    @posts = Post.unscope(where: :status)
+                .where(status: "published")
+                .includes(:user, :thread)
+                .where(thread_id: current_user.subscribed_threads.public_threads.select(:id))
+                .reorder(published_at: :desc)
+                .page(params[:page])
+                .per(20)
+  end
+
   def show
     # ソート順（デフォルトは新しい順）
     @current_sort = params[:sort] == "oldest" ? "oldest" : "newest"
     order_direction = @current_sort == "oldest" ? :asc : :desc
     @posts = @thread.visible_posts_for(current_user)
                     .includes(:user)
-                    .reorder(created_at: order_direction)
+                    .reorder(published_at: order_direction)
                     .page(params[:page])
                     .per(10)
     @members = @thread.memberships.includes(:user).order(:position)
@@ -149,7 +167,7 @@ class ThreadsController < ApplicationController
   def set_sample_threads
     @sample_threads = CorrespondenceThread.sample_threads
                                           .discoverable
-                                          .includes(:users, :memberships)
+                                          .includes(:users, memberships: :user)
                                           .recent_order
                                           .limit(3)
   end
@@ -157,7 +175,7 @@ class ThreadsController < ApplicationController
   def fetch_user_threads(limit: nil, paginate: false)
     threads = CorrespondenceThread.user_threads
                                   .discoverable
-                                  .includes(:users, :memberships)
+                                  .includes(:users, memberships: :user)
                                   .recent_order
 
     if paginate

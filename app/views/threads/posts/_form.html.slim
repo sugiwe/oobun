@@ -2,7 +2,7 @@
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
-      = f.label :title, "タイトル#{@post.published? ? '（必須）' : '（任意）'}", class: "text-sm font-medium text-gray-700"
+      = f.label :title, "タイトル（公開時は必須）", class: "text-sm font-medium text-gray-700"
       = f.text_field :title,
           placeholder: "投稿のタイトルを入力してください",
           autofocus: true,
@@ -92,4 +92,4 @@
           / 下書きを編集中（draft-first patternにより、@post.persisted? は常に true）
           = f.submit "下書き更新", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き更新"
           - if @thread.my_turn?(current_user)
-            = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { turbo_method: :post }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
+            = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { action: "click->publish#publish" }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"

@@ -15,8 +15,10 @@
     / 2. フォロー中交換日記の新着投稿
     - if @recent_posts.present?
       section
-        h2.text-xl.text-gray-900.mb-4
-          | 📬 フォロー中交換日記の新着投稿
+        .flex.items-center.justify-between.mb-4
+          h2.text-xl.text-gray-900
+            | 📬 フォロー中交換日記の新着投稿
+          = link_to "すべて見る", subscription_posts_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
 

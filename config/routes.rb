@@ -54,6 +54,9 @@ Rails.application.routes.draw do
   # 全スレッド一覧（ブラウズページ）
   get "/threads", to: "threads#browse", as: :browse_threads
 
+  # フォロー中交換日記の投稿一覧（ログイン必須）
+  get "/subscription_posts", to: "threads#subscription_posts", as: :subscription_posts
+
   # 管理画面（管理者のみ）
   namespace :admin do
     root to: "dashboard#index"

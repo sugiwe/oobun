@@ -205,12 +205,13 @@ class User < ApplicationRecord
   end
 
   # 4. フォロー中交換日記の新着投稿を取得（冗長なクエリを削減）
-  def fetch_recent_posts
+  def fetch_recent_posts(limit: 5)
+    # unscope: default_scopeは["published", "anonymized"]だが、ここでは"published"のみを取得したいため
     Post.unscope(where: :status)
         .where(status: "published")
         .includes(:user, :thread)
         .where(thread_id: subscribed_threads.public_threads.select(:id))
-        .reorder(created_at: :desc)
-        .limit(10)
+        .reorder(published_at: :desc)
+        .limit(limit)
   end
 end

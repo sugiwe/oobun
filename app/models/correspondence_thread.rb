@@ -190,7 +190,7 @@ class CorrespondenceThread < ApplicationRecord
   # エクスポート用JSON生成（メンバーのみ実行可能）
   def to_export_json(posts_with_includes: nil)
     # postsが渡されていない場合は取得（重複クエリ対策）
-    posts_data = posts_with_includes || published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc)
+    posts_data = posts_with_includes || published_posts.includes(:user).with_attached_thumbnail.reorder(Arel.sql("COALESCE(published_at, created_at) ASC"))
 
     {
       thread: {
@@ -225,7 +225,7 @@ class CorrespondenceThread < ApplicationRecord
   # 画像付きZIPエクスポート（メンバーのみ実行可能）
   def export_with_images_zip
     # 投稿データを一度だけ取得（重複クエリ対策）
-    posts_with_includes = published_posts.includes(:user).with_attached_thumbnail.order(created_at: :asc).to_a
+    posts_with_includes = published_posts.includes(:user).with_attached_thumbnail.reorder(Arel.sql("COALESCE(published_at, created_at) ASC")).to_a
 
     stringio = Zip::OutputStream.write_buffer do |zip|
       # 1. JSON追加（取得済みのpostsデータを再利用）

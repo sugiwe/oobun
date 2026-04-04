@@ -80,14 +80,21 @@ class Threads::PostsController < Threads::ApplicationController
       return
     end
 
-    ActiveRecord::Base.transaction do
-      @post.publish!
-      @thread.update_last_post_metadata!
+    @post.status = "published"
+    if @post.valid?
+      @post.published_at = Time.current
+      ActiveRecord::Base.transaction do
+        @post.save!
+        @thread.update_last_post_metadata!
+      end
+      redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
+    else
+      set_prev_post
+      render :edit, status: :unprocessable_entity
     end
-
-    redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
   rescue ActiveRecord::RecordInvalid
-    redirect_to edit_thread_post_path(@thread.slug, @post), alert: "投稿に失敗しました"
+    set_prev_post
+    render :edit, status: :unprocessable_entity
   end
 
   private
@@ -119,7 +126,7 @@ class Threads::PostsController < Threads::ApplicationController
     # 前回の投稿（最新の公開済み投稿）を取得
     @prev_post = @thread.posts.published
                         .includes(:user, thumbnail_attachment: :blob)
-                        .reorder(created_at: :desc)
+                        .reorder(published_at: :desc)
                         .first
   end
 

@@ -2,7 +2,7 @@
 - content_for :main_width, 'max-w-7xl' if @post.draft?
 
 / 自動保存コントローラーのスコープ（下書きの場合のみ）
-- autosave_data = @post.draft? ? { controller: "draft-autosave", "draft-autosave-url-value": thread_post_path(@thread.slug, @post) } : {}
+- autosave_data = @post.draft? ? { controller: "draft-autosave publish", "draft-autosave-url-value": thread_post_path(@thread.slug, @post) } : {}
 div data=autosave_data
   - if @post.draft?
     / 下書き編集時は new.html.slim と同じレイアウト

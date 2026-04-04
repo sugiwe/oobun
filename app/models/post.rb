@@ -49,7 +49,8 @@ class Post < ApplicationRecord
   end
 
   # Scopes
-  scope :published_posts, -> { where(status: [ "published", "anonymized" ]).order(created_at: :asc) }
+  # published_at 順（バックフィル済みのため published_at を直接使用）
+  scope :published_posts, -> { where(status: [ "published", "anonymized" ]).order(published_at: :asc) }
   scope :draft_posts, -> { where(status: "draft") }
 
   # Default scope: 公開済み投稿と匿名化済み投稿を表示（下書きは除外）
@@ -59,16 +60,16 @@ class Post < ApplicationRecord
   def prev
     thread.posts.unscope(where: :status)
           .where(status: "published")
-          .where("created_at < ?", created_at)
-          .reorder(created_at: :desc)
+          .where("published_at < ?", published_at)
+          .reorder(published_at: :desc)
           .first
   end
 
   def next
     thread.posts.unscope(where: :status)
           .where(status: "published")
-          .where("created_at > ?", created_at)
-          .reorder(created_at: :asc)
+          .where("published_at > ?", published_at)
+          .reorder(published_at: :asc)
           .first
   end
 
@@ -78,9 +79,14 @@ class Post < ApplicationRecord
     self.user_id == user.id
   end
 
+  # 表示用の公開日時（published_at があればそれを、なければ created_at をフォールバック）
+  def display_published_at
+    published_at || created_at
+  end
+
   # 下書きを公開する
   def publish!
-    update!(status: "published")
+    update!(status: "published", published_at: Time.current)
   end
 
   # 公開可能かどうか（自分のターンかつ下書き）
