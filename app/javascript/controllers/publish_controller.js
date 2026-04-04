@@ -25,13 +25,24 @@ export default class extends Controller {
       }
     }
 
-    // 保存完了後、Turbo経由で公開処理を実行（フラッシュメッセージを保持）
+    // 保存完了後、フォームを作成してPOST送信（フラッシュメッセージを保持）
     const url = link.href
+    const csrfToken = document.querySelector('[name="csrf-token"]')?.content
 
-    // TurboのvisitメソッドでPOSTリクエストを送信
-    // これによりフラッシュメッセージが正しく表示される
-    Turbo.visit(url, {
-      method: "post"
-    })
+    // 隠しフォームを作成してPOST送信
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = url
+
+    // CSRFトークンを追加
+    const csrfInput = document.createElement('input')
+    csrfInput.type = 'hidden'
+    csrfInput.name = 'authenticity_token'
+    csrfInput.value = csrfToken
+    form.appendChild(csrfInput)
+
+    // フォームをDOMに追加して送信
+    document.body.appendChild(form)
+    form.submit()
   }
 }
