@@ -81,6 +81,7 @@ class Threads::PostsController < Threads::ApplicationController
     end
 
     @post.status = "published"
+    @post.published_at = Time.current
     if @post.valid?
       ActiveRecord::Base.transaction do
         @post.save!

@@ -15,7 +15,7 @@
           .flex.items-center.gap-2
             .w-5.h-5.rounded-full.bg-gray-300.flex-shrink-0
             span.text-xs.text-gray-400 退会済みユーザー
-            span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
+            span.text-xs.text-gray-400 = post.display_published_at.strftime("%Y/%m/%d")
 - else
   a.block.border.rounded-lg.overflow-hidden.hover:shadow-md.transition-shadow.group class="#{post.draft? ? 'border-amber-200 bg-amber-50/30' : 'border-gray-200'}" href=thread_post_path(post.thread.slug, post)
     .flex.flex-row
@@ -43,5 +43,5 @@
             .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden
               = render "shared/avatar", user: post.user, show_fallback: true
             span.text-xs.text-gray-500 = post.user.display_name
-            span.text-xs.text-gray-400 = post.created_at.strftime("%Y/%m/%d")
+            span.text-xs.text-gray-400 = post.display_published_at.strftime("%Y/%m/%d")
           span.text-xs.text-gray-400.group-hover:text-gray-700.md:ml-auto →

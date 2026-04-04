@@ -34,7 +34,7 @@ class ThreadsController < ApplicationController
     order_direction = @current_sort == "oldest" ? :asc : :desc
     @posts = @thread.visible_posts_for(current_user)
                     .includes(:user)
-                    .reorder(created_at: order_direction)
+                    .reorder(Arel.sql("COALESCE(published_at, created_at) #{order_direction.to_s.upcase}"))
                     .page(params[:page])
                     .per(10)
     @members = @thread.memberships.includes(:user).order(:position)
