@@ -28,6 +28,23 @@ class ThreadsController < ApplicationController
     @threads = fetch_user_threads(paginate: true)
   end
 
+  def subscription_posts
+    # ログイン必須
+    unless logged_in?
+      redirect_to login_path, alert: "ログインが必要です"
+      return
+    end
+
+    # フォロー中交換日記の新着投稿をページネーション付きで取得
+    @posts = Post.unscope(where: :status)
+                .where(status: "published")
+                .includes(:user, :thread)
+                .where(thread_id: current_user.subscribed_threads.public_threads.select(:id))
+                .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
+                .page(params[:page])
+                .per(20)
+  end
+
   def show
     # ソート順（デフォルトは新しい順）
     @current_sort = params[:sort] == "oldest" ? "oldest" : "newest"
