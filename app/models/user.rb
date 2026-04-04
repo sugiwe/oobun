@@ -206,6 +206,7 @@ class User < ApplicationRecord
 
   # 4. フォロー中交換日記の新着投稿を取得（冗長なクエリを削減）
   def fetch_recent_posts(limit: 5)
+    # unscope: default_scopeは["published", "anonymized"]だが、ここでは"published"のみを取得したいため
     Post.unscope(where: :status)
         .where(status: "published")
         .includes(:user, :thread)

@@ -92,6 +92,9 @@ class Threads::PostsController < Threads::ApplicationController
       set_prev_post
       render :edit, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecordInvalid
+    set_prev_post
+    render :edit, status: :unprocessable_entity
   end
 
   private

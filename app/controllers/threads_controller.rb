@@ -36,6 +36,7 @@ class ThreadsController < ApplicationController
     end
 
     # フォロー中交換日記の新着投稿をページネーション付きで取得
+    # unscope: default_scopeは["published", "anonymized"]だが、ここでは"published"のみを取得したいため
     @posts = Post.unscope(where: :status)
                 .where(status: "published")
                 .includes(:user, :thread)
