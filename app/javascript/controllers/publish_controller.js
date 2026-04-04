@@ -9,7 +9,7 @@ export default class extends Controller {
 
     const link = event.currentTarget
     const autosaveController = this.application.getControllerForElementAndIdentifier(
-      document.querySelector('[data-controller~="draft-autosave"]'),
+      this.element,
       "draft-autosave"
     )
 

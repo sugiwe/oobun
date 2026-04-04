@@ -123,7 +123,7 @@ class Threads::PostsController < Threads::ApplicationController
     # 前回の投稿（最新の公開済み投稿）を取得
     @prev_post = @thread.posts.published
                         .includes(:user, thumbnail_attachment: :blob)
-                        .reorder(created_at: :desc)
+                        .reorder(Arel.sql("COALESCE(published_at, created_at) DESC"))
                         .first
   end
 

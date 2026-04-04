@@ -20,8 +20,9 @@
 
     / メタ情報（メンバー - アイコンのみ、参加順）
     .flex.items-center.gap-1.mt-auto
-      - thread.memberships.order(:position).limit(10).each do |membership|
+      - memberships = thread.memberships.to_a.sort_by(&:position)
+      - memberships.take(10).each do |membership|
         .w-5.h-5.rounded-full.bg-gray-200.flex-shrink-0.overflow-hidden title="@#{membership.user.username}"
           = render "shared/avatar", user: membership.user, show_fallback: true
-      - if thread.memberships.count > 10
-        span.text-xs.text-gray-400.ml-1 +#{thread.memberships.count - 10}
+      - if memberships.size > 10
+        span.text-xs.text-gray-400.ml-1 +#{memberships.size - 10}

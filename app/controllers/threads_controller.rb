@@ -166,7 +166,7 @@ class ThreadsController < ApplicationController
   def set_sample_threads
     @sample_threads = CorrespondenceThread.sample_threads
                                           .discoverable
-                                          .includes(:users, :memberships)
+                                          .includes(:users, memberships: :user)
                                           .recent_order
                                           .limit(3)
   end
@@ -174,7 +174,7 @@ class ThreadsController < ApplicationController
   def fetch_user_threads(limit: nil, paginate: false)
     threads = CorrespondenceThread.user_threads
                                   .discoverable
-                                  .includes(:users, :memberships)
+                                  .includes(:users, memberships: :user)
                                   .recent_order
 
     if paginate
