@@ -12,12 +12,12 @@
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @my_turn_posts, as: :post
 
-    / 2. フォロー中交換日記の新着投稿
+    / 2. 購読済み交換日記の新着投稿
     - if @recent_posts.present?
       section
         .flex.items-center.justify-between.mb-4
           h2.text-xl.text-gray-900
-            | 📬 フォロー中交換日記の新着投稿
+            | 📬 購読済み交換日記の新着投稿
           = link_to "すべて見る", subscription_posts_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
@@ -29,11 +29,11 @@
           | ✍️ 参加中の交換日記
         = render "threads/thread_grid", threads: @participated_threads
 
-    / 4. フォロー中の交換日記（参加中を除く）
+    / 4. 購読済み交換日記（参加中を除く）
     - if @followed_threads.present?
       section
         h2.text-xl.text-gray-900.mb-4
-          | 👀 フォロー中の交換日記
+          | 👀 購読済み交換日記
         = render "threads/thread_grid", threads: @followed_threads
 
     / サンプル交換日記セクション
