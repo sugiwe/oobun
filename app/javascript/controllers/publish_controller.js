@@ -25,36 +25,13 @@ export default class extends Controller {
       }
     }
 
-    // 保存完了後、または自動保存が不要な場合は公開処理を実行
-    // Turboを使ってPOSTリクエストを送信
+    // 保存完了後、Turbo経由で公開処理を実行（フラッシュメッセージを保持）
     const url = link.href
-    const csrfToken = document.querySelector('[name="csrf-token"]')?.content
 
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "X-CSRF-Token": csrfToken,
-          "Accept": "text/vnd.turbo-stream.html, text/html, application/xhtml+xml"
-        },
-        redirect: "follow"
-      })
-
-      if (response.redirected) {
-        // リダイレクト先にページ遷移
-        window.location.href = response.url
-      } else if (response.ok) {
-        // Turbo Streamレスポンスの場合は自動的に処理される
-        const html = await response.text()
-        Turbo.renderStreamMessage(html)
-      } else {
-        // エラーレスポンスの場合
-        const html = await response.text()
-        document.body.innerHTML = html
-      }
-    } catch (error) {
-      console.error("Publish error:", error)
-      alert("投稿に失敗しました。もう一度お試しください。")
-    }
+    // TurboのvisitメソッドでPOSTリクエストを送信
+    // これによりフラッシュメッセージが正しく表示される
+    Turbo.visit(url, {
+      method: "post"
+    })
   }
 }
