@@ -6,7 +6,8 @@ export default class extends Controller {
   static targets = ["title", "body", "status", "form"]
   static values = {
     url: String,
-    interval: { type: Number, default: 3000 } // 3秒間隔
+    interval: { type: Number, default: 1000 }, // 1秒間隔（debounce）
+    maxInterval: { type: Number, default: 5000 } // 5秒間隔（強制保存）
   }
 
   connect() {
@@ -26,6 +27,12 @@ export default class extends Controller {
     // カウントダウン用インターバル
     this.countdownInterval = null
 
+    // 強制保存用タイマー
+    this.forceSaveTimer = null
+
+    // 最後の保存時刻
+    this.lastSaveTime = Date.now()
+
     // 初期ステータス表示
     this.updateStatus("入力内容は自動保存されます")
   }
@@ -37,6 +44,9 @@ export default class extends Controller {
     }
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval)
+    }
+    if (this.forceSaveTimer) {
+      clearTimeout(this.forceSaveTimer)
     }
   }
 
@@ -84,6 +94,39 @@ export default class extends Controller {
       }
       this.save()
     }, this.intervalValue)
+
+    // 強制保存タイマーを設定（最後の保存から maxInterval 経過で発動）
+    this.scheduleForceSave()
+  }
+
+  // 強制保存タイマーをスケジュール
+  scheduleForceSave() {
+    // 既存の強制保存タイマーをクリア
+    if (this.forceSaveTimer) {
+      clearTimeout(this.forceSaveTimer)
+    }
+
+    // 最後の保存からの経過時間を計算
+    const timeSinceLastSave = Date.now() - this.lastSaveTime
+    const timeUntilForceSave = Math.max(0, this.maxIntervalValue - timeSinceLastSave)
+
+    // 強制保存タイマーを設定
+    this.forceSaveTimer = setTimeout(() => {
+      // debounce タイマーとカウントダウンをクリア
+      if (this.saveTimer) {
+        clearTimeout(this.saveTimer)
+        this.saveTimer = null
+      }
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval)
+        this.countdownInterval = null
+      }
+
+      // 変更がある場合のみ保存
+      if (this.hasChanges()) {
+        this.save()
+      }
+    }, timeUntilForceSave)
   }
 
   // 変更があるかチェック
@@ -126,6 +169,7 @@ export default class extends Controller {
         // 保存成功
         this.savedTitle = this.titleTarget.value
         this.savedBody = this.bodyTarget.value
+        this.lastSaveTime = Date.now() // 最後の保存時刻を更新
         this.updateStatus(`保存済み (${this.formatTime(new Date())})`)
       } else {
         // エラー時にレスポンスからエラーメッセージを取得
@@ -155,5 +199,14 @@ export default class extends Controller {
       minute: "2-digit",
       second: "2-digit"
     })
+  }
+
+  // 投稿前に保存を確認（外部から呼び出し可能）
+  async ensureSaved() {
+    // 未保存の変更がある場合は保存
+    if (this.hasChanges()) {
+      await this.save()
+    }
+    return !this.hasChanges() // 保存成功したか確認
   }
 }

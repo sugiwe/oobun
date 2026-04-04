@@ -92,4 +92,4 @@
           / 下書きを編集中（draft-first patternにより、@post.persisted? は常に true）
           = f.submit "下書き更新", class: "bg-gray-500 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-600 cursor-pointer", name: "commit", value: "下書き更新"
           - if @thread.my_turn?(current_user)
-            = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { turbo_method: :post }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
+            = link_to "投稿する", publish_thread_post_path(@thread.slug, @post), data: { action: "click->publish#publish" }, class: "bg-blue-600 text-white rounded-md px-5 py-2 text-sm font-medium hover:bg-blue-700 inline-block"
