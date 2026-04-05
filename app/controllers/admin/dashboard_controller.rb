@@ -8,5 +8,8 @@ class Admin::DashboardController < Admin::ApplicationController
       allowed_users_count: AllowedUser.count,
       login_invitations_count: LoginInvitation.count
     }
+
+    # 月間登録枠の状況を取得
+    @monthly_quota = MonthlySignupQuota.current_month
   end
 end

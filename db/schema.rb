@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_083525) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_05_102403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,6 +99,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_083525) do
     t.index ["thread_id"], name: "index_memberships_on_thread_id"
     t.index ["user_id", "thread_id"], name: "index_memberships_on_user_id_and_thread_id", unique: true
     t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "monthly_signup_quota", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "quota_limit", default: 100, null: false
+    t.integer "signups_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "year_month", null: false
+    t.index ["year_month"], name: "index_monthly_signup_quota_on_year_month", unique: true
   end
 
   create_table "notification_settings", force: :cascade do |t|
@@ -318,6 +327,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_083525) do
   create_table "users", force: :cascade do |t|
     t.string "avatar_url"
     t.text "bio"
+    t.boolean "contacted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
     t.string "display_name", null: false

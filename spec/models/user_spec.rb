@@ -212,8 +212,14 @@ RSpec.describe User, type: :model do
     end
 
     describe "#storage_remaining" do
-      it "残りのストレージ容量を返す" do
-        expect(user.storage_remaining).to eq(User::MAX_STORAGE_PER_USER)
+      it "残りのストレージ容量を返す（contactedがfalseの場合）" do
+        user.contacted = false
+        expect(user.storage_remaining).to eq(User::DEFAULT_STORAGE_PER_USER)
+      end
+
+      it "残りのストレージ容量を返す（contactedがtrueの場合）" do
+        user.contacted = true
+        expect(user.storage_remaining).to eq(User::CONTACTED_STORAGE_PER_USER)
       end
     end
 
@@ -225,8 +231,9 @@ RSpec.describe User, type: :model do
       end
 
       context "ファイルがストレージ上限を超える場合" do
-        it "falseを返す" do
-          expect(user.can_upload?(101.megabytes)).to be false
+        it "falseを返す（contactedがfalseの場合）" do
+          user.contacted = false
+          expect(user.can_upload?(51.megabytes)).to be false
         end
       end
     end
@@ -349,16 +356,20 @@ RSpec.describe User, type: :model do
       expect(User::MAX_THREADS_PER_USER).to eq(10)
     end
 
-    it "MAX_STORAGE_PER_USERが定義されている" do
-      expect(User::MAX_STORAGE_PER_USER).to eq(100.megabytes)
+    it "DEFAULT_STORAGE_PER_USERが定義されている" do
+      expect(User::DEFAULT_STORAGE_PER_USER).to eq(50.megabytes)
+    end
+
+    it "CONTACTED_STORAGE_PER_USERが定義されている" do
+      expect(User::CONTACTED_STORAGE_PER_USER).to eq(100.megabytes)
     end
 
     it "MAX_POSTS_PER_HOURが定義されている" do
-      expect(User::MAX_POSTS_PER_HOUR).to eq(10)
+      expect(User::MAX_POSTS_PER_HOUR).to eq(5)
     end
 
     it "MAX_POSTS_PER_DAYが定義されている" do
-      expect(User::MAX_POSTS_PER_DAY).to eq(50)
+      expect(User::MAX_POSTS_PER_DAY).to eq(30)
     end
 
     it "ANONYMIZED_DISPLAY_NAMEが定義されている" do

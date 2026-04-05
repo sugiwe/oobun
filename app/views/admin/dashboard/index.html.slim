@@ -3,6 +3,29 @@
 .max-w-4xl.mx-auto
   h1.text-2xl.mb-8 管理者ダッシュボード
 
+  / 月間登録枠の状況
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-8
+    .flex.items-center.justify-between.mb-4
+      h2.text-lg.font-medium.text-gray-900 今月の新規登録枠（#{@monthly_quota.year_month}）
+      - if @monthly_quota.available?
+        .px-3.py-1.bg-green-100.text-green-800.rounded-full.text-sm.font-medium 受付中
+      - else
+        .px-3.py-1.bg-red-100.text-red-800.rounded-full.text-sm.font-medium 上限到達
+    .grid.grid-cols-3.gap-4
+      div
+        .text-sm.text-gray-500.mb-1 上限
+        .text-2xl.text-gray-900 = "#{@monthly_quota.quota_limit}人"
+      div
+        .text-sm.text-gray-500.mb-1 登録済み
+        .text-2xl.text-gray-900 = "#{@monthly_quota.signups_count}人"
+      div
+        .text-sm.text-gray-500.mb-1 残り
+        .text-2xl class=(@monthly_quota.remaining > 10 ? "text-green-600" : "text-orange-600")
+          = "#{@monthly_quota.remaining}人"
+    .mt-4.pt-4.border-t.border-gray-200
+      .text-sm.text-gray-500
+        | ※ 招待リンク経由での登録は枠にカウントされません
+
   / 統計情報カード
   .grid.grid-cols-1.md:grid-cols-2.gap-4.mb-8
     .bg-white.border.border-gray-200.rounded-lg.p-6

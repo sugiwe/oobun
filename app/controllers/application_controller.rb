@@ -30,6 +30,19 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # 月間枠をインクリメント（招待経由でない場合のみ）
+  def increment_monthly_quota_if_needed(user)
+    # 招待経由の場合はカウント不要
+    return if session[:invitation_token].present? || session[:login_invitation_token].present?
+
+    # 月間枠をインクリメント
+    MonthlySignupQuota.current_month.increment_signups!
+    Rails.logger.info "Monthly signup quota incremented for user #{user.email}"
+  rescue StandardError => e
+    # エラーがあってもユーザー登録は継続（ログのみ）
+    Rails.logger.error "Failed to increment monthly quota: #{e.message}"
+  end
+
   # ログイン許可招待トークンがセッションにあれば処理してAllowedUserに追加
   def process_login_invitation_if_present(user)
     return unless session[:login_invitation_token]

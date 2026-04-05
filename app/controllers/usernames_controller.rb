@@ -19,6 +19,10 @@ class UsernamesController < ApplicationController
     if user.save
       session.delete(:pending_google_payload)
       session[:user_id] = user.id
+
+      # 招待経由でない場合、月間枠をインクリメント
+      increment_monthly_quota_if_needed(user)
+
       process_login_invitation_if_present(user)  # ログイン許可招待処理
       thread_slug = process_invitation_if_present(user)
       if thread_slug
