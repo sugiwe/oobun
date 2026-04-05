@@ -19,6 +19,7 @@ class UsernamesController < ApplicationController
     if user.save
       session.delete(:pending_google_payload)
       session[:user_id] = user.id
+      user.update_column(:last_sign_in_at, Time.current)
 
       # 招待経由でない場合、月間枠をインクリメント
       increment_monthly_quota_if_needed(user)

@@ -40,6 +40,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
+      user.update_column(:last_sign_in_at, Time.current)
       thread_slug = process_invitation_if_present(user, invitation)
       if thread_slug
         redirect_to thread_path(thread_slug), notice: "ログインして交換日記に参加しました！"
@@ -68,6 +69,7 @@ class SessionsController < ApplicationController
     end
 
     session[:user_id] = user.id
+    user.update_column(:last_sign_in_at, Time.current)
     redirect_to root_path, notice: "#{user.display_name} としてログインしました"
   end
 

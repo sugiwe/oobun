@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :require_login
+  before_action :track_user_activity
 
   helper_method :current_user, :logged_in?, :unread_notifications_count
 
@@ -28,6 +29,15 @@ class ApplicationController < ActionController::Base
     unless logged_in?
       redirect_to login_path, alert: "ログインしてください"
     end
+  end
+
+  # ログイン中のユーザーの最終アクティビティ日時を更新
+  # パフォーマンスのため、前回の更新から5分以上経過している場合のみ更新
+  def track_user_activity
+    return unless logged_in?
+    return if current_user.last_activity_at.present? && current_user.last_activity_at > 5.minutes.ago
+
+    current_user.update_column(:last_activity_at, Time.current)
   end
 
   # 月間枠をインクリメント（招待経由でない場合のみ）
