@@ -1,4 +1,6 @@
 class MonthlySignupQuota < ApplicationRecord
+  self.table_name = "monthly_signup_quotas"
+
   # デフォルトの月間登録枠
   DEFAULT_QUOTA_LIMIT = 100
 
@@ -10,7 +12,8 @@ class MonthlySignupQuota < ApplicationRecord
   # 今月の枠を取得または作成
   def self.current_month
     year_month = Time.current.in_time_zone("Tokyo").strftime("%Y-%m")
-    create_or_find_by!(year_month: year_month)
+    # デフォルト値はマイグレーションで設定されているため、ブロック不要
+    find_or_create_by!(year_month: year_month)
   end
 
   # 月間枠に空きがあるかチェック
@@ -18,9 +21,9 @@ class MonthlySignupQuota < ApplicationRecord
     signups_count < quota_limit
   end
 
-  # 登録数をインクリメント
+  # 登録数をインクリメント（アトミック操作）
   def increment_signups!
-    increment!(:signups_count)
+    self.class.increment_counter(:signups_count, id)
   end
 
   # 月間枠をリセット（翌月用）

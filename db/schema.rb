@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_05_204705) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_05_234149) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,13 +72,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_204705) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
-  create_table "monthly_signup_quota", force: :cascade do |t|
+  create_table "monthly_signup_quotas", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "quota_limit", default: 100, null: false
     t.integer "signups_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.string "year_month", null: false
-    t.index ["year_month"], name: "index_monthly_signup_quota_on_year_month", unique: true
+    t.index ["year_month"], name: "index_monthly_signup_quotas_on_year_month", unique: true
   end
 
   create_table "notification_settings", force: :cascade do |t|
