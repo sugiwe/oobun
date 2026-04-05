@@ -147,9 +147,16 @@ class CorrespondenceThread < ApplicationRecord
     free: { title: "自由投稿", description: "✨誰でもいつでも投稿できます（掲示板のように使いたい場合）" }
   }.freeze
 
+  # 公開されているか（free または paid）
+  # TODO: status enum値を published/paid_published にリネーム予定
+  # 詳細: docs/todo/20260406-thread-status-enum値のリネーム.md
+  def published?
+    free? || paid?
+  end
+
   # 公開/非公開を切り替え（draft ⇄ free）
   def toggle_published!
-    if free? || paid?
+    if published?
       draft!
     else
       free!
