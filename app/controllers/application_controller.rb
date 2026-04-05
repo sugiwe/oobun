@@ -33,7 +33,7 @@ class ApplicationController < ActionController::Base
   # 月間枠をインクリメント（招待経由でない場合のみ）
   def increment_monthly_quota_if_needed(user)
     # 招待経由の場合はカウント不要
-    return if session[:invitation_token].present? || session[:login_invitation_token].present?
+    return if session[:invitation_token].present?
 
     # 月間枠をインクリメント
     MonthlySignupQuota.current_month.increment_signups!
@@ -41,33 +41,6 @@ class ApplicationController < ActionController::Base
   rescue StandardError => e
     # エラーがあってもユーザー登録は継続（ログのみ）
     Rails.logger.error "Failed to increment monthly quota: #{e.message}"
-  end
-
-  # ログイン許可招待トークンがセッションにあれば処理してAllowedUserに追加
-  def process_login_invitation_if_present(user)
-    return unless session[:login_invitation_token]
-
-    login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
-    if login_invitation&.usable?
-      # トランザクションとロックで競合状態を防ぐ
-      AllowedUser.transaction do
-        allowed_user = AllowedUser.lock.find_or_initialize_by(email: user.normalized_email)
-        if allowed_user.new_record?
-          allowed_user.invited_by = login_invitation.created_by
-          allowed_user.login_invitation = login_invitation  # どの招待リンクから登録したかを記録
-          allowed_user.added_by_admin = true  # 管理者発行なのでtrue
-          allowed_user.note = "管理者招待リンクから登録 (#{login_invitation.created_by.display_name})"
-          allowed_user.save!
-        end
-        login_invitation.mark_as_used!
-      end
-      session.delete(:login_invitation_token)
-      Rails.logger.info "User #{user.email} used login invitation #{login_invitation.token}"
-    end
-  rescue ActiveRecord::RecordNotUnique => e
-    Rails.logger.warn "Login invitation already processed (race condition): #{e.message}"
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.warn "Failed to process login invitation: #{e.message}"
   end
 
   # 招待トークンがセッションにあれば処理して交換日記ページへのリダイレクトURLを返す
@@ -81,24 +54,11 @@ class ApplicationController < ActionController::Base
     thread_slug
   end
 
-  # 招待トークンの処理: AllowedUserに追加 & Membership作成
+  # 招待トークンの処理: Membership作成
   # 戻り値: 参加した交換日記のslug（成功時）またはnil（失敗時）
   def process_invitation(user, invitation)
     # 招待が有効か確認
     return nil unless invitation&.usable?
-
-    # AllowedUserテーブルに追加（まだ存在しない場合）
-    # 招待による登録なので added_by_admin = false
-    # トランザクションとロックで競合状態を防ぐ
-    AllowedUser.transaction do
-      allowed_user = AllowedUser.lock.find_or_initialize_by(email: user.normalized_email)
-      if allowed_user.new_record?
-        allowed_user.invited_by = invitation.invited_by
-        allowed_user.added_by_admin = false
-        allowed_user.note = "招待リンクから登録 (#{invitation.invited_by&.display_name})"
-        allowed_user.save!
-      end
-    end
 
     # 招待を受け入れる（Membershipを作成）
     # ユーザーレコードをロックして競合状態を防ぐ
@@ -113,9 +73,6 @@ class ApplicationController < ActionController::Base
       end
     end
     thread_slug
-  rescue ActiveRecord::RecordNotUnique => e
-    Rails.logger.warn "Invitation already processed (race condition): #{e.message}"
-    nil
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.warn "Failed to process invitation: #{e.message}"
     nil

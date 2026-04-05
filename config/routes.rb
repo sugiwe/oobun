@@ -61,12 +61,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
     resources :users, only: [ :index, :show ]
-    resources :allowed_users, except: [ :show ]
-    resources :login_invitations, only: [ :index, :new, :create, :show ]
   end
-
-  # ログイン許可招待URL（管理者発行、トークンベース）
-  get "/login-invite/:token", to: "login_invitations#show", as: :login_invitation
 
   # マークダウンプレビュー
   post "/preview_markdown", to: "markdown_previews#create", as: :preview_markdown

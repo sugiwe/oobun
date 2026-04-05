@@ -39,36 +39,7 @@
         .text-gray-500.text-sm.mb-1 自己紹介
         .text-gray-900 = @user.bio
 
-  / ログイン許可情報
-  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
-    h3.text-gray-900.mb-4 ログイン許可情報
-    - if @allowed_user
-      .text-sm
-        .grid.grid-cols-1.md:grid-cols-2.gap-4
-          div
-            .text-gray-500.mb-1 許可状態
-            span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-green-100.text-green-800
-              | 許可済み
-          div
-            .text-gray-500.mb-1 追加方法
-            .text-gray-900 = @allowed_user.added_by
-          div
-            .text-gray-500.mb-1 追加日時
-            .text-gray-900 = l(@allowed_user.created_at, format: :short)
-          - if @allowed_user.login_invitation
-            div
-              .text-gray-500.mb-1 使用した招待リンク
-              = link_to admin_login_invitation_path(@allowed_user.login_invitation), class: "text-gray-600 hover:text-gray-900" do
-                = @allowed_user.login_invitation.note || "招待リンク ##{@allowed_user.login_invitation.id}"
-        - if @allowed_user.note.present?
-          .mt-4.pt-4.border-t.border-gray-200
-            .text-gray-500.mb-1 メモ
-            .text-gray-900 = @allowed_user.note
-    - else
-      .text-sm.text-gray-500
-        | このユーザーはログイン許可リストに登録されていません
-
-  / 参加中の交換日記
+/ 参加中の交換日記
   .bg-white.border.border-gray-200.rounded-lg.overflow-hidden
     .px-6.py-4.bg-gray-50.border-b.border-gray-200
       h3.text-gray-900

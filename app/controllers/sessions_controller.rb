@@ -40,7 +40,6 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
-      process_login_invitation_if_present(user)  # ログイン許可招待処理
       thread_slug = process_invitation_if_present(user, invitation)
       if thread_slug
         redirect_to thread_path(thread_slug), notice: "ログインして交換日記に参加しました！"
@@ -85,12 +84,6 @@ class SessionsController < ApplicationController
   def signup_allowed?(invitation = nil)
     # 交換日記への招待が有効か確認（招待経由は枠カウント外）
     return true if invitation&.usable?
-
-    # ログイン許可招待が有効か確認（招待経由は枠カウント外）
-    if session[:login_invitation_token].present?
-      login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
-      return true if login_invitation&.usable?
-    end
 
     # 月間枠に空きがあるかチェック
     MonthlySignupQuota.current_month.available?
