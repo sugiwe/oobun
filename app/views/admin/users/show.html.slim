@@ -33,14 +33,55 @@
       div
         .text-gray-500.mb-1 最終更新
         .text-gray-900 = l(@user.updated_at, format: :long)
+      div
+        .text-gray-500.mb-1 最終ログイン
+        .text-gray-900
+          - if @user.last_sign_in_at.present?
+            = l(@user.last_sign_in_at, format: :long)
+          - else
+            span.text-gray-400 未記録
+      div
+        .text-gray-500.mb-1 最終アクセス
+        .text-gray-900
+          - if @user.last_activity_at.present?
+            = l(@user.last_activity_at, format: :long)
+          - else
+            span.text-gray-400 未記録
 
     - if @user.bio.present?
       .mt-4.pt-4.border-t.border-gray-200
         .text-gray-500.text-sm.mb-1 自己紹介
         .text-gray-900 = @user.bio
 
-/ 参加中の交換日記
-  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden
+  / 使用状況
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    h3.text-lg.text-gray-900.mb-4 使用状況
+    .grid.grid-cols-1.md:grid-cols-3.gap-4.text-sm
+      div
+        .text-gray-500.mb-1 ストレージ使用量
+        .text-gray-900
+          = number_to_human_size(@user.storage_used)
+          span.text-gray-500.ml-1
+            | /
+            = number_to_human_size(@user.max_storage_per_user)
+          - if @user.contacted?
+            span.ml-2.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-blue-100.text-blue-800
+              | 拡張済み
+        - storage_percent = (@user.storage_used.to_f / @user.max_storage_per_user * 100).round(1)
+        .mt-2.w-full.bg-gray-200.rounded-full.h-2
+          .bg-blue-600.h-2.rounded-full style="width: #{[storage_percent, 100].min}%"
+      div
+        .text-gray-500.mb-1 投稿数（全期間）
+        .text-gray-900 = "#{@user.posts.count}件"
+      div
+        .text-gray-500.mb-1 参加交換日記数
+        .text-gray-900
+          = "#{@user.memberships.count}件"
+          span.text-gray-500.ml-1
+            | / 10件
+
+  / 参加中の交換日記
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden.mb-6
     .px-6.py-4.bg-gray-50.border-b.border-gray-200
       h3.text-gray-900
         | 参加中の交換日記
@@ -64,3 +105,61 @@
     - else
       .px-6.py-12.text-center.text-gray-500
         | 参加中の交換日記はありません
+
+  / オーナーの交換日記
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden.mb-6
+    .px-6.py-4.bg-gray-50.border-b.border-gray-200
+      h3.text-gray-900
+        | オーナーの交換日記
+        span.ml-2.text-sm.text-gray-500
+          | （
+          = @owned_threads.count
+          | 件）
+
+    - if @owned_threads.any?
+      .divide-y.divide-gray-200
+        - @owned_threads.each do |thread|
+          = link_to thread_path(thread.slug), class: "block px-6 py-4 hover:bg-gray-50 transition-colors" do
+            .flex.items-center.justify-between
+              div
+                .text-gray-900 = thread.title
+                .text-sm.text-gray-500.mt-1
+                  | 作成日:
+                  = l(thread.created_at, format: :short)
+                  - if thread.published?
+                    span.ml-2.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-green-100.text-green-800
+                      | 公開中
+                  - else
+                    span.ml-2.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-gray-100.text-gray-800
+                      | 非公開
+              svg.w-5.h-5.text-gray-400 fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+    - else
+      .px-6.py-12.text-center.text-gray-500
+        | オーナーの交換日記はありません
+
+  / 購読中の交換日記
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden.mb-6
+    .px-6.py-4.bg-gray-50.border-b.border-gray-200
+      h3.text-gray-900
+        | 購読中の交換日記
+        span.ml-2.text-sm.text-gray-500
+          | （
+          = @subscriptions.count
+          | 件）
+
+    - if @subscriptions.any?
+      .divide-y.divide-gray-200
+        - @subscriptions.each do |subscription|
+          = link_to thread_path(subscription.thread.slug), class: "block px-6 py-4 hover:bg-gray-50 transition-colors" do
+            .flex.items-center.justify-between
+              div
+                .text-gray-900 = subscription.thread.title
+                .text-sm.text-gray-500.mt-1
+                  | 購読開始日:
+                  = l(subscription.created_at, format: :short)
+              svg.w-5.h-5.text-gray-400 fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+    - else
+      .px-6.py-12.text-center.text-gray-500
+        | 購読中の交換日記はありません

@@ -8,5 +8,7 @@ class Admin::UsersController < Admin::ApplicationController
   def show
     @user = User.find(params[:id])
     @memberships = @user.memberships.includes(:thread).order(created_at: :desc)
+    @owned_threads = @user.owned_threads.order(created_at: :desc)
+    @subscriptions = @user.subscriptions.includes(:thread).order(created_at: :desc)
   end
 end

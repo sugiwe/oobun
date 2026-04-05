@@ -8,6 +8,7 @@ class User < ApplicationRecord
   # Associations
   has_many :memberships, dependent: :destroy
   has_many :correspondence_threads, through: :memberships, source: :thread
+  has_many :owned_threads, -> { where(memberships: { role: "owner" }) }, through: :memberships, source: :thread
   has_many :posts, -> { unscope(where: :status) }, dependent: :destroy
   has_many :published_posts, -> { published_posts }, class_name: "Post"
   has_many :draft_posts, -> { draft_posts }, class_name: "Post"
