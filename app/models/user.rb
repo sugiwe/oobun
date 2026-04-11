@@ -8,6 +8,7 @@ class User < ApplicationRecord
   # Associations
   has_many :memberships, dependent: :destroy
   has_many :correspondence_threads, through: :memberships, source: :thread
+  has_many :owned_threads, -> { where(memberships: { role: "owner" }) }, through: :memberships, source: :thread
   has_many :posts, -> { unscope(where: :status) }, dependent: :destroy
   has_many :published_posts, -> { published_posts }, class_name: "Post"
   has_many :draft_posts, -> { draft_posts }, class_name: "Post"
@@ -35,14 +36,14 @@ class User < ApplicationRecord
   validate :check_storage_limit_for_avatar, if: -> { avatar.attached? && avatar.changed? }
 
   # アバターストレージ容量チェック
-  # NOTE: 複数同時アップロードによる競合状態で100MBを若干超過する可能性があるが、
-  # 1画像5MB制限により最大でも105MB程度に抑えられるため許容範囲とする
+  # NOTE: 複数同時アップロードによる競合状態で容量を若干超過する可能性があるが、
+  # 1画像5MB制限により最大でも55MB/105MB程度に抑えられるため許容範囲とする
   def check_storage_limit_for_avatar
     return unless avatar.attached?
 
     new_file_size = avatar.blob.byte_size
     unless can_upload?(new_file_size)
-      errors.add(:avatar, "ストレージ容量の上限（#{MAX_STORAGE_PER_USER / 1.megabyte}MB）を超えています")
+      errors.add(:avatar, "ストレージ容量の上限（#{max_storage_per_user / 1.megabyte}MB）を超えています")
     end
   end
 
@@ -73,9 +74,10 @@ class User < ApplicationRecord
 
   # 使用制限チェック
   MAX_THREADS_PER_USER = 10
-  MAX_STORAGE_PER_USER = 100.megabytes
-  MAX_POSTS_PER_HOUR = 10  # 下書き・公開含む（新規作成のみカウント、更新は除外）
-  MAX_POSTS_PER_DAY = 50   # 下書き・公開含む（新規作成のみカウント、更新は除外）
+  DEFAULT_STORAGE_PER_USER = 50.megabytes  # デフォルトストレージ
+  CONTACTED_STORAGE_PER_USER = 100.megabytes  # 連絡後のストレージ
+  MAX_POSTS_PER_HOUR = 5   # 下書き・公開含む（新規作成のみカウント、更新は除外）
+  MAX_POSTS_PER_DAY = 30   # 下書き・公開含む（新規作成のみカウント、更新は除外）
 
   def can_join_thread?
     correspondence_threads.count < MAX_THREADS_PER_USER
@@ -97,11 +99,16 @@ class User < ApplicationRecord
   end
 
   def storage_remaining
-    MAX_STORAGE_PER_USER - storage_used
+    max_storage_per_user - storage_used
   end
 
   def can_upload?(file_size)
-    storage_used + file_size <= MAX_STORAGE_PER_USER
+    storage_used + file_size <= max_storage_per_user
+  end
+
+  # contacted フラグに基づいてストレージ上限を返す
+  def max_storage_per_user
+    contacted? ? CONTACTED_STORAGE_PER_USER : DEFAULT_STORAGE_PER_USER
   end
 
   def post_rate_limit_exceeded?

@@ -19,7 +19,11 @@ class UsernamesController < ApplicationController
     if user.save
       session.delete(:pending_google_payload)
       session[:user_id] = user.id
-      process_login_invitation_if_present(user)  # ログイン許可招待処理
+      user.update_column(:last_sign_in_at, Time.current)
+
+      # 招待経由でない場合、月間枠をインクリメント
+      increment_monthly_quota_if_needed(user)
+
       thread_slug = process_invitation_if_present(user)
       if thread_slug
         redirect_to thread_path(thread_slug), notice: "ようこそ！アカウントを作成して交換日記に参加しました"

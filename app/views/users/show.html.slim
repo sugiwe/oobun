@@ -36,9 +36,9 @@
           = render "users/usage_stat", \
             icon: "💾", \
             title: "ストレージ", \
-            description: "#{(@user.storage_used.to_f / 1.megabyte).round(1)} MB / #{User::MAX_STORAGE_PER_USER / 1.megabyte} MB", \
+            description: "#{(@user.storage_used.to_f / 1.megabyte).round(1)} MB / #{@user.max_storage_per_user / 1.megabyte} MB", \
             current_value: @user.storage_used, \
-            max_value: User::MAX_STORAGE_PER_USER, \
+            max_value: @user.max_storage_per_user, \
             bar_color_normal: "bg-blue-500", \
             remaining_text: "残り #{(@user.storage_remaining.to_f / 1.megabyte).round(1)} MB"
 

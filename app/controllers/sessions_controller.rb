@@ -24,14 +24,15 @@ class SessionsController < ApplicationController
       return
     end
 
-    # ログイン許可チェック（招待をキャッシュして重複クエリを防ぐ）
+    # 月間枠チェック（招待をキャッシュして重複クエリを防ぐ）
     invitation = cached_invitation
-    unless user_allowed_or_invited?(payload["email"], invitation)
-      redirect_to login_path, alert: "現在ベータ版のため、招待されたユーザーのみログインできます。"
+    user = User.find_or_initialize_from_google(payload)
+
+    # 新規ユーザーの場合、月間枠または招待をチェック
+    if user.new_record? && !signup_allowed?(invitation)
+      redirect_to login_path, alert: "今月の新規登録枠が上限に達しました。来月またお試しください。"
       return
     end
-
-    user = User.find_or_initialize_from_google(payload)
 
     if user.new_record? || user.username.blank?
       # 新規ユーザー: username 設定画面へ
@@ -39,7 +40,7 @@ class SessionsController < ApplicationController
       redirect_to new_username_path
     else
       session[:user_id] = user.id
-      process_login_invitation_if_present(user)  # ログイン許可招待処理
+      user.update_column(:last_sign_in_at, Time.current)
       thread_slug = process_invitation_if_present(user, invitation)
       if thread_slug
         redirect_to thread_path(thread_slug), notice: "ログインして交換日記に参加しました！"
@@ -68,6 +69,7 @@ class SessionsController < ApplicationController
     end
 
     session[:user_id] = user.id
+    user.update_column(:last_sign_in_at, Time.current)
     redirect_to root_path, notice: "#{user.display_name} としてログインしました"
   end
 
@@ -80,21 +82,13 @@ class SessionsController < ApplicationController
     @cached_invitation ||= Invitation.find_by(token: session[:invitation_token])
   end
 
-  # ログイン許可チェック: AllowedUserテーブルまたは有効な招待トークンセッション
-  def user_allowed_or_invited?(email, invitation = nil)
-    # AllowedUserテーブルに存在するか
-    return true if AllowedUser.exists?(email: email.downcase.strip)
-
-    # 交換日記への招待が有効か確認
+  # 新規登録許可チェック: 月間枠または招待
+  def signup_allowed?(invitation = nil)
+    # 交換日記への招待が有効か確認（招待経由は枠カウント外）
     return true if invitation&.usable?
 
-    # ログイン許可招待が有効か確認
-    if session[:login_invitation_token].present?
-      login_invitation = LoginInvitation.find_by(token: session[:login_invitation_token])
-      return true if login_invitation&.usable?
-    end
-
-    false
+    # 月間枠に空きがあるかチェック
+    MonthlySignupQuota.current_month.available?
   end
 
   def valid_google_csrf_token?

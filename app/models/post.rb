@@ -30,7 +30,7 @@ class Post < ApplicationRecord
 
     new_file_size = thumbnail.blob.byte_size
     unless user.can_upload?(new_file_size)
-      errors.add(:thumbnail, "ストレージ容量の上限（#{User::MAX_STORAGE_PER_USER / 1.megabyte}MB）を超えています")
+      errors.add(:thumbnail, "ストレージ容量の上限（#{user.max_storage_per_user / 1.megabyte}MB）を超えています")
     end
   end
 
