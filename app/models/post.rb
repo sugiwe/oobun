@@ -109,6 +109,14 @@ class Post < ApplicationRecord
     slug.presence || id.to_s
   end
 
+  # デフォルトのslugを生成（編集画面の初期値用、保存はしない）
+  def default_slug
+    date = Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
+    # 同じ日付のslugを持つ投稿数をカウント（既存のslugを考慮）
+    count = thread.posts.unscoped.where("slug LIKE ?", "#{date}%").count + 1
+    "#{date}-#{count}"
+  end
+
   # Callbacks
   # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
   before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }

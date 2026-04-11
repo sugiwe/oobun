@@ -2,7 +2,7 @@
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
-      = f.label :title, "タイトル（公開時は必須）", class: "text-sm font-medium text-gray-700"
+      = f.label :title, "タイトル（任意）", class: "text-sm font-medium text-gray-700"
       = f.text_field :title,
           placeholder: "投稿のタイトルを入力してください",
           autofocus: true,
@@ -10,9 +10,8 @@
           class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
 
     .flex.flex-col.gap-1
-      = f.label :slug, "URL（任意）", class: "text-sm font-medium text-gray-700"
+      = f.label :slug, "URL", class: "text-sm font-medium text-gray-700"
       = f.text_field :slug,
-          placeholder: "例: 2026-04-11-1（空欄の場合は公開日から自動生成）",
           class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
       p.text-xs.text-gray-400 英小文字、数字、ハイフンのみ使用できます
 

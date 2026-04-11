@@ -39,6 +39,8 @@ class Threads::PostsController < Threads::ApplicationController
   def edit
     # 下書きまたは公開済み投稿を編集可能
     set_prev_post if @post.draft?
+    # 新規下書きの場合、デフォルトのslugを設定（フォームの初期値として表示）
+    @post.slug ||= @post.default_slug if @post.draft?
   end
 
   def update
