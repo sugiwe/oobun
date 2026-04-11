@@ -110,8 +110,8 @@ class Post < ApplicationRecord
   end
 
   # Callbacks
-  # 投稿作成前にslugを自動生成（slug未指定の場合）
-  before_validation :generate_slug, on: :create, if: -> { slug.blank? && published_at.present? }
+  # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
+  before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }
 
   # 投稿が公開状態になった時、スレッドの自動公開をチェック
   # (create時だけでなく、draft→publishedへの更新時にも対応)

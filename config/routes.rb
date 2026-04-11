@@ -41,6 +41,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # 投稿表示モード設定（namespace外で定義）
+  patch "/settings/post_view", to: "settings#update_post_view", as: :settings_post_view
+
   # ユーザーページ（最優先でマッチさせる）
   get    "/@:username",        to: "users#show",   as: :user
   get    "/@:username/edit",   to: "users#edit",   as: :edit_user
