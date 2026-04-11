@@ -13,11 +13,10 @@ details.border.border-gray-200.rounded-lg.bg-gray-50 open=true
     / サムネイル画像（あれば）
     - if prev_post.thumbnail.attached?
       .mb-4
-        = image_tag prev_post.thumbnail, class: "w-full rounded", alt: prev_post.title
+        = image_tag prev_post.thumbnail, class: "w-full rounded", alt: prev_post.display_title
 
     / タイトル
-    - if prev_post.title.present?
-      h3.text-lg.text-gray-900.mb-4 = prev_post.title
+    h3.text-lg.text-gray-900.mb-4 = prev_post.display_title
 
     / タブ切り替え
     .flex.gap-2.border-b.border-gray-200.mb-3

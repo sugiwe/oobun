@@ -100,13 +100,20 @@ class Threads::PostsController < Threads::ApplicationController
   private
 
   def set_post
-    @post = @thread.posts.unscope(where: :status).find(params[:id])
+    # 数値IDまたはslugで検索
+    if params[:id].match?(/\A\d+\z/)
+      # 数値IDの場合
+      @post = @thread.posts.unscope(where: :status).find(params[:id])
+    else
+      # slugの場合
+      @post = @thread.posts.unscope(where: :status).find_by!(slug: params[:id])
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to thread_path(@thread.slug), alert: "投稿が見つかりません"
   end
 
   def post_params
-    params.require(:post).permit(:title, :body, :thumbnail)
+    params.require(:post).permit(:title, :body, :thumbnail, :slug)
   end
 
   def require_post_owner

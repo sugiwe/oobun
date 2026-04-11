@@ -22,7 +22,7 @@
       / 左：サムネイル画像（スマホ: 正方形120x120、PC: 3:2比率240x160）
       .bg-gray-100.flex.items-center.justify-center.overflow-hidden.flex-shrink-0.w-30.h-30.md:w-60.md:h-40.rounded
         - if post.thumbnail.attached?
-          = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.title
+          = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.display_title
         - else
           .text-gray-300.text-xl.md:text-2xl = post.draft? ? "✍️" : "📮"
 
@@ -30,7 +30,7 @@
       .p-4.md:p-6.flex.flex-col.gap-1.md:gap-2.flex-1.min-w-0
         / タイトル
         .flex.items-center.gap-2
-          h3.text-sm.md:text-base.mb-1.text-gray-900.line-clamp-2.md:line-clamp-1.flex-1 = post.title
+          h3.text-sm.md:text-base.mb-1.text-gray-900.line-clamp-2.md:line-clamp-1.flex-1 = post.display_title
           - if post.draft?
             span.text-xs.font-medium.text-amber-700.bg-amber-100.px-2.py-0.5.rounded.flex-shrink-0 下書き
 

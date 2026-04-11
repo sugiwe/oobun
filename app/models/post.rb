@@ -12,12 +12,13 @@ class Post < ApplicationRecord
   has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations
-  validates :title, presence: true, length: { maximum: 100 }, if: :published?
-  validates :title, length: { maximum: 100 }, allow_blank: true, if: :draft?
+  validates :title, length: { maximum: 100 }, allow_blank: true
   validates :body, presence: true, length: { in: 10..10_000 }, if: :published?
   validates :body, length: { maximum: 10_000 }, allow_blank: true, if: :draft?
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }
+  validates :slug, uniqueness: { scope: :thread_id }, allow_nil: true
+  validates :slug, format: { with: /\A[a-z0-9\-]+\z/, message: "は英小文字、数字、ハイフンのみ使用できます" }, allow_blank: true
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
   validate :check_posting_rules, on: :create, if: :published?
 
@@ -84,6 +85,13 @@ class Post < ApplicationRecord
     published_at || created_at
   end
 
+  # 表示用のタイトル（空欄の場合は公開日時から生成）
+  def display_title
+    return title if title.present?
+    return ANONYMIZED_TITLE if anonymized?
+    display_published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
+  end
+
   # 下書きを公開する
   def publish!
     update!(status: "published", published_at: Time.current)
@@ -96,7 +104,15 @@ class Post < ApplicationRecord
     thread.my_turn?(user)
   end
 
+  # URLパラメータ用（slugがあればslug、なければID）
+  def to_param
+    slug.presence || id.to_s
+  end
+
   # Callbacks
+  # 投稿作成前にslugを自動生成（slug未指定の場合）
+  before_validation :generate_slug, on: :create, if: -> { slug.blank? && published_at.present? }
+
   # 投稿が公開状態になった時、スレッドの自動公開をチェック
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
@@ -106,6 +122,17 @@ class Post < ApplicationRecord
   after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
 
   private
+
+  # slug自動生成（公開日時ベース: 2026-04-11-1 形式）
+  def generate_slug
+    return if slug.present?
+    return unless published_at.present?
+
+    date = published_at.in_time_zone("Tokyo").strftime("%Y-%m-%d")
+    # 同じ日付のslugを持つ投稿数をカウント（既存のslugを考慮）
+    count = thread.posts.unscoped.where("slug LIKE ?", "#{date}%").count + 1
+    self.slug = "#{date}-#{count}"
+  end
 
   def check_auto_publish_thread
     return unless thread.draft?

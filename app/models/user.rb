@@ -19,6 +19,9 @@ class User < ApplicationRecord
   has_one :notification_setting, dependent: :destroy
   has_one_attached :avatar
 
+  # Enums
+  enum :preferred_post_view, { markdown: "markdown", plain: "plain" }, default: :markdown
+
   # Callbacks
   after_create :create_default_notification_setting
   after_create :send_welcome_notification
