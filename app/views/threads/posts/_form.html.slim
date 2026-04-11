@@ -9,11 +9,12 @@
           data: { draft_autosave_target: "title", action: "input->draft-autosave#input" },
           class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-400"
 
-    .flex.flex-col.gap-1
-      = f.label :slug, "URL", class: "text-sm font-medium text-gray-700"
-      = f.text_field :slug,
-          class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
-      p.text-xs.text-gray-400 公開時に連番が自動で付きます（例: 2026-04-11-1）。英小文字、数字、ハイフンのみ使用できます
+    - if @post.published?
+      .flex.flex-col.gap-1
+        = f.label :slug, "URL", class: "text-sm font-medium text-gray-700"
+        = f.text_field :slug,
+            class: "w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+        p.text-xs.text-gray-400 英小文字、数字、ハイフンのみ使用できます
 
     .flex.flex-col.gap-1
       = f.label :thumbnail, "サムネイル画像（任意）", class: "text-sm font-medium text-gray-700"

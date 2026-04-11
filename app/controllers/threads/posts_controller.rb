@@ -39,8 +39,6 @@ class Threads::PostsController < Threads::ApplicationController
   def edit
     # 下書きまたは公開済み投稿を編集可能
     set_prev_post if @post.draft?
-    # 新規下書きの場合、デフォルトのslugを設定（フォームの初期値として表示）
-    @post.slug ||= @post.default_slug if @post.draft?
   end
 
   def update
@@ -82,11 +80,11 @@ class Threads::PostsController < Threads::ApplicationController
       return
     end
 
+    # バリデーションチェック（公開時の必須項目チェック）
     @post.status = "published"
     if @post.valid?
-      @post.published_at = Time.current
       ActiveRecord::Base.transaction do
-        @post.save!
+        @post.publish!  # slug生成とpublished_at設定を含む
         @thread.update_last_post_metadata!
       end
       redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"

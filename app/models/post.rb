@@ -96,16 +96,21 @@ class Post < ApplicationRecord
   def publish!
     # カスタムslugが設定されていない場合、または日付のみの場合は公開時に連番を付与
     if slug.blank? || slug.match?(/\A\d{4}-\d{2}-\d{2}\z/)
-      date = Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
-      # その日のスレッド内の公開済み投稿数をカウントして連番を決定
-      count = thread.posts.unscoped
-                    .where(status: "published")
-                    .where("DATE(published_at AT TIME ZONE 'Asia/Tokyo') = ?", Time.current.in_time_zone("Tokyo").to_date)
-                    .count + 1
-      self.slug = "#{date}-#{count}"
-    end
+      # トランザクション内でスレッドをロックして、同時公開による競合を防ぐ
+      Post.transaction do
+        # スレッドをロックして、同じスレッド内の同時公開をブロック
+        thread.lock!
 
-    update!(status: "published", published_at: Time.current)
+        # published_atを設定してから保存（コールバックで再度slug生成されないようにslugを先に設定）
+        self.published_at = Time.current
+        self.slug = generate_sequential_slug(self.published_at)
+        self.status = "published"
+        save!
+      end
+    else
+      # カスタムslugの場合は通常通り更新
+      update!(status: "published", published_at: Time.current)
+    end
   end
 
   # 公開可能かどうか（自分のターンかつ下書き）
@@ -115,9 +120,14 @@ class Post < ApplicationRecord
     thread.my_turn?(user)
   end
 
-  # URLパラメータ用（slugがあればslug、なければID）
+  # URLパラメータ用（公開済みでslugがあればslug、それ以外はID）
   def to_param
-    slug.presence || id.to_s
+    # 下書きは常にID、公開済みはslugがあればslug、なければID
+    if draft?
+      id.to_s
+    else
+      slug.presence || id.to_s
+    end
   end
 
   # デフォルトのslugを生成（編集画面の初期値用、保存はしない）
@@ -145,10 +155,21 @@ class Post < ApplicationRecord
     return if slug.present?
     return unless published_at.present?
 
-    date = published_at.in_time_zone("Tokyo").strftime("%Y-%m-%d")
-    # 同じ日付のslugを持つ投稿数をカウント（既存のslugを考慮）
-    count = thread.posts.unscoped.where("slug LIKE ?", "#{date}%").count + 1
-    self.slug = "#{date}-#{count}"
+    self.slug = generate_sequential_slug(published_at)
+  end
+
+  # 連番付きslugを生成（YYYY-MM-DD-N 形式）
+  def generate_sequential_slug(timestamp)
+    tokyo_time = timestamp.in_time_zone("Tokyo")
+    date = tokyo_time.strftime("%Y-%m-%d")
+
+    # その日のスレッド内の公開済み投稿数をカウントして連番を決定（範囲クエリでインデックス使用）
+    count = thread.posts.unscoped
+                  .where(status: "published")
+                  .where(published_at: tokyo_time.all_day)
+                  .count + 1
+
+    "#{date}-#{count}"
   end
 
   def check_auto_publish_thread
