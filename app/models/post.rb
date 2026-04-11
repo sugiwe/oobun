@@ -157,11 +157,14 @@ class Post < ApplicationRecord
     tokyo_time = timestamp.in_time_zone("Tokyo")
     date = tokyo_time.strftime("%Y-%m-%d")
 
-    # その日のスレッド内の公開済み＋匿名化済み投稿数をカウントして連番を決定
-    # デフォルトスコープを活用してthread_id制約を維持
-    count = thread.posts
+    # その日のスレッド内の既存slugから最大値を取得してインクリメント
+    # 削除された投稿があっても連番が重複しない
+    slugs = thread.posts
                   .where(published_at: tokyo_time.all_day)
-                  .count + 1
+                  .where("slug LIKE ?", "#{date}-%")
+                  .pluck(:slug)
+    max_num = slugs.map { |s| s.split("-").last.to_i }.max || 0
+    count = max_num + 1
 
     "#{date}-#{count}"
   end
