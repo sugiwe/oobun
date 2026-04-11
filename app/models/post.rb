@@ -94,6 +94,17 @@ class Post < ApplicationRecord
 
   # 下書きを公開する
   def publish!
+    # カスタムslugが設定されていない場合、または日付のみの場合は公開時に連番を付与
+    if slug.blank? || slug.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      date = Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
+      # その日のスレッド内の公開済み投稿数をカウントして連番を決定
+      count = thread.posts.unscoped
+                    .where(status: "published")
+                    .where("DATE(published_at AT TIME ZONE 'Asia/Tokyo') = ?", Time.current.in_time_zone("Tokyo").to_date)
+                    .count + 1
+      self.slug = "#{date}-#{count}"
+    end
+
     update!(status: "published", published_at: Time.current)
   end
 
@@ -110,11 +121,9 @@ class Post < ApplicationRecord
   end
 
   # デフォルトのslugを生成（編集画面の初期値用、保存はしない）
+  # 公開時に連番が付与されるため、ここでは日付のみ
   def default_slug
-    date = Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
-    # 同じ日付のslugを持つ投稿数をカウント（既存のslugを考慮）
-    count = thread.posts.unscoped.where("slug LIKE ?", "#{date}%").count + 1
-    "#{date}-#{count}"
+    Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
   end
 
   # Callbacks
