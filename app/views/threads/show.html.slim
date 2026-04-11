@@ -154,12 +154,12 @@
       .flex.items-center.gap-2
         - if @current_sort == "oldest"
           = link_to thread_path(@thread.slug, sort: nil), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
-            | 最新順
-          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 古い順
+            | 最新から読む
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 初めから読む
         - else
-          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 最新順
+          span.px-3.py-1.text-sm.bg-gray-900.text-white.rounded 最新から読む
           = link_to thread_path(@thread.slug, sort: "oldest"), class: "px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded" do
-            | 古い順
+            | 初めから読む
 
   / 投稿一覧（タイムラインレイアウト）
   - if @posts.empty?

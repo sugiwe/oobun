@@ -18,7 +18,7 @@ class Post < ApplicationRecord
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }
   validates :slug, uniqueness: { scope: :thread_id }, allow_nil: true
-  validates :slug, format: { with: /\A[a-z0-9\-]+\z/, message: "は英小文字、数字、ハイフンのみ使用できます" }, allow_blank: true
+  validates :slug, format: { with: /\A(?!\d+\z)[a-z0-9\-]+\z/, message: "は英小文字、数字、ハイフンのみ使用でき、数字のみにすることはできません" }, allow_blank: true
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
   validate :check_posting_rules, on: :create, if: :published?
 
@@ -130,12 +130,6 @@ class Post < ApplicationRecord
     end
   end
 
-  # デフォルトのslugを生成（編集画面の初期値用、保存はしない）
-  # 公開時に連番が付与されるため、ここでは日付のみ
-  def default_slug
-    Time.current.in_time_zone("Tokyo").strftime("%Y-%m-%d")
-  end
-
   # Callbacks
   # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
   before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }
@@ -163,9 +157,9 @@ class Post < ApplicationRecord
     tokyo_time = timestamp.in_time_zone("Tokyo")
     date = tokyo_time.strftime("%Y-%m-%d")
 
-    # その日のスレッド内の公開済み投稿数をカウントして連番を決定（範囲クエリでインデックス使用）
-    count = thread.posts.unscoped
-                  .where(status: "published")
+    # その日のスレッド内の公開済み＋匿名化済み投稿数をカウントして連番を決定
+    # デフォルトスコープを活用してthread_id制約を維持
+    count = thread.posts
                   .where(published_at: tokyo_time.all_day)
                   .count + 1
 
