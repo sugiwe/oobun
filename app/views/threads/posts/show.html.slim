@@ -1,4 +1,4 @@
-- content_for :title, "#{@post.title} - #{@thread.title} - coconikki"
+- content_for :title, "#{@post.display_title} - #{@thread.title} - coconikki"
 
 .max-w-3xl.mx-auto
   .mb-6
@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -25,31 +25,43 @@
               .w-15.h-15.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
             .flex-1.min-w-0
               .text-xs.text-gray-500.mb-1 前回の投稿
-              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.title
+              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @prev_post.display_title
               .text-xs.text-gray-500.line-clamp-1 = truncate(@prev_post.body, length: 80)
 
     / サムネイル画像（あれば）
     - if @post.thumbnail.attached?
       .mb-12
-        = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.title
+        = image_tag @post.thumbnail, class: "w-full rounded-lg", alt: @post.display_title
 
     / ヘッダー（タイトル・著者）
     header.mb-12
       .flex.items-start.justify-between.gap-4.mb-8
-        h1.text-xl.md:text-2xl.text-gray-900.leading-7.md:leading-9.flex-1 = @post.title
+        h1.text-xl.md:text-2xl.text-gray-900.leading-7.md:leading-9.flex-1 = @post.display_title
         - if logged_in? && @post.editable_by?(current_user)
           .flex.gap-2
             = link_to "編集", edit_thread_post_path(@thread.slug, @post), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
             = button_to "削除", thread_post_path(@thread.slug, @post), method: :delete, data: { turbo_confirm: "この投稿を削除しますか？この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
-      .flex.items-center.gap-3
-        = link_to user_path(@post.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
-          = render "shared/avatar", user: @post.user, show_fallback: true
-        .flex.flex-col
-          = link_to @post.user.display_name, user_path(@post.user.username), class: "text-base font-medium text-gray-700 transition-opacity hover:opacity-70"
-          span.text-sm.text-gray-400 = @post.display_published_at.strftime("%Y年%m月%d日 %H:%M")
+      .flex.items-center.justify-between.gap-3
+        .flex.items-center.gap-3
+          = link_to user_path(@post.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
+            = render "shared/avatar", user: @post.user, show_fallback: true
+          .flex.flex-col
+            = link_to @post.user.display_name, user_path(@post.user.username), class: "text-base font-medium text-gray-700 transition-opacity hover:opacity-70"
+            span.text-sm.text-gray-400 = @post.display_published_at.strftime("%Y年%m月%d日 %H:%M")
+        / 表示切り替えトグル
+        .flex.gap-2.border-b.border-gray-200
+          button.px-3.py-1.text-xs.border-b-2.transition-colors type="button" data-post-view-target="markdownButton" data-action="click->post-view#showMarkdown"
+            | Markdown
+          button.px-3.py-1.text-xs.border-b-2.transition-colors type="button" data-post-view-target="plainButton" data-action="click->post-view#showPlain"
+            | Plain
 
-    / 本文（手紙の内容）
-    .text-base.text-gray-800.leading-loose.markdown-body = render_markdown(@post.body)
+    / 本文（手紙の内容）- Markdown表示
+    .text-base.text-gray-800.leading-loose.markdown-body data-post-view-target="markdownArea"
+      = render_markdown(@post.body)
+
+    / 本文（手紙の内容）- Plain表示
+    .text-base.text-gray-800.leading-loose.whitespace-pre-wrap.font-mono.hidden data-post-view-target="plainArea"
+      = @post.body
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?
@@ -73,10 +85,10 @@
           .flex.items-start.gap-3
             - if @next_post.thumbnail.attached?
               .w-15.h-15.flex-shrink-0.rounded.overflow-hidden.bg-gray-200
-                = image_tag @next_post.thumbnail, class: "w-full h-full object-cover", alt: @next_post.title
+                = image_tag @next_post.thumbnail, class: "w-full h-full object-cover", alt: @next_post.display_title
             - else
               .w-15.h-15.flex-shrink-0.rounded.bg-gray-200.flex.items-center.justify-center.text-xl 📮
             .flex-1.min-w-0
               .text-xs.text-gray-500.mb-1 次の投稿
-              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.title
+              .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.display_title
               .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)

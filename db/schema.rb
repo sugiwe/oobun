@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_05_234149) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_11_075443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -121,6 +121,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_234149) do
     t.text "body"
     t.datetime "created_at", null: false
     t.datetime "published_at"
+    t.string "slug"
     t.string "status", default: "published", null: false
     t.bigint "thread_id", null: false
     t.string "title", default: "", null: false
@@ -129,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_234149) do
     t.index ["published_at"], name: "index_posts_on_published_at"
     t.index ["status"], name: "index_posts_on_status"
     t.index ["thread_id", "created_at"], name: "index_posts_on_thread_id_and_created_at"
+    t.index ["thread_id", "slug"], name: "index_posts_on_thread_id_and_slug", unique: true
     t.index ["thread_id", "status"], name: "index_posts_on_thread_id_and_status"
     t.index ["thread_id"], name: "index_posts_on_thread_id"
     t.index ["user_id", "thread_id"], name: "index_posts_on_user_thread_draft_uniqueness", unique: true, where: "((status)::text = 'draft'::text)"
@@ -306,6 +308,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_234149) do
     t.string "google_uid"
     t.datetime "last_activity_at"
     t.datetime "last_sign_in_at"
+    t.string "preferred_post_view", default: "markdown", null: false
     t.datetime "updated_at", null: false
     t.string "username", null: false
     t.index ["deleted_at"], name: "index_users_on_deleted_at"

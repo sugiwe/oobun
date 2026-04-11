@@ -80,11 +80,11 @@ class Threads::PostsController < Threads::ApplicationController
       return
     end
 
+    # バリデーションチェック（公開時の必須項目チェック）
     @post.status = "published"
     if @post.valid?
-      @post.published_at = Time.current
       ActiveRecord::Base.transaction do
-        @post.save!
+        @post.publish!  # slug生成とpublished_at設定を含む
         @thread.update_last_post_metadata!
       end
       redirect_to thread_post_path(@thread.slug, @post), notice: "投稿しました"
@@ -100,7 +100,14 @@ class Threads::PostsController < Threads::ApplicationController
   private
 
   def set_post
-    @post = @thread.posts.unscope(where: :status).find(params[:id])
+    # 数値IDまたはslugで検索
+    if params[:id].match?(/\A\d+\z/)
+      # 数値IDの場合
+      @post = @thread.posts.unscope(where: :status).find(params[:id])
+    else
+      # slugの場合
+      @post = @thread.posts.unscope(where: :status).find_by!(slug: params[:id])
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to thread_path(@thread.slug), alert: "投稿が見つかりません"
   end

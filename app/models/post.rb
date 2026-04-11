@@ -12,12 +12,13 @@ class Post < ApplicationRecord
   has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations
-  validates :title, presence: true, length: { maximum: 100 }, if: :published?
-  validates :title, length: { maximum: 100 }, allow_blank: true, if: :draft?
+  validates :title, length: { maximum: 100 }, allow_blank: true
   validates :body, presence: true, length: { in: 10..10_000 }, if: :published?
   validates :body, length: { maximum: 10_000 }, allow_blank: true, if: :draft?
   validates :thumbnail, content_type: [ "image/png", "image/jpeg", "image/gif", "image/webp" ],
                         size: { less_than: 5.megabytes }
+  validates :slug, uniqueness: { scope: :thread_id }, allow_nil: true
+  validates :slug, format: { with: /\A(?!\d+\z)[a-z0-9\-]+\z/, message: "は英小文字、数字、ハイフンのみ使用でき、数字のみにすることはできません" }, allow_blank: true
   validate :check_user_storage_limit, if: -> { thumbnail.attached? && thumbnail.changed? }
   validate :check_posting_rules, on: :create, if: :published?
 
@@ -84,9 +85,32 @@ class Post < ApplicationRecord
     published_at || created_at
   end
 
+  # 表示用のタイトル（空欄の場合は公開日時から生成）
+  def display_title
+    return title if title.present?
+    return ANONYMIZED_TITLE if anonymized?
+    display_published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
+  end
+
   # 下書きを公開する
   def publish!
-    update!(status: "published", published_at: Time.current)
+    # カスタムslugが設定されていない場合、または日付のみの場合は公開時に連番を付与
+    if slug.blank? || slug.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      # トランザクション内でスレッドをロックして、同時公開による競合を防ぐ
+      Post.transaction do
+        # スレッドをロックして、同じスレッド内の同時公開をブロック
+        thread.lock!
+
+        # published_atを設定してから保存（コールバックで再度slug生成されないようにslugを先に設定）
+        self.published_at = Time.current
+        self.slug = generate_sequential_slug(self.published_at)
+        self.status = "published"
+        save!
+      end
+    else
+      # カスタムslugの場合は通常通り更新
+      update!(status: "published", published_at: Time.current)
+    end
   end
 
   # 公開可能かどうか（自分のターンかつ下書き）
@@ -96,7 +120,20 @@ class Post < ApplicationRecord
     thread.my_turn?(user)
   end
 
+  # URLパラメータ用（公開済みでslugがあればslug、それ以外はID）
+  def to_param
+    # 下書きは常にID、公開済みはslugがあればslug、なければID
+    if draft?
+      id.to_s
+    else
+      slug.presence || id.to_s
+    end
+  end
+
   # Callbacks
+  # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
+  before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }
+
   # 投稿が公開状態になった時、スレッドの自動公開をチェック
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
@@ -106,6 +143,31 @@ class Post < ApplicationRecord
   after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
 
   private
+
+  # slug自動生成（公開日時ベース: 2026-04-11-1 形式）
+  def generate_slug
+    return if slug.present?
+    return unless published_at.present?
+
+    self.slug = generate_sequential_slug(published_at)
+  end
+
+  # 連番付きslugを生成（YYYY-MM-DD-N 形式）
+  def generate_sequential_slug(timestamp)
+    tokyo_time = timestamp.in_time_zone("Tokyo")
+    date = tokyo_time.strftime("%Y-%m-%d")
+
+    # その日のスレッド内の既存slugから最大値を取得してインクリメント
+    # 削除された投稿があっても連番が重複しない
+    slugs = thread.posts
+                  .where(published_at: tokyo_time.all_day)
+                  .where("slug LIKE ?", "#{date}-%")
+                  .pluck(:slug)
+    max_num = slugs.map { |s| s.split("-").last.to_i }.max || 0
+    count = max_num + 1
+
+    "#{date}-#{count}"
+  end
 
   def check_auto_publish_thread
     return unless thread.draft?

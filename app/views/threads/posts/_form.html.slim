@@ -2,7 +2,7 @@
   .flex.flex-col.gap-5
 
     .flex.flex-col.gap-1
-      = f.label :title, "タイトル（公開時は必須）", class: "text-sm font-medium text-gray-700"
+      = f.label :title, "タイトル（任意。空欄の場合は日付が入ります）", class: "text-sm font-medium text-gray-700"
       = f.text_field :title,
           placeholder: "投稿のタイトルを入力してください",
           autofocus: true,
