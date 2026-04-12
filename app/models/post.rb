@@ -94,31 +94,27 @@ class Post < ApplicationRecord
 
   # 下書きを公開する
   def publish!
+    # published_atを設定
+    self.published_at = Time.current
+    # タイトルが空の場合は日付を自動設定（RSS対応）
+    if title.blank?
+      self.title = published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
+    end
+    self.status = "published"
+
     # カスタムslugが設定されていない場合、または日付のみの場合は公開時に連番を付与
     if slug.blank? || slug.match?(/\A\d{4}-\d{2}-\d{2}\z/)
       # トランザクション内でスレッドをロックして、同時公開による競合を防ぐ
       Post.transaction do
         # スレッドをロックして、同じスレッド内の同時公開をブロック
         thread.lock!
-
-        # published_atを設定してから保存（コールバックで再度slug生成されないようにslugを先に設定）
-        self.published_at = Time.current
+        # コールバックで再度slug生成されないようにslugを先に設定
         self.slug = generate_sequential_slug(self.published_at)
-        # タイトルが空の場合は日付を自動設定（RSS対応）
-        if title.blank?
-          self.title = published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
-        end
-        self.status = "published"
         save!
       end
     else
-      # カスタムslugの場合は通常通り更新
-      self.published_at = Time.current
-      # タイトルが空の場合は日付を自動設定（RSS対応）
-      if title.blank?
-        self.title = published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
-      end
-      update!(status: "published")
+      # カスタムslugの場合は通常通り保存
+      save!
     end
   end
 
