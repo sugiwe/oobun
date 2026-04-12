@@ -104,12 +104,21 @@ class Post < ApplicationRecord
         # published_atを設定してから保存（コールバックで再度slug生成されないようにslugを先に設定）
         self.published_at = Time.current
         self.slug = generate_sequential_slug(self.published_at)
+        # タイトルが空の場合は日付を自動設定（RSS対応）
+        if title.blank?
+          self.title = published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
+        end
         self.status = "published"
         save!
       end
     else
       # カスタムslugの場合は通常通り更新
-      update!(status: "published", published_at: Time.current)
+      self.published_at = Time.current
+      # タイトルが空の場合は日付を自動設定（RSS対応）
+      if title.blank?
+        self.title = published_at.in_time_zone("Tokyo").strftime("%Y年%-m月%-d日")
+      end
+      update!(status: "published")
     end
   end
 
