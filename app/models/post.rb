@@ -140,6 +140,9 @@ class Post < ApplicationRecord
   # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
   before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }
 
+  # 投稿の本文が変更された場合、付箋を無効化
+  before_update :invalidate_annotations_if_body_changed
+
   # 投稿が公開状態になった時、スレッドの自動公開をチェック
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
@@ -184,5 +187,16 @@ class Post < ApplicationRecord
 
   def notify_subscribers
     NotificationService.notify_new_post(self)
+  end
+
+  # 本文が変更された場合、有効な付箋を無効化
+  def invalidate_annotations_if_body_changed
+    return unless body_changed?
+    return unless annotations.active.exists?
+
+    annotations.active.update_all(
+      invalidated_at: Time.current,
+      invalidation_reason: "post_edited"
+    )
   end
 end

@@ -49,6 +49,9 @@ class Annotation < ApplicationRecord
   validate :selection_within_single_paragraph
 
   # スコープ
+  scope :active, -> { where(invalidated_at: nil) }
+  scope :invalidated, -> { where.not(invalidated_at: nil) }
+
   scope :visible_to, ->(user) {
     return none unless user
 
@@ -74,6 +77,16 @@ class Annotation < ApplicationRecord
   # 付箋のアイコンを返す
   def icon
     visibility_self_only? ? "🔒" : "🌐"
+  end
+
+  # 無効化されているかどうか
+  def invalidated?
+    invalidated_at.present?
+  end
+
+  # 有効かどうか
+  def active?
+    invalidated_at.nil?
   end
 
   private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_24_115830) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_220409) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,6 +46,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_115830) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.integer "end_offset", null: false
+    t.datetime "invalidated_at"
+    t.string "invalidation_reason"
+    t.integer "paragraph_index"
     t.bigint "post_id", null: false
     t.text "selected_text", null: false
     t.integer "start_offset", null: false

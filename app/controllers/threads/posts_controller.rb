@@ -25,11 +25,11 @@ class Threads::PostsController < Threads::ApplicationController
     @next_post = @post.next
     @draft = @thread.draft_for(current_user) if logged_in?
 
-    # マーカー・付箋を取得（ログインユーザーに表示可能なもののみ）
+    # マーカー・付箋を取得（有効かつログインユーザーに表示可能なもののみ）
     @annotations = if logged_in?
-      @post.annotations.visible_to(current_user).includes(:user).order(created_at: :asc)
+      @post.annotations.active.visible_to(current_user).includes(:user).order(created_at: :asc)
     else
-      @post.annotations.public_only.includes(:user).order(created_at: :asc)
+      @post.annotations.active.public_only.includes(:user).order(created_at: :asc)
     end
   end
 
