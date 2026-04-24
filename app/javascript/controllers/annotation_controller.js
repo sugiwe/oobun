@@ -17,21 +17,32 @@ export default class extends Controller {
   static values = {
     threadSlug: String,
     postId: String,
-    currentUserId: Number
+    currentUserId: Number,
+    annotations: Array
   }
 
   connect() {
-    // テキスト選択イベントをリッスン
-    this.contentTarget.addEventListener("mouseup", this.handleTextSelection.bind(this))
-    this.contentTarget.addEventListener("touchend", this.handleTextSelection.bind(this))
+    console.log("Annotation controller connected")
+    console.log("Annotations:", this.annotationsValue)
+
+    // 複数のcontentTargetがある場合に対応（markdown/plain）
+    this.contentTargets.forEach(target => {
+      target.addEventListener("mouseup", this.handleTextSelection.bind(this))
+      target.addEventListener("touchend", this.handleTextSelection.bind(this))
+    })
 
     // ドキュメント全体のクリックでツールチップを閉じる
     document.addEventListener("click", this.hideTooltipOnOutsideClick.bind(this))
+
+    // マーカーを描画
+    this.renderMarkers()
   }
 
   disconnect() {
-    this.contentTarget.removeEventListener("mouseup", this.handleTextSelection.bind(this))
-    this.contentTarget.removeEventListener("touchend", this.handleTextSelection.bind(this))
+    this.contentTargets.forEach(target => {
+      target.removeEventListener("mouseup", this.handleTextSelection.bind(this))
+      target.removeEventListener("touchend", this.handleTextSelection.bind(this))
+    })
     document.removeEventListener("click", this.hideTooltipOnOutsideClick.bind(this))
   }
 
@@ -39,6 +50,8 @@ export default class extends Controller {
   handleTextSelection(event) {
     const selection = window.getSelection()
     const selectedText = selection.toString().trim()
+
+    console.log("Text selected:", selectedText.substring(0, 50))
 
     if (selectedText.length === 0) {
       this.hideTooltip()
@@ -63,11 +76,14 @@ export default class extends Controller {
     const range = selection.getRangeAt(0)
     const rect = range.getBoundingClientRect()
 
-    this.showTooltip(rect, selectedText, range)
+    // どのcontentエリアで選択されたかを特定
+    const containerElement = event.currentTarget
+
+    this.showTooltip(rect, selectedText, range, containerElement)
   }
 
   // ツールチップを表示
-  showTooltip(rect, selectedText, range) {
+  showTooltip(rect, selectedText, range, containerElement) {
     this.tooltipTarget.classList.remove("hidden")
 
     // ツールチップの位置を計算（選択範囲の上部中央）
@@ -82,8 +98,9 @@ export default class extends Controller {
     this.currentSelection = {
       text: selectedText,
       range: range,
-      startOffset: this.getTextOffset(range.startContainer, range.startOffset),
-      endOffset: this.getTextOffset(range.endContainer, range.endOffset)
+      containerElement: containerElement,
+      startOffset: this.getTextOffset(range.startContainer, range.startOffset, containerElement),
+      endOffset: this.getTextOffset(range.endContainer, range.endOffset, containerElement)
     }
   }
 
@@ -95,27 +112,33 @@ export default class extends Controller {
     this.currentSelection = null
   }
 
-  // 外部クリックでツールチップを閉じる
+  // 外部クリックでツールチップとポップオーバーを閉じる
   hideTooltipOnOutsideClick(event) {
-    if (!this.hasTooltipTarget) return
+    // ツールチップ、モーダル、コンテンツエリア、ポップオーバー内のクリックは無視
+    const clickedInsideContent = this.contentTargets.some(target => target.contains(event.target))
+    const clickedInsideModal = this.hasModalTarget && this.modalTarget.contains(event.target)
+    const clickedInsidePopover = event.target.closest("[data-annotation-popover]")
+    const clickedInsideTooltip = this.hasTooltipTarget && this.tooltipTarget.contains(event.target)
 
-    // ツールチップ自体、またはコンテンツエリア内のクリックは無視
-    if (this.tooltipTarget.contains(event.target) ||
-        this.contentTarget.contains(event.target)) {
+    if (clickedInsideTooltip || clickedInsideContent || clickedInsideModal || clickedInsidePopover) {
       return
     }
 
-    this.hideTooltip()
+    // ツールチップとポップオーバーを閉じる
+    if (this.hasTooltipTarget) {
+      this.hideTooltip()
+    }
+    this.hideAnnotationPopover()
   }
 
   // テキストオフセット位置を計算（Postのbody全体からの文字位置）
-  getTextOffset(node, offset) {
-    // contentTarget内の全テキストを取得
-    const fullText = this.contentTarget.textContent
+  getTextOffset(node, offset, containerElement) {
+    // containerElement内の全テキストを取得
+    const fullText = containerElement.textContent
 
     // nodeまでのテキストを取得
     const range = document.createRange()
-    range.selectNodeContents(this.contentTarget)
+    range.selectNodeContents(containerElement)
     range.setEnd(node, offset)
 
     return range.toString().length
@@ -125,6 +148,8 @@ export default class extends Controller {
   openModal(event) {
     event.preventDefault()
     event.stopPropagation()
+
+    console.log("openModal called, currentSelection:", this.currentSelection)
 
     if (!this.currentSelection) {
       alert("テキストを選択してください")
@@ -145,8 +170,10 @@ export default class extends Controller {
     // 付箋本文にフォーカス
     this.bodyInputTarget.focus()
 
-    // ツールチップを非表示
-    this.hideTooltip()
+    // ツールチップを非表示（currentSelectionは保持）
+    if (this.hasTooltipTarget) {
+      this.tooltipTarget.classList.add("hidden")
+    }
   }
 
   // モーダルを閉じる
@@ -179,10 +206,16 @@ export default class extends Controller {
   async submitForm(event) {
     event.preventDefault()
 
+    console.log("submitForm called, currentSelection:", this.currentSelection)
+
     if (!this.currentSelection) {
       this.showError("選択範囲が見つかりません")
       return
     }
+
+    console.log("startOffset:", this.currentSelection.startOffset)
+    console.log("endOffset:", this.currentSelection.endOffset)
+    console.log("selected text:", this.currentSelection.text)
 
     const formData = new FormData(this.formTarget)
     formData.append("annotation[start_offset]", this.currentSelection.startOffset)
@@ -191,7 +224,7 @@ export default class extends Controller {
 
     try {
       const response = await fetch(
-        `/${this.threadSlugValue}/${this.postIdValue}/annotations`,
+        `/${this.threadSlugValue}/posts/${this.postIdValue}/annotations`,
         {
           method: "POST",
           headers: {
@@ -204,10 +237,18 @@ export default class extends Controller {
 
       const data = await response.json()
 
+      console.log("Response data:", data)
+
       if (data.success) {
-        // 成功: モーダルを閉じてページをリロード（または動的にマーカーを追加）
+        // 成功: モーダルを閉じて成功メッセージを表示
+        console.log("Success! Showing success message...")
         this.closeModal()
-        window.location.reload()
+        this.showSuccessToast(data.message)
+
+        // 2秒後にリロード
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
       } else {
         this.showError(data.errors.join(", "))
       }
@@ -233,6 +274,145 @@ export default class extends Controller {
       this.errorMessageTarget.textContent = ""
       this.errorMessageTarget.classList.add("hidden")
     }
+  }
+
+  // マーカークリック時に付箋内容を表示
+  showAnnotationPopover(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const annotationId = parseInt(event.currentTarget.dataset.annotationId)
+    const annotation = this.annotationsValue.find(a => a.id === annotationId)
+
+    if (!annotation) {
+      console.error("Annotation not found:", annotationId)
+      return
+    }
+
+    // 既存のポップオーバーを削除
+    this.hideAnnotationPopover()
+
+    // ポップオーバー要素を作成
+    const popover = document.createElement("div")
+    popover.className = "fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl max-w-sm p-4"
+    popover.dataset.annotationPopover = ""
+
+    popover.innerHTML = `
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">${annotation.icon}</span>
+          <span class="text-sm font-medium text-gray-900">${annotation.user.display_name}</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button>
+      </div>
+      <div class="text-xs text-gray-500 mb-2">選択箇所:</div>
+      <blockquote class="bg-gray-50 border-l-4 border-gray-300 pl-2 py-1 text-sm text-gray-700 italic mb-3">
+        ${this.escapeHtml(annotation.selected_text)}
+      </blockquote>
+      <div class="text-xs text-gray-500 mb-1">メモ:</div>
+      <div class="text-sm text-gray-800 whitespace-pre-wrap">
+        ${this.escapeHtml(annotation.body)}
+      </div>
+    `
+
+    // 位置を計算（クリックされたマーカーの下）
+    const rect = event.currentTarget.getBoundingClientRect()
+    const top = rect.bottom + window.scrollY + 8
+    const left = rect.left + window.scrollX
+
+    popover.style.top = `${top}px`
+    popover.style.left = `${left}px`
+
+    // DOMに追加
+    document.body.appendChild(popover)
+
+    // 閉じるボタンにイベントリスナーを追加
+    const closeButton = popover.querySelector("[data-close-popover]")
+    closeButton.addEventListener("click", () => {
+      this.hideAnnotationPopover()
+    })
+  }
+
+  // ポップオーバーを非表示
+  hideAnnotationPopover() {
+    const existing = document.querySelector("[data-annotation-popover]")
+    if (existing) {
+      existing.remove()
+    }
+  }
+
+  // HTMLエスケープ
+  escapeHtml(text) {
+    const div = document.createElement("div")
+    div.textContent = text
+    return div.innerHTML
+  }
+
+  // 成功トーストを表示
+  showSuccessToast(message) {
+    // トースト要素を作成
+    const toast = document.createElement("div")
+    toast.className = "fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in"
+    toast.innerHTML = `
+      <span class="text-lg">✅</span>
+      <span class="text-sm font-medium">${message}</span>
+    `
+
+    // DOM に追加
+    document.body.appendChild(toast)
+
+    // 2.5秒後に自動削除
+    setTimeout(() => {
+      toast.classList.add("opacity-0", "transition-opacity", "duration-300")
+      setTimeout(() => {
+        document.body.removeChild(toast)
+      }, 300)
+    }, 2500)
+  }
+
+  // マーカーを描画
+  renderMarkers() {
+    if (!this.annotationsValue || this.annotationsValue.length === 0) {
+      console.log("No annotations to render")
+      return
+    }
+
+    // 各contentエリアにマーカーを適用
+    this.contentTargets.forEach(contentTarget => {
+      const isPlainView = contentTarget.classList.contains("whitespace-pre-wrap")
+
+      if (isPlainView) {
+        // Plain表示の場合のみマーカーを適用
+        this.applyMarkersToPlainText(contentTarget)
+      }
+      // Markdown表示の場合は、HTML構造が複雑なため一旦スキップ
+      // TODO: Markdown表示でもマーカーを適用する
+    })
+  }
+
+  // Plainテキストにマーカーを適用
+  applyMarkersToPlainText(contentElement) {
+    const originalText = contentElement.textContent
+
+    // annotationsをstart_offsetでソート（逆順：後ろから適用）
+    const sortedAnnotations = [...this.annotationsValue].sort((a, b) => b.start_offset - a.start_offset)
+
+    let markedHTML = originalText
+
+    // 後ろから順にマーカーを挿入（文字位置がずれないようにするため）
+    sortedAnnotations.forEach(annotation => {
+      const before = markedHTML.slice(0, annotation.start_offset)
+      const marked = markedHTML.slice(annotation.start_offset, annotation.end_offset)
+      const after = markedHTML.slice(annotation.end_offset)
+
+      // マーカー要素を作成
+      const markerHTML = `<mark class="${annotation.marker_color_class} cursor-pointer px-1 rounded" data-annotation-id="${annotation.id}" data-action="click->annotation#showAnnotationPopover">${marked}</mark>`
+
+      markedHTML = before + markerHTML + after
+    })
+
+    // HTMLとして適用
+    contentElement.innerHTML = markedHTML.replace(/\n/g, "<br>")
   }
 
   // マーカービュー切り替え

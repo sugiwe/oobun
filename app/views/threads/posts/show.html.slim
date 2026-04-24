@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class], include: { user: { only: [:id], methods: [:display_name] } })}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -93,62 +93,62 @@
               .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.display_title
               .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
 
-  / テキスト選択時のツールチップ
-  - if logged_in?
-    .fixed.z-50.hidden data-annotation-target="tooltip"
-      button.bg-gray-900.text-white.text-xs.px-3.py-2.rounded.shadow-lg.hover:bg-gray-700.transition-colors data-action="click->annotation#openModal"
-        | 📌 この箇所にマーカー
+    / テキスト選択時のツールチップ
+    - if logged_in?
+      .fixed.z-50.hidden data-annotation-target="tooltip"
+        button.bg-gray-900.text-white.text-xs.px-3.py-2.rounded.shadow-lg.hover:bg-gray-700.transition-colors data-action="click->annotation#openModal"
+          | 📌 この箇所にマーカー
 
-  / マーカー作成モーダル
-  - if logged_in?
-    .fixed.inset-0.z-50.hidden.flex.items-center.justify-center.bg-black.bg-opacity-50 data-annotation-target="modal"
-      .bg-white.rounded-lg.shadow-xl.max-w-md.w-full.mx-4
-        / ヘッダー
-        .flex.items-center.justify-between.p-4.border-b
-          h2.text-lg.font-semibold マーカー・付箋を追加
-          button.text-gray-400.hover:text-gray-600 data-action="click->annotation#closeModal" type="button"
-            | ✕
+    / マーカー作成モーダル
+    - if logged_in?
+      .fixed.inset-0.z-50.hidden.flex.items-center.justify-center.bg-black.bg-opacity-50 data-annotation-target="modal"
+        .bg-white.rounded-lg.shadow-xl.max-w-md.w-full.mx-4
+          / ヘッダー
+          .flex.items-center.justify-between.p-4.border-b
+            h2.text-lg.font-semibold マーカー・付箋を追加
+            button.text-gray-400.hover:text-gray-600 data-action="click->annotation#closeModal" type="button"
+              | ✕
 
-        / フォーム
-        = form_with url: "", method: :post, data: { annotation_target: "form", action: "submit->annotation#submitForm" }, html: { class: "p-4" } do |f|
-          / 選択したテキストのプレビュー
-          .mb-4
-            .text-xs.text-gray-500.mb-1 選択したテキスト:
-            .bg-gray-50.border.border-gray-200.rounded.p-2.text-sm.text-gray-700 data-annotation-target="selectedTextPreview"
+          / フォーム
+          = form_with url: "#", method: :post, data: { annotation_target: "form", action: "submit->annotation#submitForm" }, html: { class: "p-4" } do |f|
+            / 選択したテキストのプレビュー
+            .mb-4
+              .text-xs.text-gray-500.mb-1 選択したテキスト:
+              .bg-gray-50.border.border-gray-200.rounded.p-2.text-sm.text-gray-700 data-annotation-target="selectedTextPreview"
 
-          / 公開設定
-          .mb-4
-            label.block.text-sm.font-medium.text-gray-700.mb-2 📌 公開設定を選んでください
+            / 公開設定
+            .mb-4
+              label.block.text-sm.font-medium.text-gray-700.mb-2 📌 公開設定を選んでください
 
-            .space-y-2
-              label.flex.items-start.gap-3.p-3.border.rounded.cursor-pointer.hover:bg-blue-50.transition-colors.has-checked:bg-blue-50.has-checked:border-blue-300
-                = f.radio_button :visibility, "self_only", checked: true, class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground" }
-                .flex-1
-                  .flex.items-center.gap-2
-                    span 🔒
-                    span.font-medium.text-gray-900 自分だけのメモ
-                  .text-xs.text-gray-600.mt-1 他の人には見えません
+              .space-y-2
+                label.flex.items-start.gap-3.p-3.border.rounded.cursor-pointer.hover:bg-blue-50.transition-colors.has-checked:bg-blue-50.has-checked:border-blue-300
+                  = f.radio_button :visibility, "self_only", checked: true, name: "annotation[visibility]", class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground" }
+                  .flex-1
+                    .flex.items-center.gap-2
+                      span 🔒
+                      span.font-medium.text-gray-900 自分だけのメモ
+                    .text-xs.text-gray-600.mt-1 他の人には見えません
 
-              label.flex.items-start.gap-3.p-3.border.rounded.cursor-pointer.hover:bg-yellow-50.transition-colors.has-checked:bg-yellow-50.has-checked:border-yellow-300
-                = f.radio_button :visibility, "public_visible", class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground" }
-                .flex-1
-                  .flex.items-center.gap-2
-                    span 🌐
-                    span.font-medium.text-gray-900 公開する
-                  .text-xs.text-gray-600.mt-1 誰でも見られます
+                label.flex.items-start.gap-3.p-3.border.rounded.cursor-pointer.hover:bg-yellow-50.transition-colors.has-checked:bg-yellow-50.has-checked:border-yellow-300
+                  = f.radio_button :visibility, "public_visible", name: "annotation[visibility]", class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground" }
+                  .flex-1
+                    .flex.items-center.gap-2
+                      span 🌐
+                      span.font-medium.text-gray-900 公開する
+                    .text-xs.text-gray-600.mt-1 誰でも見られます
 
-          / 付箋の内容
-          .mb-4
-            label.block.text-sm.font-medium.text-gray-700.mb-2 for="annotation_body" 付箋の内容
-            = f.text_area :body, rows: 4, class: "w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-blue-50", placeholder: "メモやコメントを入力...", data: { annotation_target: "bodyInput" }, required: true
-            .text-xs.text-gray-500.mt-1 1〜1000文字
+            / 付箋の内容
+            .mb-4
+              label.block.text-sm.font-medium.text-gray-700.mb-2 for="annotation_body" 付箋の内容
+              = f.text_area :body, rows: 4, name: "annotation[body]", class: "w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-blue-50", placeholder: "メモやコメントを入力...", data: { annotation_target: "bodyInput" }, required: true
+              .text-xs.text-gray-500.mt-1 1〜1000文字
 
-          / エラーメッセージ
-          .mb-4.hidden.text-sm.text-red-600 data-annotation-target="errorMessage"
+            / エラーメッセージ
+            .mb-4.hidden.text-sm.text-red-600 data-annotation-target="errorMessage"
 
-          / ボタン
-          .flex.gap-2.justify-end
-            button.px-4.py-2.text-sm.text-gray-700.bg-gray-100.rounded.hover:bg-gray-200.transition-colors type="button" data-action="click->annotation#closeModal"
-              | キャンセル
-            button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors type="submit"
-              | 追加
+            / ボタン
+            .flex.gap-2.justify-end
+              button.px-4.py-2.text-sm.text-gray-700.bg-gray-100.rounded.hover:bg-gray-200.transition-colors type="button" data-action="click->annotation#closeModal"
+                | キャンセル
+              button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors type="submit"
+                | 追加

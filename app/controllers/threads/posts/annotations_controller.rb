@@ -67,7 +67,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   private
 
   def set_post
-    @post = @thread.posts.find_by!(slug: params[:post_id]) ||
+    @post = @thread.posts.find_by(slug: params[:post_id]) ||
             @thread.posts.find(params[:post_id])
   end
 
