@@ -217,6 +217,27 @@ export default class extends Controller {
     console.log("endOffset:", this.currentSelection.endOffset)
     console.log("selected text:", this.currentSelection.text)
 
+    // 自分の既存のマーカーと重複チェック（他の人のマーカーは除外）
+    const hasOverlap = this.annotationsValue.some(annotation => {
+      // 他の人のマーカーはスキップ
+      if (annotation.user_id !== this.currentUserIdValue) {
+        return false
+      }
+
+      const existingStart = annotation.start_offset
+      const existingEnd = annotation.end_offset
+      const newStart = this.currentSelection.startOffset
+      const newEnd = this.currentSelection.endOffset
+
+      // 重複判定: 新しいマーカーの開始が既存の範囲内、または終了が既存の範囲内
+      return (newStart < existingEnd && newEnd > existingStart)
+    })
+
+    if (hasOverlap) {
+      this.showError("自分の既存のマーカーと重複しています。別の範囲を選択してください。")
+      return
+    }
+
     const formData = new FormData(this.formTarget)
     formData.append("annotation[start_offset]", this.currentSelection.startOffset)
     formData.append("annotation[end_offset]", this.currentSelection.endOffset)
@@ -392,7 +413,12 @@ export default class extends Controller {
 
   // Plainテキストにマーカーを適用
   applyMarkersToPlainText(contentElement) {
-    const originalText = contentElement.textContent
+    // 初回のみ、元のプレーンテキストを保存
+    if (!contentElement.dataset.originalText) {
+      contentElement.dataset.originalText = contentElement.textContent
+    }
+
+    const originalText = contentElement.dataset.originalText
 
     // annotationsをstart_offsetでソート（逆順：後ろから適用）
     const sortedAnnotations = [...this.annotationsValue].sort((a, b) => b.start_offset - a.start_offset)
