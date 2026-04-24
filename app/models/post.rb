@@ -9,6 +9,7 @@ class Post < ApplicationRecord
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :user
   has_one_attached :thumbnail
+  has_many :annotations, dependent: :destroy
   has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations

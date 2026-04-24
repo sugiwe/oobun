@@ -15,6 +15,7 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_threads, through: :subscriptions, source: :thread
   has_many :skips, dependent: :destroy
+  has_many :annotations, dependent: :destroy
   has_many :notifications, dependent: :destroy
   has_one :notification_setting, dependent: :destroy
   has_one_attached :avatar

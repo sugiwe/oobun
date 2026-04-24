@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_11_075443) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_115830) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_11_075443) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "annotations", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.integer "end_offset", null: false
+    t.bigint "post_id", null: false
+    t.text "selected_text", null: false
+    t.integer "start_offset", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.string "visibility", default: "self_only", null: false
+    t.index ["post_id", "created_at"], name: "index_annotations_on_post_id_and_created_at"
+    t.index ["post_id"], name: "index_annotations_on_post_id"
+    t.index ["user_id", "created_at"], name: "index_annotations_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_annotations_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -319,6 +335,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_11_075443) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "annotations", "posts"
+  add_foreign_key "annotations", "users"
   add_foreign_key "invitations", "threads"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "memberships", "threads"
