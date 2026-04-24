@@ -9,7 +9,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
     if @annotation.save
       # 公開付箋の場合、投稿者に通知
-      if @annotation.public? && @annotation.user_id != @post.user_id
+      if @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
         notify_post_author
       end
 
@@ -33,7 +33,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
     if @annotation.update(annotation_params)
       # self_only → public に変更された場合、投稿者に通知
-      if visibility_changed && @annotation.public? && @annotation.user_id != @post.user_id
+      if visibility_changed && @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
         notify_post_author
       end
 

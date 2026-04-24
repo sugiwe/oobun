@@ -28,10 +28,10 @@ class Annotation < ApplicationRecord
   belongs_to :user
 
   # 可視性の設定
-  enum visibility: {
-    self_only: "self_only", # 自分だけのメモ（デフォルト）
-    public: "public"        # 公開する（誰でも見られる）
-  }, _default: :self_only
+  enum :visibility, {
+    self_only: "self_only",       # 自分だけのメモ（デフォルト）
+    public_visible: "public"      # 公開する（誰でも見られる）
+  }, default: :self_only, prefix: true
 
   # バリデーション
   validates :start_offset, presence: true,
@@ -52,49 +52,28 @@ class Annotation < ApplicationRecord
   scope :visible_to, ->(user) {
     return none unless user
 
-    where(visibility: "public")
+    visibility_public_visible
       .or(where(user_id: user.id))
   }
 
-  scope :public_only, -> { where(visibility: "public") }
+  scope :public_only, -> { visibility_public_visible }
   scope :by_user, ->(user) { where(user_id: user.id) }
 
   # 可視性チェックメソッド
   def visible_to?(current_user)
     return false unless current_user
 
-    case visibility
-    when "public"
-      true
-    when "self_only"
-      user_id == current_user.id
-    else
-      false
-    end
+    visibility_public_visible? || (visibility_self_only? && user_id == current_user.id)
   end
 
   # マーカーの色を返す（CSS クラス用）
   def marker_color_class
-    case visibility
-    when "self_only"
-      "bg-blue-100" # 薄い青
-    when "public"
-      "bg-yellow-100" # 薄い黄色
-    else
-      "bg-gray-100"
-    end
+    visibility_self_only? ? "bg-blue-100" : "bg-yellow-100"
   end
 
   # 付箋のアイコンを返す
   def icon
-    case visibility
-    when "self_only"
-      "🔒"
-    when "public"
-      "🌐"
-    else
-      "📌"
-    end
+    visibility_self_only? ? "🔒" : "🌐"
   end
 
   private
