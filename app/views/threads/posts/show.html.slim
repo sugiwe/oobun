@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class], include: { user: { only: [:id], methods: [:display_name] } })}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class], include: { user: { only: [:id], methods: [:display_name] } })}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -59,9 +59,11 @@
     .text-base.text-gray-800.leading-loose.markdown-body data-post-view-target="markdownArea" data-annotation-target="content"
       = render_markdown(@post.body)
 
-    / 本文（手紙の内容）- Plain表示
-    .text-base.text-gray-800.leading-loose.whitespace-pre-wrap.font-mono.hidden data-post-view-target="plainArea" data-annotation-target="content"
-      = @post.body
+    / 本文（手紙の内容）- Plain表示（段落ごとに分割）
+    .text-base.text-gray-800.leading-loose.font-mono.hidden data-post-view-target="plainArea" data-annotation-target="content"
+      - @post.body.split("\n\n").each_with_index do |paragraph, index|
+        .paragraph.relative.px-2.py-1.rounded.transition-colors data-paragraph-index=index data-action="mouseenter->annotation#showParagraphButton mouseleave->annotation#hideParagraphButton"
+          .whitespace-pre-wrap = paragraph
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?
@@ -93,11 +95,11 @@
               .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.display_title
               .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
 
-    / テキスト選択時のツールチップ
+    / 段落ホバー時の付箋追加ボタン
     - if logged_in?
-      .fixed.z-50.hidden data-annotation-target="tooltip"
-        button.bg-gray-900.text-white.text-xs.px-3.py-2.rounded.shadow-lg.hover:bg-gray-700.transition-colors data-action="click->annotation#openModal"
-          | 📌 この箇所にマーカー
+      .absolute.z-50.hidden data-annotation-target="paragraphButton"
+        button.bg-gray-900.text-white.text-xs.px-3.py-2.rounded.shadow-lg.hover:bg-gray-700.transition-colors data-action="click->annotation#openModalForParagraph"
+          | 📌 付箋を追加
 
     / マーカー作成モーダル
     - if logged_in?
@@ -105,16 +107,16 @@
         .bg-white.rounded-lg.shadow-xl.max-w-md.w-full.mx-4
           / ヘッダー
           .flex.items-center.justify-between.p-4.border-b
-            h2.text-lg.font-semibold マーカー・付箋を追加
+            h2.text-lg.font-semibold 付箋を追加
             button.text-gray-400.hover:text-gray-600 data-action="click->annotation#closeModal" type="button"
               | ✕
 
           / フォーム
           = form_with url: "#", method: :post, data: { annotation_target: "form", action: "submit->annotation#submitForm" }, html: { class: "p-4" } do |f|
-            / 選択したテキストのプレビュー
+            / 段落のプレビュー
             .mb-4
-              .text-xs.text-gray-500.mb-1 選択したテキスト:
-              .bg-gray-50.border.border-gray-200.rounded.p-2.text-sm.text-gray-700 data-annotation-target="selectedTextPreview"
+              .text-xs.text-gray-500.mb-1 この段落に付箋を追加:
+              .bg-gray-50.border.border-gray-200.rounded.p-2.text-sm.text-gray-700.max-h-32.overflow-y-auto data-annotation-target="paragraphPreview"
 
             / 公開設定
             .mb-4

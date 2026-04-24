@@ -90,7 +90,8 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
       :end_offset,
       :selected_text,
       :body,
-      :visibility
+      :visibility,
+      :paragraph_index
     )
   end
 
@@ -99,7 +100,8 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
       id: annotation.id,
       post_id: annotation.post_id,
       user_id: annotation.user_id,
-      user_name: annotation.user.display_name,
+      user: { display_name: annotation.user.display_name },
+      paragraph_index: annotation.paragraph_index,
       start_offset: annotation.start_offset,
       end_offset: annotation.end_offset,
       selected_text: annotation.selected_text,
