@@ -76,12 +76,29 @@ export default class extends Controller {
 
   // 段落内に付箋追加ボタンを作成
   createParagraphButton(paragraph) {
+    const paragraphIndex = parseInt(paragraph.dataset.paragraphIndex)
+
+    // この段落に既に自分の付箋があるかチェック
+    const hasOwnAnnotation = this.annotationsValue.some(a =>
+      a.paragraph_index === paragraphIndex && a.user_id === this.currentUserIdValue
+    )
+
     const button = document.createElement("button")
     button.type = "button"
-    button.className = "absolute top-1 right-1 bg-gray-900 text-white text-xs px-3 py-2 rounded shadow-lg hover:bg-gray-700 transition-colors opacity-0 hover:opacity-100"
-    button.textContent = "📌 付箋を追加"
     button.dataset.paragraphButton = ""
-    button.dataset.action = "click->annotation#openModalForParagraph"
+
+    if (hasOwnAnnotation) {
+      // 付箋追加済みの場合
+      button.className = "absolute top-1 right-1 bg-gray-400 text-white text-xs px-3 py-2 rounded shadow-lg opacity-0 hover:opacity-100 cursor-not-allowed"
+      button.textContent = "✓ 付箋追加済み"
+      button.disabled = true
+    } else {
+      // 未追加の場合
+      button.className = "absolute top-1 right-1 bg-gray-900 text-white text-xs px-3 py-2 rounded shadow-lg hover:bg-gray-700 transition-colors opacity-0 hover:opacity-100 cursor-pointer"
+      button.textContent = "📌 付箋を追加"
+      button.dataset.action = "click->annotation#openModalForParagraph"
+    }
+
     paragraph.appendChild(button)
   }
 
@@ -144,6 +161,9 @@ export default class extends Controller {
       return
     }
 
+    // 編集モードフラグをリセット
+    this.currentEditingAnnotationId = null
+
     // モーダルに段落情報を保存
     this.currentParagraphIndex = paragraphIndex
     this.currentParagraphText = paragraphText
@@ -176,57 +196,74 @@ export default class extends Controller {
     }
     this.currentParagraphIndex = null
     this.currentParagraphText = null
+    this.currentEditingAnnotationId = null
     this.clearError()
   }
 
-  // フォーム送信（付箋作成）
+  // フォーム送信（付箋作成 or 更新）
   async submitForm(event) {
     event.preventDefault()
     this.clearError()
 
-    if (!this.currentParagraphIndex && this.currentParagraphIndex !== 0) {
+    const isEditMode = !!this.currentEditingAnnotationId
+
+    if (!isEditMode && (!this.currentParagraphIndex && this.currentParagraphIndex !== 0)) {
       this.showError("段落が選択されていません")
       return
     }
 
     const formData = new FormData(this.formTarget)
-    formData.append("annotation[paragraph_index]", this.currentParagraphIndex)
-    formData.append("annotation[selected_text]", this.currentParagraphText.slice(0, 300)) // 冒頭300文字
-    formData.append("annotation[start_offset]", 0) // 後方互換性のため
-    formData.append("annotation[end_offset]", this.currentParagraphText.length)
+
+    // 新規作成の場合のみ段落情報を追加
+    if (!isEditMode) {
+      formData.append("annotation[paragraph_index]", this.currentParagraphIndex)
+      formData.append("annotation[selected_text]", this.currentParagraphText.slice(0, 300)) // 冒頭300文字
+      formData.append("annotation[start_offset]", 0) // 後方互換性のため
+      formData.append("annotation[end_offset]", this.currentParagraphText.length)
+    }
 
     try {
-      const response = await fetch(
-        `/${this.threadSlugValue}/posts/${this.postIdValue}/annotations`,
-        {
-          method: "POST",
-          headers: {
-            "X-CSRF-Token": document.querySelector("[name='csrf-token']").content,
-            "Accept": "application/json"
-          },
-          body: formData
-        }
-      )
+      const url = isEditMode
+        ? `/${this.threadSlugValue}/posts/${this.postIdValue}/annotations/${this.currentEditingAnnotationId}`
+        : `/${this.threadSlugValue}/posts/${this.postIdValue}/annotations`
+
+      const method = isEditMode ? "PATCH" : "POST"
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "X-CSRF-Token": document.querySelector("[name='csrf-token']").content,
+          "Accept": "application/json"
+        },
+        body: formData
+      })
 
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // 成功: annotationsValueに追加
-        this.annotationsValue = [...this.annotationsValue, data.annotation]
+        if (isEditMode) {
+          // 更新: annotationsValue内の該当アイテムを置き換え
+          this.annotationsValue = this.annotationsValue.map(a =>
+            a.id === this.currentEditingAnnotationId ? data.annotation : a
+          )
+        } else {
+          // 新規作成: annotationsValueに追加
+          this.annotationsValue = [...this.annotationsValue, data.annotation]
+        }
 
         // モーダルを閉じる
         this.closeModal()
 
         // 成功トーストを表示
-        this.showSuccessToast(data.message || "付箋を追加しました")
+        this.showSuccessToast(data.message || (isEditMode ? "付箋を更新しました" : "付箋を追加しました"))
 
         // 段落アイコンを再描画
         this.renderParagraphIcons()
       } else {
-        this.showError(data.errors?.join(", ") || "付箋の追加に失敗しました")
+        this.showError(data.errors?.join(", ") || (isEditMode ? "付箋の更新に失敗しました" : "付箋の追加に失敗しました"))
       }
     } catch (error) {
-      console.error("Failed to create annotation:", error)
+      console.error("Failed to save annotation:", error)
       this.showError("通信エラーが発生しました")
     }
   }
@@ -291,10 +328,6 @@ export default class extends Controller {
 
   // 段落アイコンを描画（既存の付箋を表示）
   renderParagraphIcons() {
-    if (!this.annotationsValue || this.annotationsValue.length === 0) {
-      return
-    }
-
     // Plain表示の場合は付箋を描画しない
     const isPlainView = this.contentTargets.some(target =>
       !target.classList.contains("hidden") && !target.classList.contains("markdown-body")
@@ -305,6 +338,12 @@ export default class extends Controller {
 
     // 既存のアイコンをクリア
     document.querySelectorAll("[data-annotation-icon]").forEach(icon => icon.remove())
+
+    // 付箋がない場合はボタンの更新だけ行う
+    if (!this.annotationsValue || this.annotationsValue.length === 0) {
+      this.updateParagraphButtons()
+      return
+    }
 
     // 段落ごとにアイコンを追加
     this.annotationsValue.forEach(annotation => {
@@ -359,6 +398,48 @@ export default class extends Controller {
       // アイコンコンテナに追加
       iconsContainer.appendChild(icon)
     })
+
+    // 付箋追加ボタンの状態を更新（追加済み/未追加）
+    this.updateParagraphButtons()
+  }
+
+  // すべての段落の付箋追加ボタンを更新
+  updateParagraphButtons() {
+    if (this.currentUserIdValue === 0) return // 未ログイン
+
+    // すべての段落をループ
+    this.contentTargets.forEach(contentTarget => {
+      if (contentTarget.classList.contains("hidden")) return
+
+      const paragraphs = contentTarget.querySelectorAll(".paragraph")
+      paragraphs.forEach(paragraph => {
+        const paragraphIndex = parseInt(paragraph.dataset.paragraphIndex)
+        const button = paragraph.querySelector("[data-paragraph-button]")
+
+        if (!button) return
+
+        // この段落に既に自分の付箋があるかチェック
+        const hasOwnAnnotation = this.annotationsValue.some(a =>
+          a.paragraph_index === paragraphIndex && a.user_id === this.currentUserIdValue
+        )
+
+        if (hasOwnAnnotation) {
+          // 付箋追加済みの場合
+          button.className = "absolute top-1 right-1 bg-gray-400 text-white text-xs px-3 py-2 rounded shadow-lg opacity-0 hover:opacity-100 cursor-not-allowed"
+          button.textContent = "✓ 付箋追加済み"
+          button.disabled = true
+          // data-action を削除
+          delete button.dataset.action
+        } else {
+          // 未追加の場合
+          button.className = "absolute top-1 right-1 bg-gray-900 text-white text-xs px-3 py-2 rounded shadow-lg hover:bg-gray-700 transition-colors opacity-0 hover:opacity-100 cursor-pointer"
+          button.textContent = "📌 付箋を追加"
+          button.disabled = false
+          // data-action を追加
+          button.dataset.action = "click->annotation#openModalForParagraph"
+        }
+      })
+    })
   }
 
   // 付箋アイコンクリック時にポップオーバーを表示
@@ -390,8 +471,14 @@ export default class extends Controller {
 
     const displayName = annotation.user_display_name || annotation.user?.display_name || "Unknown"
     const avatarUrl = annotation.user_avatar_url || annotation.user?.avatar_url
+    const isOwnAnnotation = annotation.user_id === this.currentUserIdValue
 
-    popover.innerHTML = `<div class="flex items-start justify-between gap-3 mb-3"><div class="flex items-center gap-2"><span class="text-lg">${annotation.icon}</span><span class="text-sm font-medium text-gray-900">${this.escapeHtml(displayName)}</span></div><button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button></div><div class="text-sm text-gray-800 whitespace-pre-wrap" style="line-height: 1.75;">${this.escapeHtml(annotation.body)}</div>`
+    // 自分の付箋の場合は編集・削除ボタンを表示
+    const actionButtons = isOwnAnnotation
+      ? `<div class="flex gap-2 mt-3 pt-3 border-t border-gray-200"><button class="flex-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5" data-edit-button>編集</button><button class="flex-1 text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-3 py-1.5" data-delete-button>削除</button></div>`
+      : ''
+
+    popover.innerHTML = `<div class="flex items-start justify-between gap-3 mb-3"><div class="flex items-center gap-2"><span class="text-lg">${annotation.icon}</span><span class="text-sm font-medium text-gray-900">${this.escapeHtml(displayName)}</span></div><button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button></div><div class="text-sm text-gray-800 whitespace-pre-wrap" style="line-height: 1.75;">${this.escapeHtml(annotation.body)}</div>${actionButtons}`
 
     // 位置を計算（クリックされたアイコンの下）
     // position: fixed を使うので、scrollY/scrollX は不要（viewport基準）
@@ -409,6 +496,28 @@ export default class extends Controller {
     closeButton.addEventListener("click", () => {
       this.hideAnnotationPopover()
     })
+
+    // 編集・削除ボタンにイベントリスナーを追加（自分の付箋の場合のみ）
+    if (isOwnAnnotation) {
+      const editButton = popover.querySelector("[data-edit-button]")
+      const deleteButton = popover.querySelector("[data-delete-button]")
+
+      if (editButton) {
+        editButton.addEventListener("click", (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          this.editAnnotation(annotation)
+        })
+      }
+
+      if (deleteButton) {
+        deleteButton.addEventListener("click", (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          this.deleteAnnotation(annotation.id)
+        })
+      }
+    }
 
     // 外部クリックで閉じる
     setTimeout(() => {
@@ -472,5 +581,103 @@ export default class extends Controller {
       bodyInput.classList.remove("bg-blue-50")
       bodyInput.classList.add("bg-yellow-50")
     }
+  }
+
+  // 付箋を削除
+  async deleteAnnotation(annotationId) {
+    // 確認ダイアログ
+    if (!confirm("この付箋を削除してもよろしいですか？")) {
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `/${this.threadSlugValue}/posts/${this.postIdValue}/annotations/${annotationId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+            "Accept": "application/json"
+          }
+        }
+      )
+
+      const data = await response.json()
+
+      if (data.success) {
+        // 成功トースト表示
+        this.showToast(data.message, "success")
+
+        // annotationsValue から削除
+        this.annotationsValue = this.annotationsValue.filter(a => a.id !== parseInt(annotationId))
+
+        // ポップオーバーを閉じる
+        this.hideAnnotationPopover()
+
+        // アイコンを再描画
+        this.renderParagraphIcons()
+      } else {
+        this.showToast(data.message || "削除に失敗しました", "error")
+      }
+    } catch (error) {
+      console.error("Delete annotation error:", error)
+      this.showToast("削除中にエラーが発生しました", "error")
+    }
+  }
+
+  // 付箋を編集
+  editAnnotation(annotation) {
+    // ポップオーバーを閉じる
+    this.hideAnnotationPopover()
+
+    // モーダルを開いて編集モードに
+    this.openModalForEdit(annotation)
+  }
+
+  // 編集用にモーダルを開く
+  openModalForEdit(annotation) {
+    this.currentEditingAnnotationId = annotation.id
+
+    // フォームに既存データをセット
+    this.bodyInputTarget.value = annotation.body
+
+    // 公開設定をセット
+    const visibilityRadio = this.visibilityRadiosTargets.find(radio => radio.value === annotation.visibility)
+    if (visibilityRadio) {
+      visibilityRadio.checked = true
+      // 背景色を更新
+      if (annotation.visibility === "self_only") {
+        this.bodyInputTarget.classList.remove("bg-yellow-50")
+        this.bodyInputTarget.classList.add("bg-blue-50")
+      } else {
+        this.bodyInputTarget.classList.remove("bg-blue-50")
+        this.bodyInputTarget.classList.add("bg-yellow-50")
+      }
+    }
+
+    // 段落プレビューをセット
+    this.paragraphPreviewTarget.textContent = annotation.selected_text
+
+    // モーダルを表示
+    this.modalTarget.classList.remove("hidden")
+
+    // フォーカス
+    this.bodyInputTarget.focus()
+  }
+
+  // トースト通知を表示
+  showToast(message, type = "success") {
+    const toast = document.createElement("div")
+    const bgColor = type === "success" ? "bg-green-500" : "bg-red-500"
+    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity`
+    toast.textContent = message
+
+    document.body.appendChild(toast)
+
+    // 3秒後にフェードアウト
+    setTimeout(() => {
+      toast.style.opacity = "0"
+      setTimeout(() => toast.remove(), 300)
+    }, 3000)
   }
 }
