@@ -5,6 +5,7 @@ export default class extends Controller {
     "content",              // 本文コンテンツエリア（markdown/plain）
     "paragraphButton",      // 段落ホバー時の付箋追加ボタン
     "modal",                // 付箋作成モーダル
+    "modalContent",         // モーダルコンテンツ（背景クリック判定用）
     "form",                 // 付箋作成フォーム
     "paragraphPreview",     // 段落プレビュー
     "bodyInput",            // 付箋の内容入力欄
@@ -189,8 +190,15 @@ export default class extends Controller {
     }
   }
 
-  // モーダルを閉じる
-  closeModal() {
+  // モーダルを閉じる（入力確認あり）
+  closeModal(event) {
+    // 入力内容があるかチェック
+    if (this.hasBodyInputTarget && this.bodyInputTarget.value.trim()) {
+      if (!confirm("入力内容が消えますがよろしいですか？")) {
+        return
+      }
+    }
+
     if (this.hasModalTarget) {
       this.modalTarget.classList.add("hidden")
     }
@@ -198,6 +206,22 @@ export default class extends Controller {
     this.currentParagraphText = null
     this.currentEditingAnnotationId = null
     this.clearError()
+
+    // フォームをリセット
+    if (this.hasFormTarget) {
+      this.formTarget.reset()
+    }
+  }
+
+  // 背景クリックでモーダルを閉じる
+  closeModalOnBackdrop(event) {
+    // モーダルコンテンツ（白い部分）をクリックした場合は何もしない
+    if (this.hasModalContentTarget && this.modalContentTarget.contains(event.target)) {
+      return
+    }
+
+    // 背景をクリックした場合はモーダルを閉じる
+    this.closeModal(event)
   }
 
   // フォーム送信（付箋作成 or 更新）
