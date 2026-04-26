@@ -20,9 +20,6 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Annotation controller connected (paragraph-level)")
-    console.log("Annotations:", this.annotationsValue)
-
     // Markdown表示の<p>タグに段落番号を付与
     this.setupParagraphsForMarkdown()
 
@@ -295,7 +292,6 @@ export default class extends Controller {
   // 段落アイコンを描画（既存の付箋を表示）
   renderParagraphIcons() {
     if (!this.annotationsValue || this.annotationsValue.length === 0) {
-      console.log("No annotations to render")
       return
     }
 
@@ -304,11 +300,8 @@ export default class extends Controller {
       !target.classList.contains("hidden") && !target.classList.contains("markdown-body")
     )
     if (isPlainView) {
-      console.log("Plain view detected, skipping annotation rendering")
       return
     }
-
-    console.log("Rendering paragraph icons for", this.annotationsValue.length, "annotations")
 
     // 既存のアイコンをクリア
     document.querySelectorAll("[data-annotation-icon]").forEach(icon => icon.remove())
@@ -319,19 +312,14 @@ export default class extends Controller {
         return // 文字単位の古い付箋はスキップ
       }
 
-      console.log("Looking for paragraph", annotation.paragraph_index)
       const paragraphElement = this.getParagraphElement(annotation.paragraph_index)
       if (!paragraphElement) {
-        console.warn("Paragraph not found for annotation:", annotation, "index:", annotation.paragraph_index)
         return
       }
-      console.log("Found paragraph element:", paragraphElement)
 
       // アイコンコンテナを取得（なければ段落の末尾に作成）
       let iconsContainer = paragraphElement.querySelector('[data-annotation-icons-container]')
-      console.log("Icons container:", iconsContainer)
       if (!iconsContainer) {
-        console.log("Creating new icons container")
         iconsContainer = document.createElement("span")
         iconsContainer.className = "flex items-center gap-1 shrink-0"
         iconsContainer.dataset.annotationIconsContainer = ""
@@ -349,8 +337,6 @@ export default class extends Controller {
       const avatarUrl = annotation.user_avatar_url || annotation.user?.avatar_url
       const displayName = annotation.user_display_name || annotation.user?.display_name
 
-      console.log("Creating icon for annotation:", annotation.id, "visibility:", annotation.visibility, "avatarUrl:", avatarUrl, "displayName:", displayName)
-
       if (annotation.visibility === "public_visible" && avatarUrl) {
         // アバター画像を表示
         icon.className += " rounded-full overflow-hidden border border-gray-300"
@@ -360,22 +346,18 @@ export default class extends Controller {
         avatar.className = "w-full h-full object-cover"
         avatar.style.cssText = "margin: 0 !important; border-radius: 0 !important; height: 100% !important;"
         icon.appendChild(avatar)
-        console.log("Created avatar icon with image:", avatarUrl)
       } else if (annotation.visibility === "public_visible") {
         // アバターがない場合はイニシャル
         icon.className += " bg-gray-200 rounded-full text-xs text-gray-600"
         icon.textContent = displayName ? displayName[0] : "?"
-        console.log("Created public icon with initial:", displayName ? displayName[0] : "?")
       } else {
         // 自分用付箋は🔒
         icon.className += " text-sm"
         icon.textContent = "🔒"
-        console.log("Created private icon 🔒")
       }
 
       // アイコンコンテナに追加
       iconsContainer.appendChild(icon)
-      console.log("Icon appended to container. Container children:", iconsContainer.children.length)
     })
   }
 
@@ -400,24 +382,16 @@ export default class extends Controller {
 
     // ポップオーバー要素を作成
     const popover = document.createElement("div")
-    popover.className = "fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl max-w-md p-4"
+    // 公開付箋は薄黄色、自分用は薄青色の背景
+    const bgColor = annotation.visibility === "public_visible" ? "bg-yellow-50" : "bg-blue-50"
+    popover.className = `fixed z-50 ${bgColor} p-4`
+    popover.style.cssText = "width: 288px; border-radius: 2px; box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15), 1px 1px 2px rgba(0, 0, 0, 0.1);"
     popover.dataset.annotationPopover = ""
 
     const displayName = annotation.user_display_name || annotation.user?.display_name || "Unknown"
     const avatarUrl = annotation.user_avatar_url || annotation.user?.avatar_url
 
-    popover.innerHTML = `
-      <div class="flex items-start justify-between gap-3 mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">${annotation.icon}</span>
-          <span class="text-sm font-medium text-gray-900">${this.escapeHtml(displayName)}</span>
-        </div>
-        <button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button>
-      </div>
-      <div class="text-sm text-gray-800 whitespace-pre-wrap">
-        ${this.escapeHtml(annotation.body)}
-      </div>
-    `
+    popover.innerHTML = `<div class="flex items-start justify-between gap-3 mb-3"><div class="flex items-center gap-2"><span class="text-lg">${annotation.icon}</span><span class="text-sm font-medium text-gray-900">${this.escapeHtml(displayName)}</span></div><button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button></div><div class="text-sm text-gray-800 whitespace-pre-wrap" style="line-height: 1.75;">${this.escapeHtml(annotation.body)}</div>`
 
     // 位置を計算（クリックされたアイコンの下）
     // position: fixed を使うので、scrollY/scrollX は不要（viewport基準）

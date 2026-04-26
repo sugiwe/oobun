@@ -22,8 +22,14 @@
             .text-sm.font-medium.text-gray-900.mb-1
               = notification_text(notification)
 
-            / プレビュー（new_postの場合）
-            - if preview = notification_preview(notification)
+            / プレビュー
+            - if notification.action == "annotation_invalidated"
+              / 付箋無効化の場合は特別な表示
+              .text-sm.text-gray-600.mb-2
+                | メモ内容は
+                a.text-blue-600.hover:text-blue-800.underline href=my_annotations_path onclick="event.stopPropagation();" 自分の付箋一覧
+                | に残っています。付箋を再度追加したい場合は、投稿ページから改めて追加してください。
+            - elsif preview = notification_preview(notification)
               .text-sm.text-gray-600.line-clamp-2.mb-2
                 = preview
 

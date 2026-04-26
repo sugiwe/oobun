@@ -189,14 +189,34 @@ class Post < ApplicationRecord
     NotificationService.notify_new_post(self)
   end
 
+  # 付箋作成者に通知を送る
+  def notify_annotation_authors(user_ids)
+    User.where(id: user_ids).find_each do |annotation_author|
+      # 投稿者自身には通知しない
+      next if annotation_author.id == user_id
+
+      annotation_author.notifications.create!(
+        actor: user,
+        notifiable: self,
+        action: :annotation_invalidated
+      )
+    end
+  end
+
   # 本文が変更された場合、有効な付箋を無効化
   def invalidate_annotations_if_body_changed
     return unless body_changed?
     return unless annotations.active.exists?
 
+    # 無効化する前に付箋作成者のIDを取得
+    annotation_user_ids = annotations.active.distinct.pluck(:user_id)
+
     annotations.active.update_all(
       invalidated_at: Time.current,
       invalidation_reason: "post_edited"
     )
+
+    # 付箋作成者に通知を送る
+    notify_annotation_authors(annotation_user_ids)
   end
 end
