@@ -15,7 +15,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
       render json: {
         success: true,
-        message: "マーカー・付箋を追加しました",
+        message: "付箋を追加しました",
         annotation: annotation_json(@annotation)
       }, status: :created
     else
@@ -39,7 +39,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
       render json: {
         success: true,
-        message: "マーカー・付箋を更新しました",
+        message: "付箋を更新しました",
         annotation: annotation_json(@annotation)
       }, status: :ok
     else
@@ -55,12 +55,12 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
     render json: {
       success: true,
-      message: "マーカー・付箋を削除しました"
+      message: "付箋を削除しました"
     }, status: :ok
   rescue ActiveRecord::ActiveRecordError
     render json: {
       success: false,
-      message: "マーカー・付箋の削除に失敗しました"
+      message: "付箋の削除に失敗しました"
     }, status: :unprocessable_entity
   end
 
@@ -96,11 +96,23 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   end
 
   def annotation_json(annotation)
+    user = annotation.user
+    avatar_url = if user.avatar.attached?
+      rails_blob_url(user.avatar, only_path: true)
+    elsif user.avatar_url.present?
+      user.avatar_url
+    else
+      nil
+    end
+
     {
       id: annotation.id,
       post_id: annotation.post_id,
       user_id: annotation.user_id,
-      user: { display_name: annotation.user.display_name },
+      user: {
+        display_name: user.display_name,
+        avatar_url: avatar_url
+      },
       paragraph_index: annotation.paragraph_index,
       start_offset: annotation.start_offset,
       end_offset: annotation.end_offset,

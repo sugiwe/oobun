@@ -69,7 +69,7 @@ class Annotation < ApplicationRecord
     visibility_public_visible? || (visibility_self_only? && user_id == current_user.id)
   end
 
-  # マーカーの色を返す（CSS クラス用）
+  # 付箋の背景色を返す（CSS クラス用）
   def marker_color_class
     visibility_self_only? ? "bg-blue-100" : "bg-yellow-100"
   end
@@ -87,6 +87,22 @@ class Annotation < ApplicationRecord
   # 有効かどうか
   def active?
     invalidated_at.nil?
+  end
+
+  # ユーザーのアバターURLを返す（JSON用）
+  def user_avatar_url
+    if user.avatar.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(user.avatar, only_path: true)
+    elsif user.avatar_url.present?
+      user.avatar_url
+    else
+      nil
+    end
+  end
+
+  # ユーザーの表示名を返す（JSON用）
+  def user_display_name
+    user.display_name
   end
 
   private

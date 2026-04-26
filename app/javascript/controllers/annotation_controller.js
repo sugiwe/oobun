@@ -26,88 +26,116 @@ export default class extends Controller {
     // Markdown表示の<p>タグに段落番号を付与
     this.setupParagraphsForMarkdown()
 
+    // Plain表示の段落にもボタンを追加
+    this.setupParagraphsForPlain()
+
     // 段落アイコンを描画
     this.renderParagraphIcons()
+
+    // 表示モード切り替え時にアイコンを再描画
+    this.element.addEventListener("view-mode-changed", () => {
+      this.renderParagraphIcons()
+    })
   }
 
   disconnect() {
     // クリーンアップ
   }
 
-  // Markdown表示の<p>タグに段落番号とホバーイベントを設定
+  // Markdown表示のブロック要素に段落番号とホバーイベントを設定
   setupParagraphsForMarkdown() {
     this.contentTargets.forEach(contentTarget => {
       const isMarkdownView = contentTarget.classList.contains("markdown-body")
 
       if (isMarkdownView) {
-        const paragraphs = contentTarget.querySelectorAll("p")
-        paragraphs.forEach((p, index) => {
-          p.dataset.paragraphIndex = index
-          p.classList.add("paragraph", "relative", "px-2", "py-1", "rounded", "transition-colors")
-          p.dataset.action = "mouseenter->annotation#showParagraphButton mouseleave->annotation#hideParagraphButton"
+        // ブロック要素全般を対象にする（段落、見出し、リスト全体、引用、コードブロック）
+        // ul/olは最上位のもののみ対象（ネストした子ul/olは除外）
+        const blocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
+        blocks.forEach((block, index) => {
+          block.dataset.paragraphIndex = index
+          block.classList.add("paragraph", "relative", "px-2", "py-1", "rounded", "transition-colors")
+          block.dataset.action = "mouseenter->annotation#showParagraphButton mouseleave->annotation#hideParagraphButton"
+
+          // 付箋追加ボタンを段落内に作成（ログイン時のみ）
+          if (this.currentUserIdValue !== 0) {
+            this.createParagraphButton(block)
+          }
+
+          // アイコンコンテナを段落の下に追加
+          const iconsContainer = document.createElement("div")
+          iconsContainer.className = "flex items-center gap-1 mt-1"
+          iconsContainer.dataset.annotationIconsContainer = ""
+          block.appendChild(iconsContainer)
         })
       }
     })
   }
 
+  // Plain表示の段落設定（付箋機能は無効）
+  setupParagraphsForPlain() {
+    // Plain表示では付箋機能を提供しない
+    // （Markdownの構造を正確に把握できないため、段落番号が一致しない）
+  }
+
+  // 段落内に付箋追加ボタンを作成
+  createParagraphButton(paragraph) {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "absolute top-1 right-1 bg-gray-900 text-white text-xs px-3 py-2 rounded shadow-lg hover:bg-gray-700 transition-colors opacity-0 hover:opacity-100"
+    button.textContent = "📌 付箋を追加"
+    button.dataset.paragraphButton = ""
+    button.dataset.action = "click->annotation#openModalForParagraph"
+    paragraph.appendChild(button)
+  }
+
   // 段落ホバー時にボタンを表示
   showParagraphButton(event) {
-    if (!this.hasParagraphButtonTarget) return
     if (this.currentUserIdValue === 0) return // 未ログイン
 
     const paragraph = event.currentTarget
-    const rect = paragraph.getBoundingClientRect()
+    const button = paragraph.querySelector("[data-paragraph-button]")
 
-    // 段落を薄いグレー背景に
-    paragraph.classList.add("bg-gray-50")
-
-    // ボタンを段落の右上に配置
-    this.paragraphButtonTarget.classList.remove("hidden")
-    this.paragraphButtonTarget.style.top = `${rect.top + window.scrollY}px`
-    this.paragraphButtonTarget.style.right = `${window.innerWidth - rect.right + window.scrollX + 8}px`
-
-    // ボタンに段落情報を保存
-    this.paragraphButtonTarget.dataset.paragraphIndex = paragraph.dataset.paragraphIndex
-    this.paragraphButtonTarget.dataset.paragraphElement = paragraph
+    if (button) {
+      // 段落を薄いグレー背景に
+      paragraph.classList.add("bg-gray-50")
+      // ボタンを表示
+      button.classList.remove("opacity-0")
+      button.classList.add("opacity-100")
+    }
   }
 
   // 段落ホバー解除時にボタンを非表示
   hideParagraphButton(event) {
     const paragraph = event.currentTarget
-    paragraph.classList.remove("bg-gray-50")
+    const button = paragraph.querySelector("[data-paragraph-button]")
 
-    // ボタンにマウスが移動していない場合のみ非表示
-    setTimeout(() => {
-      if (!this.hasParagraphButtonTarget) return
-      const buttonRect = this.paragraphButtonTarget.getBoundingClientRect()
-      const mouseX = event.clientX
-      const mouseY = event.clientY
-
-      const isOverButton = (
-        mouseX >= buttonRect.left &&
-        mouseX <= buttonRect.right &&
-        mouseY >= buttonRect.top &&
-        mouseY <= buttonRect.bottom
-      )
-
-      if (!isOverButton) {
-        this.paragraphButtonTarget.classList.add("hidden")
-      }
-    }, 100)
+    if (button) {
+      // 背景を戻す
+      paragraph.classList.remove("bg-gray-50")
+      // ボタンを非表示
+      button.classList.remove("opacity-100")
+      button.classList.add("opacity-0")
+    }
   }
 
   // 段落用のモーダルを開く
   openModalForParagraph(event) {
-    const paragraphIndex = parseInt(event.currentTarget.dataset.paragraphIndex)
-    const paragraphElement = this.getParagraphElement(paragraphIndex)
+    // ボタンの親要素（段落）から段落番号を取得
+    const paragraph = event.currentTarget.closest(".paragraph")
+    const paragraphIndex = parseInt(paragraph.dataset.paragraphIndex)
 
-    if (!paragraphElement) {
-      console.error("Paragraph not found:", paragraphIndex)
+    if (!paragraph) {
+      console.error("Paragraph not found")
       return
     }
 
-    // 段落の全文を取得
-    const paragraphText = paragraphElement.textContent.trim()
+    // 段落の全文を取得（ボタンとアイコンコンテナを除外）
+    const button = paragraph.querySelector("[data-paragraph-button]")
+    const iconsContainer = paragraph.querySelector("[data-annotation-icons-container]")
+    const clone = paragraph.cloneNode(true)
+    clone.querySelector("[data-paragraph-button]")?.remove()
+    clone.querySelector("[data-annotation-icons-container]")?.remove()
+    const paragraphText = clone.textContent.trim()
 
     // 既に付箋があるかチェック
     const existingAnnotation = this.annotationsValue.find(a =>
@@ -141,11 +169,6 @@ export default class extends Controller {
     // モーダルを表示
     if (this.hasModalTarget) {
       this.modalTarget.classList.remove("hidden")
-    }
-
-    // ボタンを非表示
-    if (this.hasParagraphButtonTarget) {
-      this.paragraphButtonTarget.classList.add("hidden")
     }
   }
 
@@ -248,12 +271,17 @@ export default class extends Controller {
     }, 2500)
   }
 
-  // 段落要素を取得
+  // 段落要素を取得（現在表示されているコンテンツエリアから）
   getParagraphElement(paragraphIndex) {
     let paragraphElement = null
 
     this.contentTargets.forEach(contentTarget => {
       if (paragraphElement) return // 既に見つかっている
+
+      // hidden クラスがついている（非表示の）コンテンツエリアはスキップ
+      if (contentTarget.classList.contains("hidden")) {
+        return
+      }
 
       const candidate = contentTarget.querySelector(`[data-paragraph-index="${paragraphIndex}"]`)
       if (candidate) {
@@ -267,8 +295,20 @@ export default class extends Controller {
   // 段落アイコンを描画（既存の付箋を表示）
   renderParagraphIcons() {
     if (!this.annotationsValue || this.annotationsValue.length === 0) {
+      console.log("No annotations to render")
       return
     }
+
+    // Plain表示の場合は付箋を描画しない
+    const isPlainView = this.contentTargets.some(target =>
+      !target.classList.contains("hidden") && !target.classList.contains("markdown-body")
+    )
+    if (isPlainView) {
+      console.log("Plain view detected, skipping annotation rendering")
+      return
+    }
+
+    console.log("Rendering paragraph icons for", this.annotationsValue.length, "annotations")
 
     // 既存のアイコンをクリア
     document.querySelectorAll("[data-annotation-icon]").forEach(icon => icon.remove())
@@ -279,22 +319,63 @@ export default class extends Controller {
         return // 文字単位の古い付箋はスキップ
       }
 
+      console.log("Looking for paragraph", annotation.paragraph_index)
       const paragraphElement = this.getParagraphElement(annotation.paragraph_index)
       if (!paragraphElement) {
-        console.warn("Paragraph not found for annotation:", annotation)
+        console.warn("Paragraph not found for annotation:", annotation, "index:", annotation.paragraph_index)
         return
+      }
+      console.log("Found paragraph element:", paragraphElement)
+
+      // アイコンコンテナを取得（なければ段落の末尾に作成）
+      let iconsContainer = paragraphElement.querySelector('[data-annotation-icons-container]')
+      console.log("Icons container:", iconsContainer)
+      if (!iconsContainer) {
+        console.log("Creating new icons container")
+        iconsContainer = document.createElement("span")
+        iconsContainer.className = "flex items-center gap-1 shrink-0"
+        iconsContainer.dataset.annotationIconsContainer = ""
+        paragraphElement.appendChild(iconsContainer)
       }
 
       // アイコンを作成
       const icon = document.createElement("span")
-      icon.className = "inline-flex items-center justify-center w-6 h-6 text-sm cursor-pointer hover:scale-110 transition-transform ml-1"
-      icon.textContent = annotation.icon
+      icon.className = "inline-flex items-center justify-center w-6 h-6 shrink-0 cursor-pointer hover:scale-110 transition-transform"
       icon.dataset.annotationIcon = ""
       icon.dataset.annotationId = annotation.id
       icon.dataset.action = "click->annotation#showAnnotationPopover"
 
-      // 段落の末尾に追加
-      paragraphElement.appendChild(icon)
+      // 公開付箋の場合はアバター画像、自分用の場合は🔒
+      const avatarUrl = annotation.user_avatar_url || annotation.user?.avatar_url
+      const displayName = annotation.user_display_name || annotation.user?.display_name
+
+      console.log("Creating icon for annotation:", annotation.id, "visibility:", annotation.visibility, "avatarUrl:", avatarUrl, "displayName:", displayName)
+
+      if (annotation.visibility === "public_visible" && avatarUrl) {
+        // アバター画像を表示
+        icon.className += " rounded-full overflow-hidden border border-gray-300"
+        const avatar = document.createElement("img")
+        avatar.src = avatarUrl
+        avatar.alt = displayName
+        avatar.className = "w-full h-full object-cover"
+        avatar.style.cssText = "margin: 0 !important; border-radius: 0 !important; height: 100% !important;"
+        icon.appendChild(avatar)
+        console.log("Created avatar icon with image:", avatarUrl)
+      } else if (annotation.visibility === "public_visible") {
+        // アバターがない場合はイニシャル
+        icon.className += " bg-gray-200 rounded-full text-xs text-gray-600"
+        icon.textContent = displayName ? displayName[0] : "?"
+        console.log("Created public icon with initial:", displayName ? displayName[0] : "?")
+      } else {
+        // 自分用付箋は🔒
+        icon.className += " text-sm"
+        icon.textContent = "🔒"
+        console.log("Created private icon 🔒")
+      }
+
+      // アイコンコンテナに追加
+      iconsContainer.appendChild(icon)
+      console.log("Icon appended to container. Container children:", iconsContainer.children.length)
     })
   }
 
@@ -314,39 +395,40 @@ export default class extends Controller {
     // 既存のポップオーバーを削除
     this.hideAnnotationPopover()
 
+    // クリックされたアイコンへの参照を保持（スクロール時の位置更新用）
+    this.currentPopoverIcon = event.currentTarget
+
     // ポップオーバー要素を作成
     const popover = document.createElement("div")
     popover.className = "fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl max-w-md p-4"
     popover.dataset.annotationPopover = ""
 
+    const displayName = annotation.user_display_name || annotation.user?.display_name || "Unknown"
+    const avatarUrl = annotation.user_avatar_url || annotation.user?.avatar_url
+
     popover.innerHTML = `
-      <div class="flex items-start justify-between gap-3 mb-2">
+      <div class="flex items-start justify-between gap-3 mb-3">
         <div class="flex items-center gap-2">
           <span class="text-lg">${annotation.icon}</span>
-          <span class="text-sm font-medium text-gray-900">${this.escapeHtml(annotation.user.display_name)}</span>
+          <span class="text-sm font-medium text-gray-900">${this.escapeHtml(displayName)}</span>
         </div>
         <button class="text-gray-400 hover:text-gray-600" data-close-popover>✕</button>
       </div>
-      <div class="text-xs text-gray-500 mb-2">この段落について:</div>
-      <blockquote class="bg-gray-50 border-l-4 border-gray-300 pl-2 py-1 text-sm text-gray-700 italic mb-3 max-h-24 overflow-y-auto">
-        ${this.escapeHtml(annotation.selected_text)}
-      </blockquote>
-      <div class="text-xs text-gray-500 mb-1">メモ:</div>
       <div class="text-sm text-gray-800 whitespace-pre-wrap">
         ${this.escapeHtml(annotation.body)}
       </div>
     `
 
     // 位置を計算（クリックされたアイコンの下）
-    const rect = event.currentTarget.getBoundingClientRect()
-    const top = rect.bottom + window.scrollY + 8
-    const left = rect.left + window.scrollX
-
-    popover.style.top = `${top}px`
-    popover.style.left = `${left}px`
+    // position: fixed を使うので、scrollY/scrollX は不要（viewport基準）
+    this.updatePopoverPosition(popover)
 
     // DOMに追加
     document.body.appendChild(popover)
+
+    // スクロール時に位置を更新
+    this.scrollHandler = () => this.updatePopoverPosition(popover)
+    window.addEventListener("scroll", this.scrollHandler, { passive: true })
 
     // 閉じるボタンにイベントリスナーを追加
     const closeButton = popover.querySelector("[data-close-popover]")
@@ -360,12 +442,33 @@ export default class extends Controller {
     }, 0)
   }
 
+  // ポップオーバーの位置を更新
+  updatePopoverPosition(popover) {
+    if (!this.currentPopoverIcon || !popover) return
+
+    const rect = this.currentPopoverIcon.getBoundingClientRect()
+    const top = rect.bottom + 8  // アイコンの下に8px空ける
+    const left = rect.left
+
+    popover.style.top = `${top}px`
+    popover.style.left = `${left}px`
+  }
+
   // ポップオーバーを非表示
   hideAnnotationPopover() {
     const existing = document.querySelector("[data-annotation-popover]")
     if (existing) {
       existing.remove()
     }
+
+    // スクロールイベントリスナーを削除
+    if (this.scrollHandler) {
+      window.removeEventListener("scroll", this.scrollHandler)
+      this.scrollHandler = null
+    }
+
+    // アイコンへの参照をクリア
+    this.currentPopoverIcon = null
   }
 
   // 外部クリックでポップオーバーを閉じる

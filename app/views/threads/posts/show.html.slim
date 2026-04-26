@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class], include: { user: { only: [:id], methods: [:display_name] } })}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -61,8 +61,19 @@
 
     / 本文（手紙の内容）- Plain表示（段落ごとに分割）
     .text-base.text-gray-800.leading-loose.font-mono.hidden data-post-view-target="plainArea" data-annotation-target="content"
+      / 付箋がある場合は、Markdown表示への切り替えを促すメッセージを表示
+      - if @annotations.present?
+        .bg-blue-50.border.border-blue-200.rounded-lg.p-4.mb-6
+          .flex.items-start.gap-3
+            .text-xl 📌
+            .flex-1
+              .text-sm.font-medium.text-blue-900
+                | この投稿には付箋があります
+              .text-xs.text-blue-700.mt-1
+                | 付箋を表示するには、上の「Markdown」タブに切り替えてください。
+
       - @post.body.split("\n\n").each_with_index do |paragraph, index|
-        .paragraph.relative.px-2.py-1.rounded.transition-colors data-paragraph-index=index data-action="mouseenter->annotation#showParagraphButton mouseleave->annotation#hideParagraphButton"
+        .px-2.py-1
           .whitespace-pre-wrap = paragraph
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
@@ -95,13 +106,7 @@
               .text-base.text-gray-700.group-hover:text-gray-900.truncate = @next_post.display_title
               .text-sm.text-gray-500.line-clamp-1 = truncate(@next_post.body, length: 80)
 
-    / 段落ホバー時の付箋追加ボタン
-    - if logged_in?
-      .absolute.z-50.hidden data-annotation-target="paragraphButton"
-        button.bg-gray-900.text-white.text-xs.px-3.py-2.rounded.shadow-lg.hover:bg-gray-700.transition-colors data-action="click->annotation#openModalForParagraph"
-          | 📌 付箋を追加
-
-    / マーカー作成モーダル
+    / 付箋作成モーダル
     - if logged_in?
       .fixed.inset-0.z-50.hidden.flex.items-center.justify-center.bg-black.bg-opacity-50 data-annotation-target="modal"
         .bg-white.rounded-lg.shadow-xl.max-w-md.w-full.mx-4

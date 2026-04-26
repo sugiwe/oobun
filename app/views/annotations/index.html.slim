@@ -1,9 +1,9 @@
-- content_for :title, "自分のマーカー・付箋 - coconikki"
+- content_for :title, "自分の付箋 - coconikki"
 
 .max-w-4xl.mx-auto.px-4.py-8
   .mb-8
-    h1.text-2xl.font-bold.text-gray-900.mb-2 自分のマーカー・付箋
-    p.text-sm.text-gray-600 投稿に追加したマーカー・付箋の一覧です
+    h1.text-2xl.font-bold.text-gray-900.mb-2 自分の付箋
+    p.text-sm.text-gray-600 投稿に追加した付箋の一覧です
 
   - if @annotations.any?
     .space-y-4
@@ -24,9 +24,9 @@
                     | ⚠️ 投稿が編集されたため表示されていません
 
           / 選択したテキスト
-          .mb-3
+          .mb-3 data-controller="expandable-text"
             .text-xs.text-gray-500.mb-1 選択箇所:
-            blockquote.bg-gray-50.border-l-4.border-gray-300.pl-3.py-2.text-sm.text-gray-700.italic
+            blockquote.bg-gray-50.border-l-4.border-gray-300.pl-3.py-2.text-sm.text-gray-700.italic.cursor-pointer.hover:bg-gray-100.transition-colors data-action="click->expandable-text#toggle" data-expandable-text-target="content" class="line-clamp-2"
               = annotation.selected_text
 
           / 付箋の内容
@@ -46,5 +46,5 @@
   - else
     .text-center.py-12
       .text-4xl.mb-4 📌
-      p.text-gray-500 まだマーカー・付箋がありません
-      p.text-sm.text-gray-400.mt-2 投稿を読んで、気になった箇所にマーカーを追加してみましょう
+      p.text-gray-500 まだ付箋がありません
+      p.text-sm.text-gray-400.mt-2 投稿を読んで、気になった箇所に付箋を追加してみましょう

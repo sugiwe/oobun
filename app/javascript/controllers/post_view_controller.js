@@ -29,6 +29,9 @@ export default class extends Controller {
     this.plainButtonTarget.classList.remove("border-gray-900", "text-gray-900")
 
     this.saveMode("markdown")
+
+    // 表示モード切り替えイベントを発火（付箋アイコン再描画用）
+    this.element.dispatchEvent(new CustomEvent("view-mode-changed", { bubbles: true }))
   }
 
   // Plain表示に切り替え
@@ -43,6 +46,9 @@ export default class extends Controller {
     this.markdownButtonTarget.classList.remove("border-gray-900", "text-gray-900")
 
     this.saveMode("plain")
+
+    // 表示モード切り替えイベントを発火（付箋アイコン再描画用）
+    this.element.dispatchEvent(new CustomEvent("view-mode-changed", { bubbles: true }))
   }
 
   // モードを保存（ログインユーザーはAjax、非ログインはlocalStorage）
