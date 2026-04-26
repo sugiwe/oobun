@@ -284,25 +284,9 @@ export default class extends Controller {
     }
   }
 
-  // 成功トーストを表示
+  // 成功トーストを表示（統一デザイン）
   showSuccessToast(message) {
-    const toast = document.createElement("div")
-    toast.className = "fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2"
-    toast.innerHTML = `
-      <span class="text-lg">✅</span>
-      <span class="text-sm font-medium">${message}</span>
-    `
-
-    document.body.appendChild(toast)
-
-    setTimeout(() => {
-      toast.classList.add("opacity-0", "transition-opacity", "duration-300")
-      setTimeout(() => {
-        if (toast.parentElement) {
-          document.body.removeChild(toast)
-        }
-      }, 300)
-    }, 2500)
+    this.showToast(message, "success")
   }
 
   // 段落要素を取得（現在表示されているコンテンツエリアから）
@@ -665,19 +649,46 @@ export default class extends Controller {
     this.bodyInputTarget.focus()
   }
 
-  // トースト通知を表示
+  // トースト通知を表示（統一デザイン - Rails標準と同じスタイル）
   showToast(message, type = "success") {
     const toast = document.createElement("div")
-    const bgColor = type === "success" ? "bg-green-500" : "bg-red-500"
-    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity`
-    toast.textContent = message
+
+    // タイプに応じた色とアイコンを設定
+    const isSuccess = type === "success"
+    const borderColor = isSuccess ? "border-green-200" : "border-red-200"
+    const textColor = isSuccess ? "text-green-800" : "text-red-800"
+    const progressBg = isSuccess ? "bg-green-200" : "bg-red-200"
+    const progressColor = isSuccess ? "bg-green-600" : "bg-red-600"
+    const icon = isSuccess ? "✅" : "⚠️"
+
+    toast.className = `fixed top-4 right-4 z-50 bg-white border ${borderColor} px-6 py-3 rounded shadow-lg max-w-md`
+
+    // トースト内容
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <span class="text-lg">${icon}</span>
+        <div class="flex-1">
+          <div class="text-sm font-medium ${textColor}">${this.escapeHtml(message)}</div>
+        </div>
+      </div>
+      <div class="absolute bottom-0 left-0 right-0 h-px ${progressBg} rounded-b overflow-hidden">
+        <div class="h-full ${progressColor} transition-all ease-linear" style="width: 100%; transition-duration: 4000ms;"></div>
+      </div>
+    `
 
     document.body.appendChild(toast)
 
-    // 3秒後にフェードアウト
+    // プログレスバーのアニメーション開始
+    const progressBar = toast.querySelector(`.${progressColor}`)
+    requestAnimationFrame(() => {
+      progressBar.style.width = "0%"
+    })
+
+    // 4秒後にフェードアウト
     setTimeout(() => {
+      toast.style.transition = "opacity 300ms ease-out"
       toast.style.opacity = "0"
       setTimeout(() => toast.remove(), 300)
-    }, 3000)
+    }, 4000)
   }
 }
