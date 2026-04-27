@@ -7,23 +7,25 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     @annotation = @post.annotations.build(annotation_params)
     @annotation.user = current_user
 
-    if @annotation.save
+    ActiveRecord::Base.transaction do
+      @annotation.save!
+
       # 公開付箋の場合、投稿者に通知
       if @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
         notify_post_author
       end
-
-      render json: {
-        success: true,
-        message: "付箋を追加しました",
-        annotation: annotation_json(@annotation)
-      }, status: :created
-    else
-      render json: {
-        success: false,
-        errors: @annotation.errors.full_messages
-      }, status: :unprocessable_entity
     end
+
+    render json: {
+      success: true,
+      message: "付箋を追加しました",
+      annotation: annotation_json(@annotation)
+    }, status: :created
+  rescue ActiveRecord::RecordInvalid
+    render json: {
+      success: false,
+      errors: @annotation.errors.full_messages
+    }, status: :unprocessable_entity
   end
 
   def update
@@ -31,23 +33,25 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     visibility_changed = annotation_params[:visibility].present? &&
                          annotation_params[:visibility] != @annotation.visibility
 
-    if @annotation.update(annotation_params)
+    ActiveRecord::Base.transaction do
+      @annotation.update!(annotation_params)
+
       # self_only → public に変更された場合、投稿者に通知
       if visibility_changed && @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
         notify_post_author
       end
-
-      render json: {
-        success: true,
-        message: "付箋を更新しました",
-        annotation: annotation_json(@annotation)
-      }, status: :ok
-    else
-      render json: {
-        success: false,
-        errors: @annotation.errors.full_messages
-      }, status: :unprocessable_entity
     end
+
+    render json: {
+      success: true,
+      message: "付箋を更新しました",
+      annotation: annotation_json(@annotation)
+    }, status: :ok
+  rescue ActiveRecord::RecordInvalid
+    render json: {
+      success: false,
+      errors: @annotation.errors.full_messages
+    }, status: :unprocessable_entity
   end
 
   def destroy
@@ -96,22 +100,13 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   end
 
   def annotation_json(annotation)
-    user = annotation.user
-    avatar_url = if user.avatar.attached?
-      rails_blob_url(user.avatar, only_path: true)
-    elsif user.avatar_url.present?
-      user.avatar_url
-    else
-      nil
-    end
-
     {
       id: annotation.id,
       post_id: annotation.post_id,
       user_id: annotation.user_id,
       user: {
-        display_name: user.display_name,
-        avatar_url: avatar_url
+        display_name: annotation.user_display_name,
+        avatar_url: annotation.user_avatar_url
       },
       paragraph_index: annotation.paragraph_index,
       start_offset: annotation.start_offset,

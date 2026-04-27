@@ -31,13 +31,26 @@ export default class extends Controller {
     this.renderParagraphIcons()
 
     // 表示モード切り替え時にアイコンを再描画
-    this.element.addEventListener("view-mode-changed", () => {
+    this.handleViewModeChange = () => {
       this.renderParagraphIcons()
-    })
+    }
+    this.element.addEventListener("view-mode-changed", this.handleViewModeChange)
   }
 
   disconnect() {
-    // クリーンアップ
+    // イベントリスナーのクリーンアップ
+    if (this.handleViewModeChange) {
+      this.element.removeEventListener("view-mode-changed", this.handleViewModeChange)
+    }
+
+    // スクロールイベントリスナーのクリーンアップ
+    if (this.scrollHandler) {
+      window.removeEventListener("scroll", this.scrollHandler)
+      this.scrollHandler = null
+    }
+
+    // ポップオーバーの削除
+    this.hideAnnotationPopover()
   }
 
   // Markdown表示のブロック要素に段落番号とホバーイベントを設定

@@ -111,6 +111,9 @@ class Annotation < ApplicationRecord
     return unless post&.body && selected_text.present?
 
     # 選択されたテキストに段落区切り（\n\n）が含まれていないかチェック
+    # Markdown では段落は空行（\n\n）で区切られるため、この単純なチェックで十分
+    # より複雑な正規表現（例: /\n\s*\n/）も考えられるが、
+    # 本アプリでは実際のテキストマッチングに影響するため、シンプルな "\n\n" を使用
     if selected_text.include?("\n\n")
       errors.add(:selected_text, "は段落を跨いで選択できません。1つの段落内で選択してください。")
     end
