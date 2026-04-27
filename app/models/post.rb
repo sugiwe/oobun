@@ -151,6 +151,10 @@ class Post < ApplicationRecord
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
 
+  # 本文変更により付箋が無効化された時に通知を送信
+  # トランザクションがコミットされた後に送信することで、ロールバック時の誤通知を防ぐ
+  after_commit :notify_invalidated_annotation_authors, if: -> { saved_change_to_body? && @invalidated_annotation_user_ids.present? }
+
   private
 
   # slug自動生成（公開日時ベース: 2026-04-11-1 形式）
@@ -201,16 +205,21 @@ class Post < ApplicationRecord
     return unless body_changed?
     return unless annotations.active.exists?
 
-    # 無効化する前に付箋作成者のIDを取得
-    annotation_user_ids = annotations.active.distinct.pluck(:user_id)
+    # 無効化する前に付箋作成者のIDを取得（通知用にインスタンス変数に保存）
+    @invalidated_annotation_user_ids = annotations.active.distinct.pluck(:user_id)
 
     annotations.active.update_all(
       invalidated_at: Time.current,
       invalidation_reason: "post_edited",
       updated_at: Time.current
     )
+  end
 
-    # 付箋作成者に通知を送る
-    notify_annotation_authors(annotation_user_ids)
+  # 付箋無効化後の通知送信（after_commitで呼ばれる）
+  def notify_invalidated_annotation_authors
+    return unless @invalidated_annotation_user_ids.present?
+
+    notify_annotation_authors(@invalidated_annotation_user_ids)
+    @invalidated_annotation_user_ids = nil # クリーンアップ
   end
 end

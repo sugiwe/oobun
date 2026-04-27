@@ -72,8 +72,8 @@ export default class extends Controller {
             this.createParagraphButton(block)
           }
 
-          // アイコンコンテナを段落の下に追加
-          const iconsContainer = document.createElement("div")
+          // アイコンコンテナを段落の下に追加（spanを使用してHTML仕様違反を回避）
+          const iconsContainer = document.createElement("span")
           iconsContainer.className = "flex items-center gap-1 mt-1"
           iconsContainer.dataset.annotationIconsContainer = ""
           block.appendChild(iconsContainer)

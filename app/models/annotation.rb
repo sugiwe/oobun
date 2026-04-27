@@ -2,20 +2,23 @@
 #
 # Table name: annotations
 #
-#  id            :bigint           not null, primary key
-#  body          :text             not null
-#  end_offset    :integer          not null
-#  selected_text :text             not null
-#  start_offset  :integer          not null
-#  visibility    :string           default("self_only"), not null
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  post_id       :bigint           not null
-#  user_id       :bigint           not null
+#  id                   :bigint           not null, primary key
+#  body                 :text             not null
+#  invalidated_at       :datetime
+#  invalidation_reason  :string
+#  paragraph_index      :integer
+#  selected_text        :text             not null
+#  visibility           :string           default("self_only"), not null
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  post_id              :bigint           not null
+#  user_id              :bigint           not null
 #
 # Indexes
 #
+#  index_annotations_on_post_id              (post_id)
 #  index_annotations_on_post_id_and_created_at  (post_id,created_at)
+#  index_annotations_on_user_id              (user_id)
 #  index_annotations_on_user_id_and_created_at  (user_id,created_at)
 #
 # Foreign Keys
