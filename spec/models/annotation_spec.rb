@@ -7,48 +7,19 @@ RSpec.describe Annotation, type: :model do
   end
 
   describe "validations" do
-    describe "start_offset" do
-      it "正の整数は有効" do
-        annotation = build(:annotation, start_offset: 0, end_offset: 10)
-        expect(annotation).to be_valid
-      end
-
-      it "負の数は無効" do
-        annotation = build(:annotation, start_offset: -1, end_offset: 10)
-        expect(annotation).not_to be_valid
-      end
-    end
-
-    describe "end_offset" do
-      it "start_offsetより大きい値は有効" do
-        annotation = build(:annotation, start_offset: 0, end_offset: 10)
-        expect(annotation).to be_valid
-      end
-
-      it "start_offsetと同じ値は無効" do
-        annotation = build(:annotation, start_offset: 10, end_offset: 10)
-        expect(annotation).not_to be_valid
-      end
-
-      it "start_offsetより小さい値は無効" do
-        annotation = build(:annotation, start_offset: 10, end_offset: 5)
-        expect(annotation).not_to be_valid
-      end
-    end
-
     describe "selected_text" do
       it "1文字は有効" do
         annotation = build(:annotation, selected_text: "a")
         expect(annotation).to be_valid
       end
 
-      it "300文字は有効" do
-        annotation = build(:annotation, selected_text: "a" * 300)
+      it "1000文字は有効" do
+        annotation = build(:annotation, selected_text: "a" * 1000)
         expect(annotation).to be_valid
       end
 
-      it "301文字は無効" do
-        annotation = build(:annotation, selected_text: "a" * 301)
+      it "1001文字は無効" do
+        annotation = build(:annotation, selected_text: "a" * 1001)
         expect(annotation).not_to be_valid
       end
 

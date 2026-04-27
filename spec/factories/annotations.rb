@@ -5,8 +5,6 @@ FactoryBot.define do
 
     # 基本属性
     paragraph_index { 0 }
-    start_offset { 0 }
-    end_offset { 10 }
     selected_text { "テスト段落" }
     body { "付箋のテスト内容です" }
     visibility { :self_only }

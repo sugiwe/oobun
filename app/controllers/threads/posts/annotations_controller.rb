@@ -90,8 +90,6 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
   def annotation_params
     params.require(:annotation).permit(
-      :start_offset,
-      :end_offset,
       :selected_text,
       :body,
       :visibility,
@@ -109,8 +107,6 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
         avatar_url: annotation.user_avatar_url
       },
       paragraph_index: annotation.paragraph_index,
-      start_offset: annotation.start_offset,
-      end_offset: annotation.end_offset,
       selected_text: annotation.selected_text,
       body: annotation.body,
       visibility: annotation.visibility,

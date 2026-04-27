@@ -254,9 +254,7 @@ export default class extends Controller {
     // 新規作成の場合のみ段落情報を追加
     if (!isEditMode) {
       formData.append("annotation[paragraph_index]", this.currentParagraphIndex)
-      formData.append("annotation[selected_text]", this.currentParagraphText.slice(0, 300)) // 冒頭300文字
-      formData.append("annotation[start_offset]", 0) // 後方互換性のため
-      formData.append("annotation[end_offset]", this.currentParagraphText.length)
+      formData.append("annotation[selected_text]", this.currentParagraphText.slice(0, 1000)) // 段落全体（最大1000文字）
     }
 
     try {

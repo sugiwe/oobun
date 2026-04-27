@@ -34,12 +34,8 @@ class Annotation < ApplicationRecord
   }, default: :self_only, prefix: true
 
   # バリデーション
-  validates :start_offset, presence: true,
-                           numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-  validates :end_offset, presence: true,
-                         numericality: { only_integer: true, greater_than: :start_offset }
   validates :selected_text, presence: true,
-                            length: { minimum: 1, maximum: 300 }
+                            length: { minimum: 1, maximum: 1000 }
   validates :body, presence: true,
                    length: { minimum: 1, maximum: 1000 }
   validates :visibility, presence: true,
