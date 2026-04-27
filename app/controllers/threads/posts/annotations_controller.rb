@@ -71,8 +71,9 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   private
 
   def set_post
-    @post = @thread.posts.find_by(slug: params[:post_id]) ||
-            @thread.posts.find(params[:post_id])
+    # 下書きにも付箋をつけられる（編集時に無効化されるが、ユーザーが学習する）
+    @post = @thread.posts.unscope(where: :status).find_by(slug: params[:post_id]) ||
+            @thread.posts.unscope(where: :status).find(params[:post_id])
   end
 
   def set_annotation
