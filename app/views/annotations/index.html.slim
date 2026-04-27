@@ -41,7 +41,7 @@
 
     / ページネーション
     .mt-8
-      == pagy_nav(@pagy) if defined?(@pagy)
+      == paginate @annotations
 
   - else
     .text-center.py-12

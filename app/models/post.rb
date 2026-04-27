@@ -206,7 +206,8 @@ class Post < ApplicationRecord
 
     annotations.active.update_all(
       invalidated_at: Time.current,
-      invalidation_reason: "post_edited"
+      invalidation_reason: "post_edited",
+      updated_at: Time.current
     )
 
     # 付箋作成者に通知を送る
