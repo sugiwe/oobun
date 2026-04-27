@@ -2,39 +2,84 @@
 
 .max-w-3xl.mx-auto
   article.bg-white.border.border-gray-200.rounded-lg.p-8.md:p-16
-    h1.text-2xl.mb-14 coconikkiについて
+    h1.text-2xl.mb-8 coconikkiについて
+
+    / 目次
+    nav.mb-12.px-8.py-6.bg-gray-50.rounded-lg
+      h2.text-sm.font-semibold.mb-4.text-gray-700 目次
+      ul.text-sm.divide-y.divide-gray-200
+        li
+          = link_to "#about", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 📖 coconikkiとは？
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#features", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span ✨ coconikkiの特徴
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#how-to-use", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 📮 使い方
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#notification-settings", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 🔔 通知設定
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#usage-limits", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span ⚙️ 使用制限
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#privacy", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 🔓 公開・非公開について
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#discoverability", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 🔍 見つかりやすさの設定
+            span.text-gray-400.flex.items-center ⌄
+        li
+          = link_to "#contact", class: "flex items-center justify-between py-3 text-gray-700 hover:text-gray-900 transition-colors" do
+            span 💬 ご質問・お問い合わせ
+            span.text-gray-400.flex.items-center ⌄
 
     .prose.prose-sm.text-gray-700
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 coconikkiとは？
+      section#about.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 📖 coconikkiとは？
         p coconikki（ココニッキ）は、誰でも読める「公開交換日記」プラットフォームです。
         p.mt-2 2人以上のメンバーが交代で投稿を重ねていく「交換日記」を、誰でも読める形で公開します。リアルタイムチャットではなく、蓄積されていく対話を「読み物」として楽しむことに価値を置いています。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 coconikkiの特徴
+      hr.my-12.border-gray-200
+
+      section#features.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 ✨ coconikkiの特徴
 
         .mt-4
-          h3.text-base.font-medium.mb-2 🌐 公開プラットフォーム
+          h3.text-base.font-medium.mb-2 🌟 公開プラットフォーム
           p.text-sm.text-gray-600.ml-4 すべての投稿は原則として公開され、ログインしていなくても誰でも読むことができます。面白い対話を発見して、読み物として楽しめます。非公開設定は、公開前の一時的な準備期間としてのみ利用可能です。誰でも無料で新規登録できます（月間登録数に制限があります）。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 📮 交代制の投稿
+          h3.text-base.font-medium.mb-2 🌟 交代制の投稿
           p.text-sm.text-gray-600.ml-4 メンバーが順番に投稿していく「ターン制」を採用。自分の番が来たら、じっくり考えて投稿できます。下書き保存機能もあるので、時間をかけて文章を練ることができます。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 🎨 カバーアートとサムネイル
+          h3.text-base.font-medium.mb-2 🌟 付箋機能
+          p.text-sm.text-gray-600.ml-4 投稿の気になる段落に、自分だけのメモや公開コメントを残せます。自分の付箋は一覧ページで確認できます。公開付箋は他の読者とも共有され、投稿への理解を深めるのに役立ちます。
+
+        .mt-6
+          h3.text-base.font-medium.mb-2 🌟 カバーアートとサムネイル
           p.text-sm.text-gray-600.ml-4 交換日記にはポッドキャストのようなカバーアートを、投稿には画像を添付できます。視覚的にも楽しめる文通を作れます。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 📬 RSSフィード対応
-          p.text-sm.text-gray-600.ml-4 各交換日記はRSSフィードで配信されるので、お気に入りのRSSリーダーで新着投稿を購読できます。
-
-        .mt-6
-          h3.text-base.font-medium.mb-2 🔔 通知機能
+          h3.text-base.font-medium.mb-2 🌟 通知機能
           p.text-sm.text-gray-600.ml-4 参加・購読している交換日記に新しい投稿があると、アプリ内とメールで通知を受け取れます。メール通知は「即時配信（100通/月まで）」「ダイジェスト配信（1日1回）」「OFF」の3つのモードから選べます。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 使い方
+        .mt-6
+          h3.text-base.font-medium.mb-2 🌟 RSSフィード対応
+          p.text-sm.text-gray-600.ml-4 各交換日記はRSSフィードで配信されるので、お気に入りのRSSリーダーで新着投稿を購読できます。
+
+      hr.my-12.border-gray-200
+
+      section#how-to-use.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 📮 使い方
 
         .mt-4
           h3.text-base.font-medium.mb-2 1. 交換日記を作成する
@@ -60,16 +105,23 @@
           h3.text-base.font-medium.mb-2 5. 通知を受け取る
           p.text-sm.text-gray-600.ml-4 参加・購読している交換日記に新しい投稿があると、アプリ内通知とメール通知で知らせます。通知設定は「設定」→「通知設定」から変更できます。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 通知設定
+        .mt-6
+          h3.text-base.font-medium.mb-2 6. 付箋でメモを残す
+          p.text-sm.text-gray-600.ml-4 投稿詳細ページで、気になる段落をクリックすると付箋を追加できます。自分だけのメモとして残すことも、公開コメントとして他の読者と共有することもできます。
+          p.text-sm.text-gray-600.ml-4.mt-2 自分の付箋は「自分の付箋」ページ（メニュー内）で一覧できます。公開付箋は投稿に表示され、投稿者に通知されます。
+
+      hr.my-12.border-gray-200
+
+      section#notification-settings.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 🔔 通知設定
         p 「設定」→「通知設定」から、通知の受け取り方を細かく設定できます。
 
         .mt-4
-          h3.text-base.font-medium.mb-2 アプリ内通知
+          h3.text-base.font-medium.mb-2 🌟 アプリ内通知
           p.text-sm.text-gray-600.ml-4 参加・購読している交換日記に新しい投稿があると、アプリ内で通知を受け取れます。通知は画面右上のベルアイコンから確認できます。
 
         .mt-6
-          h3.text-base.font-medium.mb-2 メール通知
+          h3.text-base.font-medium.mb-2 🌟 メール通知
           p.text-sm.text-gray-600.ml-4 メール通知は3つのモードから選べます：
           ul.list-disc.list-inside.mt-2.ml-8.text-sm.text-gray-600.space-y-1
             li
@@ -82,8 +134,10 @@
               strong> メール通知なし：
               | アプリ内通知のみ受け取る設定です。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 使用制限
+      hr.my-12.border-gray-200
+
+      section#usage-limits.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 ⚙️ 使用制限
         p 健全な運営と公平な利用環境を維持するため、以下の使用制限を設けています。
         ul.list-disc.list-inside.mt-2.space-y-1
           li 参加可能な交換日記：1ユーザーあたり10個まで
@@ -93,8 +147,10 @@
           li 月間登録者数：月100人まで（交換日記への招待リンク経由の登録は上限に含まれません）
         p.mt-2 使用状況は、マイページの「使用状況」セクションで確認できます。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 公開・非公開について
+      hr.my-12.border-gray-200
+
+      section#privacy.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 🔓 公開・非公開について
         p coconikkiは「公開読み物プラットフォーム」として設計されており、投稿は原則として公開されます。
         p.mt-2
           | 非公開設定は、公開前の準備期間として一時的に利用できます。非公開の交換日記は、以下の条件で自動的に公開されます：
@@ -105,8 +161,10 @@
           | ⚠️ 作成から30日以内に1つも投稿がない場合、自動的に削除されます。
         p.mt-2 プライベートなやり取りには適していませんので、ご注意ください。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 見つかりやすさの設定
+      hr.my-12.border-gray-200
+
+      section#discoverability.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 🔍 見つかりやすさの設定
         p 公開されている交換日記は、coconikki内の一覧ページやGoogle等の検索エンジンから発見されます。
         p.mt-2
           | 身内向けに静かに公開したい場合は、交換日記の編集ページで以下の設定を調整できます：
@@ -116,8 +174,10 @@
         p.mt-2.text-sm.text-red-700
           | ⚠️ これらはアクセス制限の設定ではありません。URLを知っている人は誰でも閲覧できます。
 
-      section.mb-8.mt-14
-        h2.text-lg.font-semibold.mb-3 ご質問・お問い合わせ
+      hr.my-12.border-gray-200
+
+      section#contact.mb-8.mt-14
+        h2.text-lg.md:text-xl.font-semibold.mb-3 💬 ご質問・お問い合わせ
         p
           | coconikkiについてのご質問やご要望は、
           = link_to "お問い合わせフォーム", "https://forms.gle/xEZ8jNtB6g5nPMF16", target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:underline"
