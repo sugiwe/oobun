@@ -249,6 +249,14 @@ export default class extends Controller {
       return
     }
 
+    // 二重送信防止: 送信ボタンを無効化
+    const submitButton = event.submitter || this.formTarget.querySelector("button[type='submit']")
+    const originalButtonText = submitButton?.textContent
+    if (submitButton) {
+      submitButton.disabled = true
+      submitButton.textContent = "送信中..."
+    }
+
     const formData = new FormData(this.formTarget)
 
     // 新規作成の場合のみ段落情報を追加
@@ -300,6 +308,12 @@ export default class extends Controller {
     } catch (error) {
       console.error("Failed to save annotation:", error)
       this.showError("通信エラーが発生しました")
+    } finally {
+      // エラー時・成功時のいずれも、ボタンを有効化
+      if (submitButton) {
+        submitButton.disabled = false
+        submitButton.textContent = originalButtonText
+      }
     }
   }
 
@@ -355,8 +369,8 @@ export default class extends Controller {
       return
     }
 
-    // 既存のアイコンをクリア
-    document.querySelectorAll("[data-annotation-icon]").forEach(icon => icon.remove())
+    // 既存のアイコンをクリア（このコントローラーの範囲内のみ）
+    this.element.querySelectorAll("[data-annotation-icon]").forEach(icon => icon.remove())
 
     // 付箋がない場合はボタンの更新だけ行う
     if (!this.annotationsValue || this.annotationsValue.length === 0) {
@@ -538,9 +552,10 @@ export default class extends Controller {
       }
     }
 
-    // 外部クリックで閉じる
+    // 外部クリックで閉じる（once: true を削除し、明示的にリスナー管理）
+    this.outsideClickHandler = this.closePopoverOnOutsideClick.bind(this)
     setTimeout(() => {
-      document.addEventListener("click", this.closePopoverOnOutsideClick.bind(this), { once: true })
+      document.addEventListener("click", this.outsideClickHandler)
     }, 0)
   }
 
@@ -567,6 +582,12 @@ export default class extends Controller {
     if (this.scrollHandler) {
       window.removeEventListener("scroll", this.scrollHandler)
       this.scrollHandler = null
+    }
+
+    // 外部クリックイベントリスナーを削除
+    if (this.outsideClickHandler) {
+      document.removeEventListener("click", this.outsideClickHandler)
+      this.outsideClickHandler = null
     }
 
     // アイコンへの参照をクリア

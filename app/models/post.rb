@@ -189,18 +189,11 @@ class Post < ApplicationRecord
     NotificationService.notify_new_post(self)
   end
 
-  # 付箋作成者に通知を送る
+  # 付箋作成者に通知を送る（非同期）
   def notify_annotation_authors(user_ids)
-    User.where(id: user_ids).find_each do |annotation_author|
-      # 投稿者自身には通知しない
-      next if annotation_author.id == user_id
+    return if user_ids.empty?
 
-      annotation_author.notifications.create!(
-        actor: user,
-        notifiable: self,
-        action: :annotation_invalidated
-      )
-    end
+    NotifyAnnotationAuthorsJob.perform_later(id, user_ids)
   end
 
   # 本文が変更された場合、有効な付箋を無効化
