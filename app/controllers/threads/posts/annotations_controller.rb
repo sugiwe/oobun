@@ -69,9 +69,15 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   private
 
   def set_post
+    # 数値IDまたはslugで検索（PostsControllerと同じロジック）
     # 下書きにも付箋をつけられる（編集時に無効化されるが、ユーザーが学習する）
-    @post = @thread.posts.unscope(where: :status).find_by(slug: params[:post_id]) ||
-            @thread.posts.unscope(where: :status).find(params[:post_id])
+    if params[:post_id].match?(/\A\d+\z/)
+      # 数値IDの場合
+      @post = @thread.posts.unscope(where: :status).find(params[:post_id])
+    else
+      # slugの場合
+      @post = @thread.posts.unscope(where: :status).find_by!(slug: params[:post_id])
+    end
   end
 
   # 投稿への付箋作成権限をチェック

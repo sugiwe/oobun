@@ -188,9 +188,10 @@ RSpec.describe Annotation, type: :model do
       context "paragraph_indexがnilの場合" do
         let(:post) { create(:post, :published, body: "テストの本文です。10文字以上必要。") }
 
-        it "バリデーションをスキップする" do
+        it "無効（必須フィールド）" do
           annotation = build(:annotation, post: post, user: user, paragraph_index: nil, selected_text: "テストの本文です")
-          expect(annotation).to be_valid
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:paragraph_index]).to include("を入力してください")
         end
       end
     end

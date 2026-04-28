@@ -43,7 +43,8 @@ class Annotation < ApplicationRecord
                    length: { minimum: 1, maximum: 1000 }
   validates :visibility, presence: true,
                          inclusion: { in: visibilities.keys }
-  validates :paragraph_index, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :paragraph_index, presence: true,
+                              numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   # カスタムバリデーション: 段落を跨いでいないかチェック
   validate :selection_within_single_paragraph
@@ -166,11 +167,10 @@ class Annotation < ApplicationRecord
     # - ul/ol は最上位のもののみ（ネストした子リストは除外）
     block_elements = doc.css("p, h1, h2, h3, h4, h5, h6, blockquote, pre")
 
-    # 最上位のul/olを追加（親がli要素で、その親がul/olの場合はネストとみなす）
-    top_level_lists = doc.css("ul, ol").reject do |list|
-      parent = list.parent
-      # 親がli、かつその親（祖父母）がul/olならネストしたリスト
-      parent&.name == "li" && parent.parent && (parent.parent.name == "ul" || parent.parent.name == "ol")
+    # 最上位のul/olを追加（先祖要素にul/olがあればネストとみなす）
+    top_level_lists = doc.css("ul, ol").select do |list|
+      # 先祖要素にul/olが存在しない場合のみ最上位リストとみなす
+      list.ancestors("ul, ol").empty?
     end
 
     block_elements.count + top_level_lists.count
