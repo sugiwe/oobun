@@ -9,7 +9,9 @@ class Notification < ApplicationRecord
   enum :action, {
     new_post: "new_post",
     welcome: "welcome",
-    test_notification: "test_notification"
+    test_notification: "test_notification",
+    annotation_added: "annotation_added",
+    annotation_invalidated: "annotation_invalidated"
   }
 
   # 通知作成後に各種配信を実行

@@ -27,6 +27,21 @@ class NotificationsController < ApplicationController
         # 投稿が削除されている場合はスレッド詳細へ
         thread_path(notification.params["thread_slug"])
       end
+    when "annotation_added"
+      # 付箋追加の通知 → 付箋の投稿ページへ
+      if notification.notifiable.is_a?(Annotation)
+        post = notification.notifiable.post
+        thread_post_path(post.thread.slug, post)
+      else
+        notifications_path
+      end
+    when "annotation_invalidated"
+      # 付箋無効化の通知 → 編集された投稿ページへ
+      if notification.notifiable.is_a?(Post)
+        thread_post_path(notification.notifiable.thread.slug, notification.notifiable)
+      else
+        notifications_path
+      end
     when "welcome"
       welcome_path
     else

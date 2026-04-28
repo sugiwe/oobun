@@ -9,6 +9,7 @@ class Post < ApplicationRecord
   belongs_to :thread, class_name: "CorrespondenceThread", foreign_key: :thread_id
   belongs_to :user
   has_one_attached :thumbnail
+  has_many :annotations, dependent: :destroy
   has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Validations
@@ -139,6 +140,9 @@ class Post < ApplicationRecord
   # 投稿作成・更新前にslugを自動生成（slug未指定 かつ published_atが設定されている場合）
   before_validation :generate_slug, if: -> { slug.blank? && published_at.present? }
 
+  # 投稿の本文が変更された場合、付箋を無効化
+  before_update :invalidate_annotations_if_body_changed
+
   # 投稿が公開状態になった時、スレッドの自動公開をチェック
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :check_auto_publish_thread, if: -> { saved_change_to_status?(to: "published") }
@@ -146,6 +150,10 @@ class Post < ApplicationRecord
   # 投稿が公開状態になった時に通知を送信
   # (create時だけでなく、draft→publishedへの更新時にも対応)
   after_commit :notify_subscribers, if: -> { saved_change_to_status?(to: "published") }
+
+  # 本文変更により付箋が無効化された時に通知を送信
+  # トランザクションがコミットされた後に送信することで、ロールバック時の誤通知を防ぐ
+  after_commit :notify_invalidated_annotation_authors, if: -> { saved_change_to_body? && @invalidated_annotation_user_ids.present? }
 
   private
 
@@ -183,5 +191,35 @@ class Post < ApplicationRecord
 
   def notify_subscribers
     NotificationService.notify_new_post(self)
+  end
+
+  # 付箋作成者に通知を送る（非同期）
+  def notify_annotation_authors(user_ids)
+    return if user_ids.empty?
+
+    NotifyAnnotationAuthorsJob.perform_later(id, user_ids)
+  end
+
+  # 本文が変更された場合、有効な付箋を無効化
+  def invalidate_annotations_if_body_changed
+    return unless body_changed?
+    return unless annotations.active.exists?
+
+    # 無効化する前に付箋作成者のIDを取得（通知用にインスタンス変数に保存）
+    @invalidated_annotation_user_ids = annotations.active.distinct.pluck(:user_id)
+
+    annotations.active.update_all(
+      invalidated_at: Time.current,
+      invalidation_reason: "post_edited",
+      updated_at: Time.current
+    )
+  end
+
+  # 付箋無効化後の通知送信（after_commitで呼ばれる）
+  def notify_invalidated_annotation_authors
+    return unless @invalidated_annotation_user_ids.present?
+
+    notify_annotation_authors(@invalidated_annotation_user_ids)
+    @invalidated_annotation_user_ids = nil # クリーンアップ
   end
 end

@@ -24,6 +24,9 @@ class Threads::PostsController < Threads::ApplicationController
     @prev_post = @post.prev
     @next_post = @post.next
     @draft = @thread.draft_for(current_user) if logged_in?
+
+    # 付箋を取得（有効かつログインユーザーに表示可能なもののみ）
+    @annotations = @post.annotations.active.visible_to(current_user).includes(:user).order(created_at: :asc)
   end
 
   def new

@@ -60,6 +60,9 @@ Rails.application.routes.draw do
   # フォロー中交換日記の投稿一覧（ログイン必須）
   get "/subscription_posts", to: "threads#subscription_posts", as: :subscription_posts
 
+  # 自分の付箋一覧（ログイン必須）
+  get "/my_annotations", to: "annotations#index", as: :my_annotations
+
   # 管理画面（管理者のみ）
   namespace :admin do
     root to: "dashboard#index"
@@ -93,6 +96,8 @@ Rails.application.routes.draw do
       member do
         post :publish  # 下書きを公開
       end
+      # 付箋（Annotations）
+      resources :annotations, only: [ :create, :update, :destroy ], controller: "threads/posts/annotations"
     end
     resource :skip,         only: [ :create ], controller: "threads/skips"
     resource :subscription, only: [ :create, :destroy ], controller: "threads/subscriptions"
