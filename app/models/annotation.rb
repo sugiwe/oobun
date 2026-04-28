@@ -43,19 +43,23 @@ class Annotation < ApplicationRecord
                    length: { minimum: 1, maximum: 1000 }
   validates :visibility, presence: true,
                          inclusion: { in: visibilities.keys }
+  validates :paragraph_index, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   # カスタムバリデーション: 段落を跨いでいないかチェック
   validate :selection_within_single_paragraph
+  # カスタムバリデーション: paragraph_indexが投稿の段落数を超えていないかチェック
+  validate :paragraph_index_within_range
 
   # スコープ
   scope :active, -> { where(invalidated_at: nil) }
   scope :invalidated, -> { where.not(invalidated_at: nil) }
 
   scope :visible_to, ->(user) {
-    return none unless user
-
-    visibility_public_visible
-      .or(where(user_id: user.id))
+    if user
+      visibility_public_visible.or(where(user_id: user.id))
+    else
+      visibility_public_visible  # 未ログインユーザーには公開付箋のみ表示
+    end
   }
 
   scope :public_only, -> { visibility_public_visible }
@@ -115,6 +119,17 @@ class Annotation < ApplicationRecord
     # 本アプリでは実際のテキストマッチングに影響するため、シンプルな "\n\n" を使用
     if selected_text.include?("\n\n")
       errors.add(:selected_text, "は段落を跨いで選択できません。1つの段落内で選択してください。")
+    end
+  end
+
+  def paragraph_index_within_range
+    return unless paragraph_index.present? && post&.body.present?
+
+    # 段落数を計算（Markdownの段落は空行で区切られる）
+    paragraph_count = post.body.split(/\n\s*\n/).count
+
+    if paragraph_index >= paragraph_count
+      errors.add(:paragraph_index, "が投稿の段落数を超えています")
     end
   end
 end

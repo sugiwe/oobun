@@ -26,11 +26,7 @@ class Threads::PostsController < Threads::ApplicationController
     @draft = @thread.draft_for(current_user) if logged_in?
 
     # 付箋を取得（有効かつログインユーザーに表示可能なもののみ）
-    @annotations = if logged_in?
-      @post.annotations.active.visible_to(current_user).includes(:user).order(created_at: :asc)
-    else
-      @post.annotations.active.public_only.includes(:user).order(created_at: :asc)
-    end
+    @annotations = @post.annotations.active.visible_to(current_user).includes(:user).order(created_at: :asc)
   end
 
   def new

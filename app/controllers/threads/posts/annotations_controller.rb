@@ -1,5 +1,6 @@
 class Threads::Posts::AnnotationsController < Threads::ApplicationController
   before_action :set_post
+  before_action :check_post_viewability
   before_action :set_annotation, only: [ :update, :destroy ]
   before_action :require_annotation_owner, only: [ :update, :destroy ]
 
@@ -9,11 +10,11 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
     ActiveRecord::Base.transaction do
       @annotation.save!
+    end
 
-      # 公開付箋の場合、投稿者に通知
-      if @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
-        notify_post_author
-      end
+    # トランザクション外で通知を作成（失敗しても付箋は作成済み）
+    if @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
+      notify_post_author
     end
 
     render json: {
@@ -35,11 +36,12 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
 
     ActiveRecord::Base.transaction do
       @annotation.update!(annotation_params)
+    end
 
-      # self_only → public に変更された場合、投稿者に通知
-      if visibility_changed && @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
-        notify_post_author
-      end
+    # トランザクション外で通知を作成（失敗しても付箋は更新済み）
+    # self_only → public に変更された場合、投稿者に通知
+    if visibility_changed && @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
+      notify_post_author
     end
 
     render json: {
@@ -74,6 +76,26 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     # 下書きにも付箋をつけられる（編集時に無効化されるが、ユーザーが学習する）
     @post = @thread.posts.unscope(where: :status).find_by(slug: params[:post_id]) ||
             @thread.posts.unscope(where: :status).find(params[:post_id])
+  end
+
+  # 投稿への付箋作成権限をチェック
+  def check_post_viewability
+    # スレッドの閲覧権限チェック
+    unless @thread.viewable_by?(current_user)
+      render json: {
+        success: false,
+        message: "この投稿には付箋を追加できません"
+      }, status: :forbidden
+      return
+    end
+
+    # 下書きは本人のみアクセス可能
+    if @post.draft? && @post.user_id != current_user.id
+      render json: {
+        success: false,
+        message: "この投稿には付箋を追加できません"
+      }, status: :forbidden
+    end
   end
 
   def set_annotation
