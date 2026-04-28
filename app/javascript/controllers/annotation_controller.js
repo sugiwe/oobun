@@ -66,7 +66,12 @@ export default class extends Controller {
         const blocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
         blocks.forEach((block, index) => {
           block.dataset.paragraphIndex = index
-          block.classList.add("paragraph", "relative", "px-2", "py-1", "rounded", "transition-colors")
+          // pre要素はpadding保持のためpx-2 py-1を除外
+          if (block.tagName === "PRE") {
+            block.classList.add("paragraph", "relative", "rounded", "transition-colors")
+          } else {
+            block.classList.add("paragraph", "relative", "px-2", "py-1", "rounded", "transition-colors")
+          }
           block.dataset.action = "mouseenter->annotation#showParagraphButton mouseleave->annotation#hideParagraphButton"
 
           // 付箋追加ボタンを段落内に作成（ログイン時のみ）
@@ -74,11 +79,21 @@ export default class extends Controller {
             this.createParagraphButton(block)
           }
 
-          // アイコンコンテナを段落の下に追加（spanを使用してHTML仕様違反を回避）
+          // アイコンコンテナを追加（ul/olの場合は最後のliの中、それ以外は要素内）
           const iconsContainer = document.createElement("span")
           iconsContainer.className = "flex items-center gap-1 mt-1"
           iconsContainer.dataset.annotationIconsContainer = ""
-          block.appendChild(iconsContainer)
+
+          if (block.tagName === "UL" || block.tagName === "OL") {
+            // リスト要素の場合: 最後のli要素の中に追加（HTML仕様違反を回避）
+            const lastLi = block.querySelector("li:last-child")
+            if (lastLi) {
+              lastLi.appendChild(iconsContainer)
+            }
+          } else {
+            // それ以外の要素: 要素内に直接追加
+            block.appendChild(iconsContainer)
+          }
         })
       }
     })
