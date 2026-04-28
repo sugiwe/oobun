@@ -8,11 +8,9 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     @annotation = @post.annotations.build(annotation_params)
     @annotation.user = current_user
 
-    ActiveRecord::Base.transaction do
-      @annotation.save!
-    end
+    @annotation.save!
 
-    # トランザクション外で通知を作成（失敗しても付箋は作成済み）
+    # 通知を作成（失敗しても付箋は作成済み）
     if @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
       notify_post_author
     end
@@ -34,11 +32,9 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     visibility_changed = annotation_params[:visibility].present? &&
                          annotation_params[:visibility] != @annotation.visibility
 
-    ActiveRecord::Base.transaction do
-      @annotation.update!(annotation_params)
-    end
+    @annotation.update!(annotation_params)
 
-    # トランザクション外で通知を作成（失敗しても付箋は更新済み）
+    # 通知を作成（失敗しても付箋は更新済み）
     # self_only → public に変更された場合、投稿者に通知
     if visibility_changed && @annotation.visibility_public_visible? && @annotation.user_id != @post.user_id
       notify_post_author
