@@ -113,7 +113,7 @@
           / ヘッダー
           .p-4.border-b
             .flex.items-center.justify-between.mb-2
-              h2.text-lg.font-semibold 付箋を追加
+              h2.text-lg.font-semibold data-annotation-target="modalTitle" 付箋を追加
               button.text-gray-400.hover:text-gray-600 data-action="click->annotation#closeModal" type="button"
                 | ✕
             .text-xs.text-gray-600
@@ -162,5 +162,5 @@
             .flex.gap-2.justify-end
               button.px-4.py-2.text-sm.text-gray-700.bg-gray-100.rounded.hover:bg-gray-200.transition-colors type="button" data-action="click->annotation#closeModal"
                 | キャンセル
-              button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors type="submit"
+              button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors type="submit" data-annotation-target="submitButton"
                 | 追加

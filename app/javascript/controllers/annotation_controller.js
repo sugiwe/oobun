@@ -6,6 +6,8 @@ export default class extends Controller {
     "paragraphButton",      // 段落ホバー時の付箋追加ボタン
     "modal",                // 付箋作成モーダル
     "modalContent",         // モーダルコンテンツ（背景クリック判定用）
+    "modalTitle",           // モーダルのタイトル
+    "submitButton",         // 送信ボタン
     "form",                 // 付箋作成フォーム
     "paragraphPreview",     // 段落プレビュー
     "bodyInput",            // 付箋の内容入力欄
@@ -191,6 +193,14 @@ export default class extends Controller {
       this.paragraphPreviewTarget.textContent = previewText
     }
 
+    // モーダルのタイトルとボタンを「追加」モードに設定
+    if (this.hasModalTitleTarget) {
+      this.modalTitleTarget.textContent = "付箋を追加"
+    }
+    if (this.hasSubmitButtonTarget) {
+      this.submitButtonTarget.textContent = "追加"
+    }
+
     // フォームをリセット
     if (this.hasFormTarget) {
       this.formTarget.reset()
@@ -204,9 +214,10 @@ export default class extends Controller {
   }
 
   // モーダルを閉じる（入力確認あり）
-  closeModal(event) {
-    // 入力内容があるかチェック
-    if (this.hasBodyInputTarget && this.bodyInputTarget.value.trim()) {
+  // skipConfirm: trueの場合は確認ダイアログをスキップ（保存成功時など）
+  closeModal(event, skipConfirm = false) {
+    // 入力内容があるかチェック（skipConfirmがfalseの場合のみ）
+    if (!skipConfirm && this.hasBodyInputTarget && this.bodyInputTarget.value.trim()) {
       if (!confirm("入力内容が消えますがよろしいですか？")) {
         return
       }
@@ -294,8 +305,8 @@ export default class extends Controller {
           this.annotationsValue = [...this.annotationsValue, data.annotation]
         }
 
-        // モーダルを閉じる
-        this.closeModal()
+        // モーダルを閉じる（確認ダイアログをスキップ）
+        this.closeModal(null, true)
 
         // 成功トーストを表示
         this.showSuccessToast(data.message || (isEditMode ? "付箋を更新しました" : "付箋を追加しました"))
@@ -678,6 +689,14 @@ export default class extends Controller {
   openModalForEdit(annotation) {
     this.currentEditingAnnotationId = annotation.id
 
+    // モーダルのタイトルとボタンを「編集」モードに設定
+    if (this.hasModalTitleTarget) {
+      this.modalTitleTarget.textContent = "付箋を編集"
+    }
+    if (this.hasSubmitButtonTarget) {
+      this.submitButtonTarget.textContent = "更新"
+    }
+
     // フォームに既存データをセット
     this.bodyInputTarget.value = annotation.body
 
@@ -697,6 +716,9 @@ export default class extends Controller {
 
     // 段落プレビューをセット
     this.paragraphPreviewTarget.textContent = annotation.selected_text
+
+    // エラーメッセージをクリア
+    this.clearError()
 
     // モーダルを表示
     this.modalTarget.classList.remove("hidden")
