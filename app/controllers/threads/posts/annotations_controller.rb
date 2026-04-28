@@ -149,5 +149,9 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
       notifiable: @annotation,
       action: :annotation_added
     )
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
+    # 通知失敗をログに記録（付箋作成は成功させる）
+    Rails.logger.error("Failed to create notification for annotation #{@annotation.id}: #{e.message}")
+    # 通知失敗は付箋作成に影響させない（Graceful Degradation）
   end
 end
