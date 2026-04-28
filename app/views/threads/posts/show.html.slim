@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :start_offset, :end_offset, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
