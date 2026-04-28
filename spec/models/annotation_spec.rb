@@ -91,6 +91,109 @@ RSpec.describe Annotation, type: :model do
         end
       end
     end
+
+    describe "paragraph_index_within_range" do
+      let(:user) { create(:user) }
+
+      context "空行で区切られた段落" do
+        let(:post) { create(:post, :published, body: "第1段落\n\n第2段落\n\n第3段落") }
+
+        it "範囲内のインデックスは有効（index=0）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 0, selected_text: "第1段落")
+          expect(annotation).to be_valid
+        end
+
+        it "範囲内のインデックスは有効（index=2）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 2, selected_text: "第3段落")
+          expect(annotation).to be_valid
+        end
+
+        it "範囲外のインデックスは無効（index=3）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 3, selected_text: "test")
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:paragraph_index]).to include("が投稿の段落数を超えています")
+        end
+      end
+
+      context "見出しと本文（空行なし）" do
+        let(:post) { create(:post, :published, body: "# 見出し\n本文テキスト") }
+
+        it "見出し（index=0）は有効" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 0, selected_text: "見出し")
+          expect(annotation).to be_valid
+        end
+
+        it "本文（index=1）は有効" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 1, selected_text: "本文テキスト")
+          expect(annotation).to be_valid
+        end
+
+        it "範囲外（index=2）は無効" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 2, selected_text: "test")
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:paragraph_index]).to include("が投稿の段落数を超えています")
+        end
+      end
+
+      context "複数の見出しとリスト" do
+        let(:post) do
+          create(:post, :published, body: <<~MD)
+            # タイトル
+            本文です。
+
+            ## 小見出し
+            - リスト1
+            - リスト2
+
+            最後の段落
+          MD
+        end
+
+        # 期待されるブロック: h1, p, h2, ul, p = 5個
+        it "範囲内のインデックスは有効（index=4）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 4, selected_text: "最後の段落")
+          expect(annotation).to be_valid
+        end
+
+        it "範囲外のインデックスは無効（index=5）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 5, selected_text: "test")
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:paragraph_index]).to include("が投稿の段落数を超えています")
+        end
+      end
+
+      context "ネストしたリスト" do
+        let(:post) do
+          create(:post, :published, body: <<~MD)
+            - トップレベル1
+              - ネスト1
+              - ネスト2
+            - トップレベル2
+          MD
+        end
+
+        # 期待されるブロック: ul（最上位のみ）= 1個
+        it "範囲内のインデックスは有効（index=0）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 0, selected_text: "トップレベル1")
+          expect(annotation).to be_valid
+        end
+
+        it "範囲外のインデックスは無効（index=1）" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: 1, selected_text: "test")
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:paragraph_index]).to include("が投稿の段落数を超えています")
+        end
+      end
+
+      context "paragraph_indexがnilの場合" do
+        let(:post) { create(:post, :published, body: "テストの本文です。10文字以上必要。") }
+
+        it "バリデーションをスキップする" do
+          annotation = build(:annotation, post: post, user: user, paragraph_index: nil, selected_text: "テストの本文です")
+          expect(annotation).to be_valid
+        end
+      end
+    end
   end
 
   describe "enums" do
@@ -123,6 +226,40 @@ RSpec.describe Annotation, type: :model do
       it "公開付箋は🌐を返す" do
         annotation = create(:annotation, post: post, user: user, visibility: :public_visible)
         expect(annotation.icon).to eq("🌐")
+      end
+    end
+
+    describe "#visible_to?" do
+      context "公開付箋の場合" do
+        let(:public_annotation) { create(:annotation, post: post, user: user, visibility: :public_visible) }
+
+        it "ゲストユーザー（nil）にはtrueを返す" do
+          expect(public_annotation.visible_to?(nil)).to be true
+        end
+
+        it "作成者にはtrueを返す" do
+          expect(public_annotation.visible_to?(user)).to be true
+        end
+
+        it "他のユーザーにはtrueを返す" do
+          expect(public_annotation.visible_to?(other_user)).to be true
+        end
+      end
+
+      context "自分用付箋の場合" do
+        let(:private_annotation) { create(:annotation, post: post, user: user, visibility: :self_only) }
+
+        it "ゲストユーザー（nil）にはfalseを返す" do
+          expect(private_annotation.visible_to?(nil)).to be false
+        end
+
+        it "作成者にはtrueを返す" do
+          expect(private_annotation.visible_to?(user)).to be true
+        end
+
+        it "他のユーザーにはfalseを返す" do
+          expect(private_annotation.visible_to?(other_user)).to be false
+        end
       end
     end
 

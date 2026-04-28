@@ -67,7 +67,7 @@ class Annotation < ApplicationRecord
 
   # 可視性チェックメソッド
   def visible_to?(current_user)
-    return false unless current_user
+    return visibility_public_visible? if current_user.nil?
 
     visibility_public_visible? || (visibility_self_only? && user_id == current_user.id)
   end
@@ -125,11 +125,54 @@ class Annotation < ApplicationRecord
   def paragraph_index_within_range
     return unless paragraph_index.present? && post&.body.present?
 
-    # 段落数を計算（Markdownの段落は空行で区切られる）
-    paragraph_count = post.body.split(/\n\s*\n/).count
+    # ブロック要素数を計算（フロントエンドと同じロジック）
+    block_count = count_markdown_blocks(post.body)
 
-    if paragraph_index >= paragraph_count
+    if paragraph_index >= block_count
       errors.add(:paragraph_index, "が投稿の段落数を超えています")
     end
+  end
+
+  # Markdownをレンダリングしてブロック要素数をカウント
+  # フロントエンドのJavaScriptと同じロジック:
+  # querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
+  def count_markdown_blocks(markdown_text)
+    return 0 if markdown_text.blank?
+
+    # Redcarpetでレンダリング（MarkdownHelperと同じ設定）
+    renderer = Redcarpet::Render::HTML.new(
+      filter_html: false,
+      no_images: false,
+      no_links: false,
+      hard_wrap: true
+    )
+
+    markdown = Redcarpet::Markdown.new(
+      renderer,
+      autolink: true,
+      space_after_headers: true,
+      fenced_code_blocks: true,
+      strikethrough: true,
+      superscript: true
+    )
+
+    html = markdown.render(markdown_text)
+
+    # NokogiriでHTMLをパース
+    doc = Nokogiri::HTML.fragment(html)
+
+    # フロントエンドと同じセレクタでブロック要素をカウント
+    # - p, h1-h6, blockquote, pre は直接カウント
+    # - ul/ol は最上位のもののみ（ネストした子リストは除外）
+    block_elements = doc.css("p, h1, h2, h3, h4, h5, h6, blockquote, pre")
+
+    # 最上位のul/olを追加（親がli要素で、その親がul/olの場合はネストとみなす）
+    top_level_lists = doc.css("ul, ol").reject do |list|
+      parent = list.parent
+      # 親がli、かつその親（祖父母）がul/olならネストしたリスト
+      parent&.name == "li" && parent.parent && (parent.parent.name == "ul" || parent.parent.name == "ol")
+    end
+
+    block_elements.count + top_level_lists.count
   end
 end
