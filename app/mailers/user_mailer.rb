@@ -35,7 +35,7 @@ class UserMailer < ApplicationMailer
       else
         nil
       end
-    end.compact
+    end.except(nil)
 
     # 総通知数
     @total_count = notifications.count
