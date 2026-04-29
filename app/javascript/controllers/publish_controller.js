@@ -8,6 +8,7 @@ export default class extends Controller {
     event.preventDefault()
 
     const link = event.currentTarget
+    const publishUrl = link.href
     const autosaveController = this.application.getControllerForElementAndIdentifier(
       this.element,
       "draft-autosave"
@@ -25,8 +26,83 @@ export default class extends Controller {
       }
     }
 
-    // 保存完了後、フォームを作成してPOST送信（フラッシュメッセージを保持）
-    const url = link.href
+    // サムネイル画像が選択されているかチェック
+    const thumbnailInput = this.element.querySelector('input[type="file"][name="post[thumbnail]"]')
+    const hasThumbnailSelected = thumbnailInput && thumbnailInput.files.length > 0
+
+    if (hasThumbnailSelected) {
+      // 画像が選択されている場合は、先にフォーム全体を送信して画像をアップロード
+      const thumbnailSaved = await this.saveDraftWithThumbnail()
+      if (!thumbnailSaved) {
+        return // エラー時は中断
+      }
+      // 画像保存後、そのまま公開処理に進む
+    }
+
+    // 公開処理を実行
+    this.submitPublish(publishUrl)
+  }
+
+  async saveDraftWithThumbnail() {
+    // 元のフォームを取得
+    const form = this.element.querySelector('form')
+    if (!form) {
+      alert("フォームが見つかりませんでした")
+      return false
+    }
+
+    // サムネイル input を取得
+    const thumbnailInput = this.element.querySelector('input[type="file"][name="post[thumbnail]"]')
+    if (!thumbnailInput || !thumbnailInput.files.length) {
+      // 画像が選択されていない（念のためのチェック）
+      return true
+    }
+
+    // FormData を手動で構築
+    // form_with が生成するフォームでは new FormData(form) が正しく動作しないため、
+    // 各フィールドを明示的に追加する必要があります
+    const formData = new FormData()
+
+    // タイトルと本文を追加
+    const titleInput = form.querySelector('input[name="post[title]"]')
+    const bodyInput = form.querySelector('textarea[name="post[body]"]')
+
+    if (titleInput) {
+      formData.append('post[title]', titleInput.value)
+    }
+    if (bodyInput) {
+      formData.append('post[body]', bodyInput.value)
+    }
+
+    // サムネイル画像を追加
+    formData.append('post[thumbnail]', thumbnailInput.files[0])
+
+    // 下書き保存のためのリクエストを送信
+    try {
+      const response = await fetch(form.action, {
+        method: 'PATCH',
+        body: formData,
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
+          'Accept': 'application/json'
+          // Content-Type は fetch が自動的に multipart/form-data に設定してくれる
+        }
+      })
+
+      if (response.ok) {
+        // 保存成功
+        return true
+      } else {
+        alert("画像のアップロードに失敗しました。もう一度お試しください。")
+        return false
+      }
+    } catch (error) {
+      alert("画像のアップロードに失敗しました。もう一度お試しください。")
+      return false
+    }
+  }
+
+  submitPublish(url) {
     const csrfToken = document.querySelector('[name="csrf-token"]')?.content
 
     // 隠しフォームを作成してPOST送信

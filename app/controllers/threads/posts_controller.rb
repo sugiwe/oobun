@@ -45,7 +45,7 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def update
-    @post.thumbnail.purge if params[:post][:remove_thumbnail] == "1"
+    @post.thumbnail.purge if params[:post]&.[](:remove_thumbnail) == "1"
 
     respond_to do |format|
       if @post.update(post_params)
@@ -116,7 +116,7 @@ class Threads::PostsController < Threads::ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :body, :thumbnail)
+    params.fetch(:post, {}).permit(:title, :body, :thumbnail)
   end
 
   def require_post_owner
