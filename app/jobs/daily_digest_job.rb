@@ -42,7 +42,7 @@ class DailyDigestJob < ApplicationJob
     notifications = user.notifications
                         .where(action: actions)
                         .where("created_at >= ?", since_time)
-                        .includes(:actor, notifiable: [ :thread, { post: :thread } ])
+                        .includes(:actor, notifiable: { Post: :thread, Annotation: { post: :thread } })
                         .order(created_at: :desc)
 
     # 通知がなければスキップ

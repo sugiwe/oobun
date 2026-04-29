@@ -152,9 +152,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
       notifiable: @annotation,
       action: :annotation_added,
       params: {
-        annotation_preview: annotation_preview,
-        post_title: @post.title,
-        thread_title: @post.thread.title
+        annotation_preview: annotation_preview
       }
     )
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
