@@ -5,7 +5,15 @@
 = "こんにちは、@#{@user.username} さん"
 |
 |
-= "過去24時間で、参加・購読している交換日記に #{@total_count}件 の投稿がありました："
+- summary_text = "過去24時間で、参加・購読している交換日記に #{@total_count}件 の新着がありました"
+- if @post_count > 0 && @annotation_count > 0
+  = "#{summary_text}（投稿#{@post_count}件・付箋#{@annotation_count}件）："
+- elsif @post_count > 0
+  = "#{summary_text}（投稿#{@post_count}件）："
+- elsif @annotation_count > 0
+  = "#{summary_text}（付箋#{@annotation_count}件）："
+- else
+  = "#{summary_text}："
 |
 |
 - @notifications_by_thread.each do |thread, thread_notifications|
@@ -13,7 +21,12 @@
   = "📝 「#{thread.title}」に#{thread_notifications.count}件の新着"
   |
   - thread_notifications.each do |notification|
-    = "  ・#{notification.actor.display_name}（@#{notification.actor.username}）: #{notification.params['post_preview']}"
+    - if notification.new_post?
+      = "  ・#{notification.actor.display_name}（@#{notification.actor.username}）: #{notification.params['post_preview']}"
+    - elsif notification.annotation_added?
+      = "  🌐 #{notification.actor.display_name}（@#{notification.actor.username}）が付箋を追加しました"
+    - elsif notification.annotation_invalidated?
+      = "  ⚠️ 投稿が編集されたため、あなたの付箋は非表示になりました"
   |
   = "  → #{thread_url(thread.slug)}"
   |
