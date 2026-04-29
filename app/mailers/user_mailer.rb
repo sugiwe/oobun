@@ -26,11 +26,11 @@ class UserMailer < ApplicationMailer
     # スレッドごとにグループ化
     # notifiable が Post の場合: notifiable.thread
     # notifiable が Annotation の場合: notifiable.post.thread
-    # 付箋の親投稿が削除されている場合も考慮して安全呼び出し（&.）を使用
+    # 孤立通知（notifiable が削除済み）や付箋の親投稿が削除されている場合も考慮して安全呼び出し（&.）を使用
     @notifications_by_thread = notifications.group_by do |n|
-      if n.notifiable.is_a?(Post)
+      if n.notifiable&.is_a?(Post)
         n.notifiable.thread
-      elsif n.notifiable.is_a?(Annotation)
+      elsif n.notifiable&.is_a?(Annotation)
         n.notifiable.post&.thread
       else
         nil
