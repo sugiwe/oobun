@@ -59,6 +59,8 @@ export default class extends Controller {
     }
 
     // FormData を手動で構築
+    // form_with が生成するフォームでは new FormData(form) が正しく動作しないため、
+    // 各フィールドを明示的に追加する必要があります
     const formData = new FormData()
 
     // タイトルと本文を追加
@@ -75,12 +77,6 @@ export default class extends Controller {
     // サムネイル画像を追加
     formData.append('post[thumbnail]', thumbnailInput.files[0])
 
-    // デバッグ: FormData の中身を確認
-    console.log("FormData contents:")
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value)
-    }
-
     // 下書き保存のためのリクエストを送信
     try {
       const response = await fetch(form.action, {
@@ -95,16 +91,12 @@ export default class extends Controller {
 
       if (response.ok) {
         // 保存成功
-        console.log("Thumbnail saved successfully")
         return true
       } else {
-        const errorText = await response.text()
-        console.error("Save error response:", errorText)
         alert("画像のアップロードに失敗しました。もう一度お試しください。")
         return false
       }
     } catch (error) {
-      console.error("Draft save error:", error)
       alert("画像のアップロードに失敗しました。もう一度お試しください。")
       return false
     }
