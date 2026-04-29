@@ -35,14 +35,14 @@ class DailyDigestJob < ApplicationJob
     # 即時配信モードの場合は new_post を除外（すでに即時配信済みのため、重複を防ぐ）
     actions = if setting&.email_mode_realtime?
                 [ :annotation_added, :annotation_invalidated ]
-              else
-                [ :new_post, :annotation_added, :annotation_invalidated ]
-              end
+    else
+      [ :new_post, :annotation_added, :annotation_invalidated ]
+    end
 
     notifications = user.notifications
                         .where(action: actions)
                         .where("created_at >= ?", since_time)
-                        .includes(:actor, notifiable: :thread)
+                        .includes(:actor, notifiable: [ :thread, { post: :thread } ])
                         .order(created_at: :desc)
 
     # 通知がなければスキップ

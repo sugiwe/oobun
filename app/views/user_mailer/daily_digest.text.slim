@@ -26,7 +26,7 @@
     - elsif notification.annotation_added?
       = "  🌐 #{notification.actor.display_name}（@#{notification.actor.username}）が付箋を追加しました"
     - elsif notification.annotation_invalidated?
-      = "  ⚠️ 投稿が編集されたため、あなたの付箋は非表示になりました"
+      = "  ⚠️ 投稿が編集されたため、あなたの付箋は非表示になりました（システム通知）"
   |
   = "  → #{thread_url(thread.slug)}"
   |

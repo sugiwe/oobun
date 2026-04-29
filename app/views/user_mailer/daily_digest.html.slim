@@ -102,8 +102,9 @@ html
 
           - thread_notifications.each do |notification|
             .notification-item
-              .author
-                | #{notification.actor.display_name}（@#{notification.actor.username}）
+              - if notification.actor
+                .author
+                  | #{notification.actor.display_name}（@#{notification.actor.username}）
               .preview
                 - if notification.new_post?
                   = notification.params["post_preview"]
