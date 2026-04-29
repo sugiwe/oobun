@@ -22,9 +22,9 @@
   |
   - thread_notifications.each do |notification|
     - if notification.new_post?
-      = "  ・#{notification.actor.display_name}（@#{notification.actor.username}）: #{notification.params['post_preview']}"
+      = "  ・#{notification.actor&.display_name}（@#{notification.actor&.username}）: #{notification.params['post_preview']}"
     - elsif notification.annotation_added?
-      = "  🌐 #{notification.actor.display_name}（@#{notification.actor.username}）が付箋を追加しました"
+      = "  🌐 #{notification.actor&.display_name}（@#{notification.actor&.username}）が付箋を追加しました: #{notification.params['annotation_preview']}"
     - elsif notification.annotation_invalidated?
       = "  ⚠️ 投稿が編集されたため、あなたの付箋は非表示になりました（システム通知）"
   |
