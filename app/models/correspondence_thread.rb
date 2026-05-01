@@ -78,6 +78,11 @@ class CorrespondenceThread < ApplicationRecord
     memberships.find_by(user: user)
   end
 
+  # オーナーを取得
+  def owner
+    memberships.find_by(role: "owner")&.user
+  end
+
   # 権限チェック
   def admin_by?(user)
     membership = membership_for(user)
