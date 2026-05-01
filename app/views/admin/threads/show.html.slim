@@ -48,15 +48,15 @@
   .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
     h3.text-lg.font-medium.mb-4 オーナー
     .flex.items-center.gap-3
-      - if @thread.owner.avatar.attached?
-        = image_tag @thread.owner.avatar.variant(resize_to_limit: [48, 48]), class: "w-12 h-12 rounded-full"
+      - if @owner&.avatar&.attached?
+        = image_tag @owner.avatar.variant(resize_to_limit: [48, 48]), class: "w-12 h-12 rounded-full"
       - else
         .w-12.h-12.bg-gray-200.rounded-full
       div
-        .text-gray-900 = @thread.owner.display_name
+        .text-gray-900 = @owner&.display_name
         .text-sm.text-gray-500
           | @
-          = @thread.owner.username
+          = @owner&.username
 
   / 投稿統計
   .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6

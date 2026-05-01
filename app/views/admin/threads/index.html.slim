@@ -53,10 +53,10 @@
                   - when "free"
                     | 自由投稿
                 td.px-6.py-4.text-sm.text-gray-600
-                  = thread.memberships.count
+                  = thread.memberships.size
                   | 人
                 td.px-6.py-4.text-sm.text-gray-600
-                  = thread.posts.count
+                  = thread.posts.size
                   | 件
                 td.px-6.py-4.text-sm.text-gray-500
                   - last_post = thread.posts.order(:created_at).last
