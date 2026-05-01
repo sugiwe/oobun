@@ -10,6 +10,10 @@ class EmailNotificationJob < ApplicationJob
     # メール通知がOFFの場合はスキップ
     return if setting.email_mode_off?
 
+    # 付箋通知は即時配信しない（ダイジェストのみ）
+    # 理由: 短時間に複数の付箋がつくことがあり、メール通知が大量になるのを防ぐため
+    return if notification.annotation_added? || notification.annotation_invalidated?
+
     # 即時配信モードの場合のみメール送信
     if setting.email_mode_realtime?
       # test_notification の場合

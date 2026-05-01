@@ -24,14 +24,31 @@ class UserMailer < ApplicationMailer
     @notifications = notifications
 
     # スレッドごとにグループ化
-    @notifications_by_thread = notifications.group_by { |n| n.notifiable.thread }
+    # notifiable が Post の場合: notifiable.thread
+    # notifiable が Annotation の場合: notifiable.post.thread
+    # 孤立通知（notifiable が削除済み）や付箋の親投稿が削除されている場合も考慮して安全呼び出し（&.）を使用
+    @notifications_by_thread = notifications.group_by do |n|
+      if n.notifiable&.is_a?(Post)
+        n.notifiable.thread
+      elsif n.notifiable&.is_a?(Annotation)
+        n.notifiable.post&.thread
+      else
+        nil
+      end
+    end.except(nil)
 
     # 総通知数
     @total_count = notifications.count
 
+    # 付箋通知の数
+    @annotation_count = notifications.count { |n| n.annotation_added? || n.annotation_invalidated? }
+
+    # 投稿通知の数
+    @post_count = notifications.count { |n| n.new_post? }
+
     mail(
       to: @user.email,
-      subject: "coconikki - #{@total_count}件の新着投稿があります"
+      subject: "coconikki - #{@total_count}件の新着があります"
     )
   end
 

@@ -123,5 +123,99 @@ RSpec.describe EmailNotificationJob, type: :job do
         end
       end
     end
+
+    context "annotation_added の場合" do
+      let(:annotation) { create(:annotation, post: post_instance, user: actor, visibility: :public_visible) }
+      let(:notification) do
+        create(:notification,
+          user: user,
+          actor: actor,
+          notifiable: annotation,
+          action: :annotation_added,
+          params: { annotation_preview: annotation.body[0..50] })
+      end
+
+      context "即時配信モード" do
+        before do
+          user.create_notification_setting(
+            email_mode: :realtime,
+            email_count_this_month: 0,
+            email_count_reset_at: Date.current.beginning_of_month
+          )
+        end
+
+        it "付箋通知は即時配信されない（ダイジェストのみ）" do
+          expect {
+            described_class.perform_now(notification.id)
+          }.not_to have_enqueued_job(ActionMailer::MailDeliveryJob)
+
+          # 残数も減らない
+          user.notification_setting.reload
+          expect(user.notification_setting.remaining_emails_this_month).to eq(100)
+        end
+      end
+
+      context "ダイジェスト配信モード" do
+        before do
+          user.create_notification_setting(
+            email_mode: :digest,
+            digest_time: Time.zone.parse("08:00:00")
+          )
+        end
+
+        it "メール送信されない（DailyDigestJobで処理される）" do
+          expect {
+            described_class.perform_now(notification.id)
+          }.not_to have_enqueued_job(ActionMailer::MailDeliveryJob)
+        end
+      end
+    end
+
+    context "annotation_invalidated の場合" do
+      let(:annotation) { create(:annotation, post: post_instance, user: user, visibility: :public_visible) }
+      let(:notification) do
+        create(:notification,
+          user: user,
+          actor: nil, # システム通知なのでactorなし
+          notifiable: annotation,
+          action: :annotation_invalidated,
+          params: {})
+      end
+
+      context "即時配信モード" do
+        before do
+          user.create_notification_setting(
+            email_mode: :realtime,
+            email_count_this_month: 0,
+            email_count_reset_at: Date.current.beginning_of_month
+          )
+        end
+
+        it "付箋無効化通知は即時配信されない（ダイジェストのみ）" do
+          expect {
+            described_class.perform_now(notification.id)
+          }.not_to have_enqueued_job(ActionMailer::MailDeliveryJob)
+
+          # 残数も減らない
+          user.notification_setting.reload
+          expect(user.notification_setting.remaining_emails_this_month).to eq(100)
+        end
+      end
+
+      context "ダイジェスト配信モード" do
+        before do
+          user.create_notification_setting(
+            email_mode: :digest,
+            digest_time: Time.zone.parse("08:00:00")
+          )
+        end
+
+        it "メール送信されない（DailyDigestJobで処理される）" do
+          expect {
+            described_class.perform_now(notification.id)
+          }.not_to have_enqueued_job(ActionMailer::MailDeliveryJob)
+        end
+      end
+    end
   end
 end

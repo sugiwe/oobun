@@ -26,14 +26,23 @@ class DailyDigestJob < ApplicationJob
   def send_digest_email(user)
     setting = user.notification_setting
 
-    # 前回配信時刻以降の通知を取得（既読・未読問わず、new_post のみ）
+    # 前回配信時刻以降の通知を取得（既読・未読問わず）
+    # 即時配信モードの場合: new_post は除外（すでに即時配信済みのため）
+    # ダイジェスト配信モードの場合: すべての通知を含める
     # 初回の場合は過去24時間
     since_time = setting&.last_digest_sent_at || 24.hours.ago
 
+    # 即時配信モードの場合は new_post を除外（すでに即時配信済みのため、重複を防ぐ）
+    actions = if setting&.email_mode_realtime?
+                [ :annotation_added, :annotation_invalidated ]
+    else
+      [ :new_post, :annotation_added, :annotation_invalidated ]
+    end
+
     notifications = user.notifications
-                        .where(action: :new_post)
+                        .where(action: actions)
                         .where("created_at >= ?", since_time)
-                        .includes(:actor, notifiable: :thread)
+                        .includes(:actor, :notifiable)
                         .order(created_at: :desc)
 
     # 通知がなければスキップ
