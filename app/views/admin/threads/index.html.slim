@@ -1,0 +1,76 @@
+- content_for :title, "交換日記一覧 - coconikki"
+
+.max-w-6xl.mx-auto
+  .flex.items-center.justify-between.mb-6
+    h1.text-2xl 交換日記一覧
+    = link_to "← ダッシュボード", admin_root_path, class: "text-sm text-gray-600 hover:text-gray-900"
+
+  .bg-white.border.border-gray-200.rounded-lg.overflow-hidden
+    .px-6.py-4.bg-gray-50.border-b.border-gray-200.flex.items-center.justify-between
+      .text-sm.text-gray-600
+        | 全
+        span.text-gray-900 = @threads.total_count
+        |  件
+
+    - if @threads.any?
+      .overflow-x-auto
+        table.w-full style="min-width: 1200px"
+          thead.bg-gray-50.border-b.border-gray-200
+            tr
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 60px" ID
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="min-width: 200px" タイトル
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="min-width: 150px" Slug
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 90px" 公開状態
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 100px" 投稿モード
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 80px" メンバー
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 80px" 投稿数
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="min-width: 130px" 最終投稿
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="min-width: 130px" 作成日
+              th.px-6.py-3.text-left.text-xs.text-gray-500.uppercase style="width: 80px" 操作
+          tbody.divide-y.divide-gray-200
+            - @threads.each do |thread|
+              tr.hover:bg-gray-50
+                td.px-6.py-4.text-sm.text-gray-900
+                  = thread.id
+                td.px-6.py-4
+                  = link_to thread_path(slug: thread.slug), class: "text-sm text-gray-900 hover:text-gray-600", target: "_blank" do
+                    = thread.title
+                td.px-6.py-4.text-sm.text-gray-600
+                  = thread.slug
+                td.px-6.py-4.text-sm
+                  - if thread.published?
+                    span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-green-100.text-green-800
+                      | 公開
+                  - else
+                    span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-gray-100.text-gray-600
+                      | 下書き
+                td.px-6.py-4.text-sm.text-gray-600
+                  - case thread.posting_mode
+                  - when "relay"
+                    | 順番制
+                  - when "rotation"
+                    | 交代制
+                  - when "free"
+                    | 自由投稿
+                td.px-6.py-4.text-sm.text-gray-600
+                  = thread.memberships.count
+                  | 人
+                td.px-6.py-4.text-sm.text-gray-600
+                  = thread.posts.count
+                  | 件
+                td.px-6.py-4.text-sm.text-gray-500
+                  - last_post = thread.posts.order(:created_at).last
+                  - if last_post
+                    = l(last_post.created_at, format: :short)
+                  - else
+                    span.text-gray-400 —
+                td.px-6.py-4.text-sm.text-gray-500
+                  = l(thread.created_at, format: :short)
+                td.px-6.py-4.text-sm
+                  = link_to "詳細", admin_thread_path(thread), class: "text-gray-600 hover:text-gray-900"
+
+      .px-6.py-4.border-t.border-gray-200.flex.justify-center
+        = paginate @threads
+    - else
+      .px-6.py-12.text-center.text-gray-500
+        | 交換日記がありません

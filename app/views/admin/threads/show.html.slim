@@ -1,0 +1,122 @@
+- content_for :title, "#{@thread.title} - 交換日記詳細 - coconikki"
+
+.max-w-4xl.mx-auto
+  .flex.items-center.justify-between.mb-6
+    h1.text-2xl 交換日記詳細
+    = link_to "← 一覧に戻る", admin_threads_path, class: "text-sm text-gray-600 hover:text-gray-900"
+
+  / 基本情報
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    .flex.items-start.gap-4.mb-4
+      - if @thread.thumbnail.attached?
+        = image_tag @thread.thumbnail.variant(resize_to_limit: [200, 200]), class: "w-32 h-32 object-cover rounded-lg"
+      - else
+        .w-32.h-32.bg-gray-100.rounded-lg.flex.items-center.justify-center
+          svg.w-12.h-12.text-gray-400 fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      div.flex-1
+        h2.text-xl.font-medium.mb-2 = @thread.title
+        .text-sm.text-gray-600.mb-2
+          | ID:
+          span.font-mono = @thread.id
+        .text-sm.text-gray-600.mb-2
+          | Slug:
+          span.font-mono = @thread.slug
+        .flex.gap-2.mb-2
+          - if @thread.published?
+            span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-green-100.text-green-800
+              | 公開
+          - else
+            span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-gray-100.text-gray-600
+              | 下書き
+          span.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-blue-100.text-blue-800
+            - case @thread.posting_mode
+            - when "relay"
+              | 順番制
+            - when "rotation"
+              | 交代制
+            - when "free"
+              | 自由投稿
+        = link_to "スレッドを表示 →", thread_path(slug: @thread.slug), target: "_blank", class: "text-sm text-gray-600 hover:text-gray-900"
+
+    - if @thread.description.present?
+      .mt-4.pt-4.border-t.border-gray-200
+        .text-sm.text-gray-500.mb-1 説明
+        .text-gray-700 = simple_format(@thread.description)
+
+  / オーナー情報
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    h3.text-lg.font-medium.mb-4 オーナー
+    .flex.items-center.gap-3
+      - if @thread.owner.avatar.attached?
+        = image_tag @thread.owner.avatar.variant(resize_to_limit: [48, 48]), class: "w-12 h-12 rounded-full"
+      - else
+        .w-12.h-12.bg-gray-200.rounded-full
+      div
+        .text-gray-900 = @thread.owner.display_name
+        .text-sm.text-gray-500
+          | @
+          = @thread.owner.username
+
+  / 投稿統計
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    h3.text-lg.font-medium.mb-4 投稿統計
+    .grid.grid-cols-3.gap-4
+      div
+        .text-sm.text-gray-500.mb-1 総投稿数
+        .text-2xl.text-gray-900 = "#{@posts_count}件"
+      div
+        .text-sm.text-gray-500.mb-1 最初の投稿
+        .text-sm.text-gray-900
+          - if @first_post_at
+            = l(@first_post_at, format: :short)
+          - else
+            span.text-gray-400 —
+      div
+        .text-sm.text-gray-500.mb-1 最終投稿
+        .text-sm.text-gray-900
+          - if @last_post_at
+            = l(@last_post_at, format: :short)
+          - else
+            span.text-gray-400 —
+
+  / メンバー一覧
+  .bg-white.border.border-gray-200.rounded-lg.p-6.mb-6
+    h3.text-lg.font-medium.mb-4
+      | メンバー（
+      = @memberships.count
+      | 人）
+    .divide-y.divide-gray-200
+      - @memberships.each do |membership|
+        .py-3.flex.items-center.justify-between
+          .flex.items-center.gap-3
+            - if membership.user.avatar.attached?
+              = image_tag membership.user.avatar.variant(resize_to_limit: [40, 40]), class: "w-10 h-10 rounded-full"
+            - else
+              .w-10.h-10.bg-gray-200.rounded-full
+            div
+              .text-gray-900
+                = membership.user.display_name
+                - if membership.owner?
+                  span.ml-2.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-purple-100.text-purple-800
+                    | オーナー
+                - elsif membership.moderator?
+                  span.ml-2.inline-flex.items-center.px-2.py-0.5.rounded.text-xs.bg-blue-100.text-blue-800
+                    | 管理者
+              .text-sm.text-gray-500
+                | @
+                = membership.user.username
+          .text-sm.text-gray-500
+            | ポジション:
+            = membership.position
+
+  / メタ情報
+  .bg-white.border.border-gray-200.rounded-lg.p-6
+    h3.text-lg.font-medium.mb-4 メタ情報
+    .space-y-2.text-sm
+      .flex.justify-between
+        .text-gray-500 作成日時
+        .text-gray-900 = l(@thread.created_at, format: :long)
+      .flex.justify-between
+        .text-gray-500 更新日時
+        .text-gray-900 = l(@thread.updated_at, format: :long)
