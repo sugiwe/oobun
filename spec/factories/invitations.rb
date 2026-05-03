@@ -9,13 +9,8 @@ FactoryBot.define do
     expiry_type { "seven_days" }
     use_count { 0 }
 
-    # タイムスタンプ（コールバックで自動設定されるがテスト用に明示）
-    created_at { Time.current }
-    updated_at { Time.current }
-    accepted_at { nil }
-    last_used_at { nil }
-
     # token と expires_at は before_validation コールバックで自動生成
+    # created_at, updated_at は ActiveRecord が自動設定
 
     # Trait: 無制限招待
     trait :unlimited do
