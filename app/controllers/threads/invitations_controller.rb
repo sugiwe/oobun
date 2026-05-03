@@ -24,6 +24,8 @@ class Threads::InvitationsController < Threads::ApplicationController
   # GET /invite/:token
   # 招待を受け取った人が承認画面を見る
   def show
+    # 招待トークンが検索エンジンに露出しないようnoindex設定
+    @noindex = true
     # 招待トークンをセッションに保存（ログイン許可に使用）
     session[:invitation_token] = @invitation.token
     # 未ログイン時も招待画面を表示（show.html.slimで分岐）
