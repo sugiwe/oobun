@@ -8,6 +8,15 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     @annotation = @post.annotations.build(annotation_params)
     @annotation.user = current_user
 
+    # 公開付箋が禁止されている場合のチェック
+    if @annotation.visibility_public_visible? && !@thread.allow_public_annotations
+      render json: {
+        success: false,
+        errors: [ "この交換日記では公開付箋は無効化されています" ]
+      }, status: :unprocessable_entity
+      return
+    end
+
     @annotation.save!
 
     # 通知を作成（失敗しても付箋は作成済み）
@@ -31,6 +40,15 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
     # 可視性が変更される場合の処理
     visibility_changed = annotation_params[:visibility].present? &&
                          annotation_params[:visibility] != @annotation.visibility
+
+    # 公開付箋に変更しようとしている場合のチェック
+    if annotation_params[:visibility] == "public_visible" && !@thread.allow_public_annotations
+      render json: {
+        success: false,
+        errors: [ "この交換日記では公開付箋は無効化されています" ]
+      }, status: :unprocessable_entity
+      return
+    end
 
     @annotation.update!(annotation_params)
 
