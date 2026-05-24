@@ -51,5 +51,4 @@ RSpec.describe CorrespondenceThread, type: :model do
       end
     end
   end
-
 end
