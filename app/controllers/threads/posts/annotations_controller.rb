@@ -70,8 +70,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   def set_post
     # 数値IDまたはslugで検索（PostsControllerと同じロジック）
     # 下書きにも付箋をつけられる（編集時に無効化されるが、ユーザーが学習する）
-    # N+1問題を防ぐため、threadを事前ロード（バリデーションで使用）
-    posts = @thread.posts.includes(:thread).unscope(where: :status)
+    posts = @thread.posts.unscope(where: :status)
 
     if params[:post_id].match?(/\A\d+\z/)
       # 数値IDの場合
