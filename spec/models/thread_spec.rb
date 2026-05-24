@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe CorrespondenceThread, type: :model do
   describe "#convert_public_annotations_to_private!" do
-    let(:thread) { create(:correspondence_thread, :published) }
+    let(:thread) { create(:correspondence_thread, :free) }
     let(:post1) { create(:post, :published, thread: thread) }
     let(:post2) { create(:post, :published, thread: thread) }
     let(:user) { create(:user) }
@@ -28,10 +28,14 @@ RSpec.describe CorrespondenceThread, type: :model do
       end
 
       it "自分用付箋は変更されない" do
+        self_only_annotation = Annotation.joins(post: :thread)
+                                         .where(posts: { thread_id: thread.id }, visibility: "self_only")
+                                         .first
+
         expect {
           thread.convert_public_annotations_to_private!
         }.not_to change {
-          Annotation.joins(post: :thread).where(posts: { thread_id: thread.id }, visibility: "self_only").count
+          self_only_annotation.reload.visibility
         }
       end
     end
@@ -49,7 +53,7 @@ RSpec.describe CorrespondenceThread, type: :model do
   end
 
   describe "#allow_public_annotations_changed_to_false?" do
-    let(:thread) { create(:correspondence_thread, :published, allow_public_annotations: true) }
+    let(:thread) { create(:correspondence_thread, :free, allow_public_annotations: true) }
 
     context "true → false に変更される場合" do
       it "trueを返す（boolean）" do

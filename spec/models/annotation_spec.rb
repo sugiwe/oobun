@@ -198,7 +198,7 @@ RSpec.describe Annotation, type: :model do
 
     describe "public_annotations_allowed" do
       let(:user) { create(:user) }
-      let(:thread) { create(:correspondence_thread, :published) }
+      let(:thread) { create(:correspondence_thread, :free) }
       let(:post) { create(:post, :published, thread: thread) }
 
       context "公開付箋が許可されている場合" do
