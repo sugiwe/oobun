@@ -298,6 +298,25 @@ class CorrespondenceThread < ApplicationRecord
     login logout auth oauth callback feeds rss assets rails
   ].freeze
 
+  # allow_public_annotations が true → false に変更されたかチェック
+  def allow_public_annotations_changed_to_false?(new_value)
+    # new_value が文字列の場合は boolean に変換
+    new_value_bool = ActiveModel::Type::Boolean.new.cast(new_value)
+    allow_public_annotations && !new_value_bool
+  end
+
+  # 既存の公開付箋を自分用に変更
+  def convert_public_annotations_to_private!
+    # このスレッドの全投稿の公開付箋を取得
+    public_annotations = Annotation.joins(post: :thread)
+                                   .where(posts: { thread_id: id })
+                                   .where(visibility: "public")
+
+    count = public_annotations.count
+    public_annotations.update_all(visibility: "self_only") if count > 0
+    count
+  end
+
   private
 
   def slug_not_reserved

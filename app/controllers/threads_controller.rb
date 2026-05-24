@@ -96,9 +96,23 @@ class ThreadsController < ApplicationController
     should_remove_thumbnail = params.dig(:thread, :remove_thumbnail) == "1" &&
                               thread_params[:thumbnail].blank?
 
+    # allow_public_annotations が false に変更される場合、既存の公開付箋を非公開化
+    allow_public_annotations_changed = @thread.allow_public_annotations_changed_to_false?(
+      thread_params[:allow_public_annotations]
+    )
+
     if @thread.update(thread_params)
       @thread.thumbnail.purge if should_remove_thumbnail
-      redirect_to thread_path(@thread.slug), notice: "交換日記を更新しました"
+
+      # 公開付箋設定が無効化された場合、既存の公開付箋を自分用に変更
+      if allow_public_annotations_changed
+        converted_count = @thread.convert_public_annotations_to_private!
+        notice_message = "交換日記を更新しました"
+        notice_message += "（#{converted_count}件の公開付箋を自分用に変更しました）" if converted_count > 0
+        redirect_to thread_path(@thread.slug), notice: notice_message
+      else
+        redirect_to thread_path(@thread.slug), notice: "交換日記を更新しました"
+      end
     else
       render :edit, status: :unprocessable_entity
     end
