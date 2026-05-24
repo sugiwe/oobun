@@ -63,7 +63,20 @@ export default class extends Controller {
       if (isMarkdownView) {
         // ブロック要素全般を対象にする（段落、見出し、リスト全体、引用、コードブロック）
         // ul/olは最上位のもののみ対象（ネストした子ul/olは除外）
-        const blocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
+        const allBlocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
+
+        // blockquote内の要素を除外（blockquote自体は含める）
+        // 引用全体に1つの付箋をつけるため、引用内の個別要素は対象外
+        const blocks = Array.from(allBlocks).filter(block => {
+          if (block.tagName === "BLOCKQUOTE") {
+            return true // blockquote自体は含める
+          }
+          if (block.closest("blockquote")) {
+            return false // blockquote内の要素（p, h1, ul等）は除外
+          }
+          return true
+        })
+
         blocks.forEach((block, index) => {
           block.dataset.paragraphIndex = index
           // pre要素はpadding保持のためpx-2 py-1を除外
@@ -85,8 +98,8 @@ export default class extends Controller {
           iconsContainer.dataset.annotationIconsContainer = ""
 
           if (block.tagName === "UL" || block.tagName === "OL") {
-            // リスト要素の場合: 最後のli要素の中に追加（HTML仕様違反を回避）
-            const lastLi = block.querySelector("li:last-child")
+            // リスト要素の場合: 直下の最後のli要素の中に追加（ネストしたliは除外）
+            const lastLi = block.querySelector(":scope > li:last-child")
             if (lastLi) {
               lastLi.appendChild(iconsContainer)
             }
