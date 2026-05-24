@@ -655,6 +655,9 @@ export default class extends Controller {
 
   // 公開付箋の設定に応じてラジオボタンを制御
   updatePublicAnnotationOption() {
+    // モーダルが存在しない場合（未ログインユーザー等）は早期リターン
+    if (!this.hasModalTarget) return
+
     const publicRadio = this.modalTarget.querySelector("[data-public-annotation-radio]")
     const publicLabel = this.modalTarget.querySelector("[data-public-annotation-label]")
     const publicDescription = this.modalTarget.querySelector("[data-public-annotation-description]")

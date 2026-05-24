@@ -37,12 +37,13 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   end
 
   def update
-    # 可視性が変更される場合の処理
-    visibility_changed = annotation_params[:visibility].present? &&
-                         annotation_params[:visibility] != @annotation.visibility
+    # 属性を適用してモデルの最終状態をチェック（より堅牢なバリデーション）
+    @annotation.assign_attributes(annotation_params)
+    visibility_changed = @annotation.visibility_changed?
 
-    # 公開付箋に変更しようとしている場合のチェック
-    if annotation_params[:visibility] == "public_visible" && !@thread.allow_public_annotations
+    # 公開付箋に変更しようとしている（または公開のまま維持しようとしている）場合のチェック
+    # assign_attributes後のモデル状態をチェックすることで、パラメータ省略による回避を防ぐ
+    if @annotation.visibility_public_visible? && !@thread.allow_public_annotations
       render json: {
         success: false,
         errors: [ "この交換日記では公開付箋は無効化されています" ]
@@ -50,7 +51,7 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
       return
     end
 
-    @annotation.update!(annotation_params)
+    @annotation.save!
 
     # 通知を作成（失敗しても付箋は更新済み）
     # self_only → public に変更された場合、投稿者に通知
