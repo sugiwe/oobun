@@ -195,6 +195,41 @@ RSpec.describe Annotation, type: :model do
         end
       end
     end
+
+    describe "public_annotations_allowed" do
+      let(:user) { create(:user) }
+      let(:thread) { create(:correspondence_thread, :free) }
+      let(:post) { create(:post, :published, thread: thread) }
+
+      context "公開付箋が許可されている場合" do
+        before { thread.update!(allow_public_annotations: true) }
+
+        it "公開付箋は有効" do
+          annotation = build(:annotation, post: post, user: user, visibility: :public_visible)
+          expect(annotation).to be_valid
+        end
+
+        it "自分用付箋は有効" do
+          annotation = build(:annotation, post: post, user: user, visibility: :self_only)
+          expect(annotation).to be_valid
+        end
+      end
+
+      context "公開付箋が禁止されている場合" do
+        before { thread.update!(allow_public_annotations: false) }
+
+        it "公開付箋は無効" do
+          annotation = build(:annotation, post: post, user: user, visibility: :public_visible)
+          expect(annotation).not_to be_valid
+          expect(annotation.errors[:visibility]).to include("この交換日記では公開付箋は無効化されています")
+        end
+
+        it "自分用付箋は有効" do
+          annotation = build(:annotation, post: post, user: user, visibility: :self_only)
+          expect(annotation).to be_valid
+        end
+      end
+    end
   end
 
   describe "enums" do

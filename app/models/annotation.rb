@@ -50,6 +50,8 @@ class Annotation < ApplicationRecord
   validate :selection_within_single_paragraph
   # カスタムバリデーション: paragraph_indexが投稿の段落数を超えていないかチェック
   validate :paragraph_index_within_range
+  # カスタムバリデーション: 公開付箋が許可されているかチェック
+  validate :public_annotations_allowed, if: :visibility_public_visible?
 
   # スコープ
   scope :active, -> { where(invalidated_at: nil) }
@@ -131,6 +133,14 @@ class Annotation < ApplicationRecord
 
     if paragraph_index >= block_count
       errors.add(:paragraph_index, "が投稿の段落数を超えています")
+    end
+  end
+
+  def public_annotations_allowed
+    return unless post&.thread
+
+    unless post.thread.allow_public_annotations
+      errors.add(:visibility, "この交換日記では公開付箋は無効化されています")
     end
   end
 

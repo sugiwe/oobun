@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-allow-public-annotations-value="#{@thread.allow_public_annotations}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -141,13 +141,13 @@
                       span.font-medium.text-gray-900.text-sm 自分だけ
                     .text-xs.text-gray-600.mt-1 他の人には見えません
 
-                label.flex.items-start.gap-2.p-3.border.rounded.cursor-pointer.hover:bg-yellow-50.transition-colors.has-checked:bg-yellow-50.has-checked:border-yellow-300
-                  = f.radio_button :visibility, "public_visible", name: "annotation[visibility]", class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground" }
+                label.flex.items-start.gap-2.p-3.border.rounded.cursor-pointer.hover:bg-yellow-50.transition-colors.has-checked:bg-yellow-50.has-checked:border-yellow-300 data-public-annotation-label=""
+                  = f.radio_button :visibility, "public_visible", name: "annotation[visibility]", class: "mt-1", data: { annotation_target: "visibilityRadios", action: "change->annotation#updateFormBackground", public_annotation_radio: "" }
                   .flex-1
                     .flex.items-center.gap-1
                       span 🌐
                       span.font-medium.text-gray-900.text-sm 公開する
-                    .text-xs.text-gray-600.mt-1 誰でも見られます
+                    .text-xs.text-gray-600.mt-1 data-public-annotation-description="" 誰でも見られます
 
             / 付箋の内容
             .mb-4

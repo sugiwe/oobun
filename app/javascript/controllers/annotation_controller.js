@@ -19,6 +19,7 @@ export default class extends Controller {
     threadSlug: String,
     postId: String,
     currentUserId: Number,
+    allowPublicAnnotations: Boolean,
     annotations: Array
   }
 
@@ -221,6 +222,9 @@ export default class extends Controller {
       this.formTarget.reset()
     }
     this.clearError()
+
+    // 公開付箋の設定に応じてラジオボタンを制御
+    this.updatePublicAnnotationOption()
 
     // モーダルを表示
     if (this.hasModalTarget) {
@@ -649,6 +653,43 @@ export default class extends Controller {
     }
   }
 
+  // 公開付箋の設定に応じてラジオボタンを制御
+  updatePublicAnnotationOption() {
+    // モーダルが存在しない場合（未ログインユーザー等）は早期リターン
+    if (!this.hasModalTarget) return
+
+    const publicRadio = this.modalTarget.querySelector("[data-public-annotation-radio]")
+    const publicLabel = this.modalTarget.querySelector("[data-public-annotation-label]")
+    const publicDescription = this.modalTarget.querySelector("[data-public-annotation-description]")
+
+    if (!publicRadio || !publicLabel || !publicDescription) {
+      return
+    }
+
+    if (!this.allowPublicAnnotationsValue) {
+      // 公開付箋が無効化されている場合
+      publicRadio.disabled = true
+      publicLabel.classList.add("opacity-50", "cursor-not-allowed")
+      publicLabel.classList.remove("hover:bg-yellow-50", "cursor-pointer")
+      publicDescription.textContent = "公開付箋は無効化されています"
+
+      // 自分用付箋を選択状態にする
+      const selfOnlyRadio = this.visibilityRadiosTargets.find(radio => radio.value === "self_only")
+      if (selfOnlyRadio) {
+        selfOnlyRadio.checked = true
+        // 背景色も更新
+        this.bodyInputTarget.classList.remove("bg-yellow-50")
+        this.bodyInputTarget.classList.add("bg-blue-50")
+      }
+    } else {
+      // 公開付箋が有効な場合（デフォルト状態に戻す）
+      publicRadio.disabled = false
+      publicLabel.classList.remove("opacity-50", "cursor-not-allowed")
+      publicLabel.classList.add("hover:bg-yellow-50", "cursor-pointer")
+      publicDescription.textContent = "誰でも見られます"
+    }
+  }
+
   // 付箋を削除
   async deleteAnnotation(annotationId) {
     // 確認ダイアログ
@@ -734,6 +775,9 @@ export default class extends Controller {
 
     // エラーメッセージをクリア
     this.clearError()
+
+    // 公開付箋の設定に応じてラジオボタンを制御
+    this.updatePublicAnnotationOption()
 
     // モーダルを表示
     this.modalTarget.classList.remove("hidden")
