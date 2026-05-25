@@ -301,6 +301,8 @@ class CorrespondenceThread < ApplicationRecord
   # 既存の公開付箋を自分用に変更
   def convert_public_annotations_to_private!
     # このスレッドの全投稿の公開付箋を自分用に更新し、更新件数を返す
+    # update_allを使用するため、モデルのコールバック・バリデーションはバイパスされるが、
+    # visibilityの単純な値変更のみなので問題ない（パフォーマンス優先）
     Annotation.joins(:post)
               .where(posts: { thread_id: id }, visibility: :public_visible)
               .update_all(visibility: :self_only)
