@@ -66,20 +66,16 @@ export default class extends Controller {
         // ul/olは最上位のもののみ対象（ネストした子ul/olは除外）
         const allBlocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
 
-        // blockquote内の要素を除外（blockquote自体は含める）
-        // 引用全体に1つの付箋をつけるため、引用内の個別要素は対象外
-        const blocks = Array.from(allBlocks).filter(block => {
-          if (block.tagName === "BLOCKQUOTE") {
-            return true // blockquote自体は含める
-          }
-          if (block.closest("blockquote")) {
-            return false // blockquote内の要素（p, h1, ul等）は除外
-          }
-          return true
-        })
-
-        blocks.forEach((block, index) => {
+        // すべてのブロック要素にインデックスを付与（サーバー側との整合性を保つ）
+        // blockquote内の要素はUIセットアップをスキップするが、インデックスは付与する
+        allBlocks.forEach((block, index) => {
           block.dataset.paragraphIndex = index
+
+          // 引用内の要素（引用自体は除く）は付箋の対象外とする
+          if (block.tagName !== "BLOCKQUOTE" && block.closest("blockquote")) {
+            return
+          }
+
           // pre要素はpadding保持のためpx-2 py-1を除外
           if (block.tagName === "PRE") {
             block.classList.add("paragraph", "relative", "rounded", "transition-colors")
