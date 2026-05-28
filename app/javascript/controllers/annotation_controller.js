@@ -72,7 +72,7 @@ export default class extends Controller {
           block.dataset.paragraphIndex = index
 
           // 引用内の要素（ネストされた引用自体も含む）は付箋の対象外とする
-          if (block.closest("blockquote") && (block.tagName !== "BLOCKQUOTE" || block.parentElement.closest("blockquote"))) {
+          if (block.closest("blockquote") && (block.tagName !== "BLOCKQUOTE" || block.parentElement?.closest("blockquote"))) {
             return
           }
 
