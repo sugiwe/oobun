@@ -71,8 +71,8 @@ export default class extends Controller {
         allBlocks.forEach((block, index) => {
           block.dataset.paragraphIndex = index
 
-          // 引用内の要素（引用自体は除く）は付箋の対象外とする
-          if (block.tagName !== "BLOCKQUOTE" && block.closest("blockquote")) {
+          // 引用内の要素（ネストされた引用自体も含む）は付箋の対象外とする
+          if (block.closest("blockquote") && (block.tagName !== "BLOCKQUOTE" || block.parentElement.closest("blockquote"))) {
             return
           }
 
@@ -434,7 +434,20 @@ export default class extends Controller {
         iconsContainer = document.createElement("span")
         iconsContainer.className = "flex items-center gap-1 shrink-0"
         iconsContainer.dataset.annotationIconsContainer = ""
-        paragraphElement.appendChild(iconsContainer)
+
+        // リスト要素の場合は直下の最後のli要素の中に追加（ネストしたliは除外）
+        if (paragraphElement.tagName === "UL" || paragraphElement.tagName === "OL") {
+          const lastLi = paragraphElement.querySelector(":scope > li:last-child")
+          if (lastLi) {
+            lastLi.appendChild(iconsContainer)
+          } else {
+            // 空リストの場合はスキップ（HTML仕様違反を避ける）
+            return
+          }
+        } else {
+          // それ以外の要素: 要素内に直接追加
+          paragraphElement.appendChild(iconsContainer)
+        }
       }
 
       // アイコンを作成
