@@ -28,11 +28,10 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   end
 
   def update
-    # 可視性が変更される場合の処理
-    visibility_changed = annotation_params[:visibility].present? &&
-                         annotation_params[:visibility] != @annotation.visibility
+    @annotation.assign_attributes(annotation_params)
+    visibility_changed = @annotation.visibility_changed?
 
-    @annotation.update!(annotation_params)
+    @annotation.save!
 
     # 通知を作成（失敗しても付箋は更新済み）
     # self_only → public に変更された場合、投稿者に通知
@@ -71,12 +70,14 @@ class Threads::Posts::AnnotationsController < Threads::ApplicationController
   def set_post
     # 数値IDまたはslugで検索（PostsControllerと同じロジック）
     # 下書きにも付箋をつけられる（編集時に無効化されるが、ユーザーが学習する）
+    posts = @thread.posts.unscope(where: :status)
+
     if params[:post_id].match?(/\A\d+\z/)
       # 数値IDの場合
-      @post = @thread.posts.unscope(where: :status).find(params[:post_id])
+      @post = posts.find(params[:post_id])
     else
       # slugの場合
-      @post = @thread.posts.unscope(where: :status).find_by!(slug: params[:post_id])
+      @post = posts.find_by!(slug: params[:post_id])
     end
   end
 
