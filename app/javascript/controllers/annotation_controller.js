@@ -64,9 +64,18 @@ export default class extends Controller {
       if (isMarkdownView) {
         // ブロック要素全般を対象にする（段落、見出し、リスト全体、引用、コードブロック）
         // ul/olは最上位のもののみ対象（ネストした子ul/olは除外）
-        const blocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
-        blocks.forEach((block, index) => {
+        const allBlocks = contentTarget.querySelectorAll("p, h1, h2, h3, h4, h5, h6, ul:not(ul ul):not(ol ul), ol:not(ul ol):not(ol ol), blockquote, pre")
+
+        // すべてのブロック要素にインデックスを付与（サーバー側との整合性を保つ）
+        // blockquote内の要素はUIセットアップをスキップするが、インデックスは付与する
+        allBlocks.forEach((block, index) => {
           block.dataset.paragraphIndex = index
+
+          // 引用内の要素（ネストされた引用自体も含む）は付箋の対象外とする
+          if (block.closest("blockquote") && (block.tagName !== "BLOCKQUOTE" || block.parentElement?.closest("blockquote"))) {
+            return
+          }
+
           // pre要素はpadding保持のためpx-2 py-1を除外
           if (block.tagName === "PRE") {
             block.classList.add("paragraph", "relative", "rounded", "transition-colors")
@@ -86,8 +95,8 @@ export default class extends Controller {
           iconsContainer.dataset.annotationIconsContainer = ""
 
           if (block.tagName === "UL" || block.tagName === "OL") {
-            // リスト要素の場合: 最後のli要素の中に追加（HTML仕様違反を回避）
-            const lastLi = block.querySelector("li:last-child")
+            // リスト要素の場合: 直下の最後のli要素の中に追加（ネストしたliは除外）
+            const lastLi = block.querySelector(":scope > li:last-child")
             if (lastLi) {
               lastLi.appendChild(iconsContainer)
             }
@@ -425,7 +434,20 @@ export default class extends Controller {
         iconsContainer = document.createElement("span")
         iconsContainer.className = "flex items-center gap-1 shrink-0"
         iconsContainer.dataset.annotationIconsContainer = ""
-        paragraphElement.appendChild(iconsContainer)
+
+        // リスト要素の場合は直下の最後のli要素の中に追加（ネストしたliは除外）
+        if (paragraphElement.tagName === "UL" || paragraphElement.tagName === "OL") {
+          const lastLi = paragraphElement.querySelector(":scope > li:last-child")
+          if (lastLi) {
+            lastLi.appendChild(iconsContainer)
+          } else {
+            // 空リストの場合はスキップ（HTML仕様違反を避ける）
+            return
+          }
+        } else {
+          // それ以外の要素: 要素内に直接追加
+          paragraphElement.appendChild(iconsContainer)
+        }
       }
 
       // アイコンを作成
