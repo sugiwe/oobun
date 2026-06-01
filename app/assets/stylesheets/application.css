@@ -9,6 +9,11 @@
  * Note: Markdown rendering styles have been consolidated into this file for simplicity.
  */
 
+/* カスタムカラー変数 */
+:root {
+  --color-bg-main: #fbf6f4;
+}
+
 /* Markdown rendered content styles */
 .markdown-body {
   font-size: 1rem;

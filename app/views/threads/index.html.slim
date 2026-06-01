@@ -18,7 +18,7 @@
         .flex.items-center.justify-between.mb-4
           h2.text-xl.text-gray-900
             | 📬 購読済み交換日記の新着投稿
-          = link_to "すべて見る", subscription_posts_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
+          = link_to "すべて見る", subscription_posts_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 bg-white"
         .flex.flex-col.gap-4
           = render partial: "posts/post_card", collection: @recent_posts, as: :post
 
@@ -41,7 +41,7 @@
 
     / 5. すべての交換日記を見る
     section.text-center.py-8
-      = link_to browse_threads_path, class: "inline-block text-sm text-gray-700 hover:text-gray-900 font-medium border border-gray-300 rounded-md px-6 py-3 hover:bg-gray-50 transition-colors" do
+      = link_to browse_threads_path, class: "inline-block text-sm text-gray-700 hover:text-gray-900 font-medium border border-gray-300 rounded-md px-6 py-3 hover:bg-gray-50 transition-colors bg-white" do
         | 🌐 他の交換日記を探す
 
     / 空の状態（何もフォロー・参加していない場合）
@@ -60,13 +60,13 @@
 
     / ヒーローセクション
     .bg-white.border.border-gray-200.rounded-lg.p-8.md:px-8.py-20.text-center
-      h1.text-3xl.tracking-wide.md:text-4xl.text-gray-900.mb-8
-        | coconikki
+      .flex.justify-center.mb-8
+        = image_tag "logo-vertical.svg", alt: "coconikki", class: "h-32 w-auto"
       p.text-base.text-gray-600.mb-6
         | 誰でも読める、公開交換日記サービス
       .flex.gap-4.justify-center.flex-wrap
         = link_to "ログイン / はじめる", login_path, class: "bg-gray-900 text-white rounded-md px-6 py-3 hover:bg-gray-700 font-medium"
-        = link_to "coconikkiについて", about_path, class: "border border-gray-300 text-gray-700 rounded-md px-6 py-3 hover:bg-gray-50 font-medium"
+        = link_to "coconikkiについて", about_path, class: "border border-gray-300 text-gray-700 rounded-md px-6 py-3 hover:bg-gray-50 font-medium bg-white"
 
     / 特徴紹介（簡潔版）
     .grid.md:grid-cols-3.gap-6
@@ -92,4 +92,4 @@
         h2.text-xl.text-gray-900.mb-4 最近の交換日記
         = render "threads/thread_grid", threads: @threads
         .text-center.mt-6
-          = link_to "すべての交換日記を見る", browse_threads_path, class: "text-sm text-blue-600 hover:underline font-medium"
+          = link_to "すべての交換日記を見る", browse_threads_path, class: "inline-block text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 bg-white"
