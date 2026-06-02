@@ -18,12 +18,10 @@ html
     script src="https://accounts.google.com/gsi/client" async=true defer=true
 
   body style="background-color: var(--color-bg-main);" data-controller="smooth-scroll"
-    header style="background-color: var(--color-bg-main);"
-      nav.h-14.flex.items-center
-        .px-4.flex.items-center.gap-3
-          = link_to root_path, class: "block h-8" do
-            = image_tag "logo.svg", alt: "coconikki", class: "h-full w-auto"
-          = yield :back_link
+    header.pt-3 style="background-color: var(--color-bg-main);"
+      nav.h-14.flex.items-center.justify-center
+        = link_to root_path, class: "block", style: "height: 26px;" do
+          = image_tag "logo.svg", alt: "coconikki", class: "h-full w-auto"
 
     / メニューボタン（PC: 左下固定、スマホ: 右下固定）
     - if logged_in?
