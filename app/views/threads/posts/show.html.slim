@@ -57,7 +57,10 @@
 
     / 本文（手紙の内容）- Markdown表示
     .text-base.text-gray-800.leading-loose.markdown-body data-post-view-target="markdownArea" data-annotation-target="content"
-      = render_markdown(@post.body)
+      - if @post.body.present?
+        = render_markdown(@post.body)
+      - else
+        .text-gray-400.italic 本文が入力されていません
 
     / 本文（手紙の内容）- Plain表示（段落ごとに分割）
     .text-base.text-gray-800.leading-loose.font-mono.hidden data-post-view-target="plainArea" data-annotation-target="content"
@@ -72,9 +75,12 @@
               .text-xs.text-blue-700.mt-1
                 | 付箋を表示するには、上の「Markdown」タブに切り替えてください。
 
-      - @post.body.split("\n\n").each_with_index do |paragraph, index|
-        .px-2.py-1
-          .whitespace-pre-wrap = paragraph
+      - if @post.body.present?
+        - @post.body.split("\n\n").each_with_index do |paragraph, index|
+          .px-2.py-1
+            .whitespace-pre-wrap = paragraph
+      - else
+        .text-gray-400.italic 本文が入力されていません
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?
