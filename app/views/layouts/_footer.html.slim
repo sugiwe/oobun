@@ -1,4 +1,4 @@
-footer.mt-16.py-12 style="background-color: var(--color-bg-main);"
+footer.mt-16.pt-8.pb-24 style="background-color: var(--color-bg-main);"
   .container.mx-auto.px-4.sm:px-6.lg:px-8
     .max-w-6xl.mx-auto
       .flex.flex-col.md:flex-row.justify-between.items-start.gap-8
@@ -10,6 +10,8 @@ footer.mt-16.py-12 style="background-color: var(--color-bg-main);"
           p.text-xs.text-gray-400.mt-4 © coconikki
 
         / リンク集
-        .flex.gap-6
-          = link_to "coconikkiについて", about_path, class: "text-sm text-gray-600 hover:text-gray-900"
-          = link_to "お問い合わせ", contact_path, class: "text-sm text-gray-600 hover:text-gray-900"
+        .flex.flex-wrap.gap-x-6.gap-y-2
+          = link_to "coconikkiについて", about_path, class: "text-sm text-gray-400 hover:text-gray-600"
+          = link_to "利用規約", terms_path, class: "text-sm text-gray-400 hover:text-gray-600"
+          = link_to "プライバシーポリシー", privacy_path, class: "text-sm text-gray-400 hover:text-gray-600"
+          = link_to "お問い合わせ", contact_path, class: "text-sm text-gray-400 hover:text-gray-600"
