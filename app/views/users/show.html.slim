@@ -12,7 +12,7 @@
             h1.text-2xl = @user.display_name
             p.text-gray-500.text-sm = "@#{@user.username}"
           - if @is_own_profile
-            = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+            = link_to "編集", edit_user_path(@user.username), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1 bg-white"
         - if @user.bio.present?
           .text-gray-700.text-sm.mt-3 = auto_link_bio(@user.bio)
 
@@ -67,7 +67,7 @@
     .flex.items-center.justify-between.mb-4
       h2.text-lg ✍️ 参加中の交換日記
       - if @is_own_profile && @threads.present?
-        = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5"
+        = link_to "新しい交換日記", new_thread_path, class: "text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 bg-white"
 
     / 自分のプロフィールの場合のみ表示する補足説明
     - if @is_own_profile

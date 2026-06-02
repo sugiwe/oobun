@@ -1,6 +1,6 @@
 - content_for :title, "#{@post.display_title} - #{@thread.title} - coconikki"
 
-.max-w-3xl.mx-auto
+.max-w-2xl.mx-auto
   .mb-6
     = link_to "← #{@thread.title}", thread_path(@thread.slug), class: "text-sm text-gray-500 hover:text-gray-700"
   / 下書きバナー
@@ -12,7 +12,7 @@
         .text-xs.text-amber-700 この投稿はまだ公開されていません。あなただけが閲覧できます。
 
   / 今回の投稿（メイン）
-  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} border border-gray-200 rounded-lg p-8 md:p-16 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-allow-public-annotations-value="#{@thread.allow_public_annotations}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
+  article class="#{@post.draft? ? 'bg-amber-50/30' : 'bg-white'} md:p-0 relative" data-controller="post-view annotation" data-post-view-user-id-value="#{logged_in? ? current_user.id : 0}" data-default-mode="#{logged_in? ? current_user.preferred_post_view : 'markdown'}" data-annotation-thread-slug-value="#{@thread.slug}" data-annotation-post-id-value="#{@post.to_param}" data-annotation-current-user-id-value="#{logged_in? ? current_user.id : 0}" data-annotation-allow-public-annotations-value="#{@thread.allow_public_annotations}" data-annotation-annotations-value="#{@annotations.to_json(only: [:id, :paragraph_index, :selected_text, :body, :visibility, :user_id], methods: [:icon, :marker_color_class, :user_avatar_url, :user_display_name])}"
     / 前回の投稿（チラ見せ）- 公開済み投稿のみ
     - if @post.published? && @prev_post
       .mb-12
@@ -40,7 +40,7 @@
         - if logged_in? && @post.editable_by?(current_user)
           .flex.gap-2
             = link_to "編集", edit_thread_post_path(@thread.slug, @post), class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
-            = button_to "削除", thread_post_path(@thread.slug, @post), method: :delete, data: { turbo_confirm: "この投稿を削除しますか？この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+            = button_to "削除", thread_post_path(@thread.slug, @post), method: :delete, data: { turbo_confirm: "この投稿を削除しますか？この操作は取り消せません。" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1 cursor-pointer"
       .flex.items-center.justify-between.gap-3
         .flex.items-center.gap-3
           = link_to user_path(@post.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
@@ -50,14 +50,17 @@
             span.text-sm.text-gray-400 = @post.display_published_at.strftime("%Y年%m月%d日 %H:%M")
         / 表示切り替えトグル
         .flex.gap-2.border-b.border-gray-200
-          button.px-3.py-1.text-xs.border-b-2.transition-colors type="button" data-post-view-target="markdownButton" data-action="click->post-view#showMarkdown"
+          button.px-3.py-1.text-xs.border-b-2.transition-colors.cursor-pointer type="button" data-post-view-target="markdownButton" data-action="click->post-view#showMarkdown"
             | Markdown
-          button.px-3.py-1.text-xs.border-b-2.transition-colors type="button" data-post-view-target="plainButton" data-action="click->post-view#showPlain"
+          button.px-3.py-1.text-xs.border-b-2.transition-colors.cursor-pointer type="button" data-post-view-target="plainButton" data-action="click->post-view#showPlain"
             | Plain
 
     / 本文（手紙の内容）- Markdown表示
     .text-base.text-gray-800.leading-loose.markdown-body data-post-view-target="markdownArea" data-annotation-target="content"
-      = render_markdown(@post.body)
+      - if @post.body.present?
+        = render_markdown(@post.body)
+      - else
+        .text-gray-400.italic 本文が入力されていません
 
     / 本文（手紙の内容）- Plain表示（段落ごとに分割）
     .text-base.text-gray-800.leading-loose.font-mono.hidden data-post-view-target="plainArea" data-annotation-target="content"
@@ -72,13 +75,16 @@
               .text-xs.text-blue-700.mt-1
                 | 付箋を表示するには、上の「Markdown」タブに切り替えてください。
 
-      - @post.body.split("\n\n").each_with_index do |paragraph, index|
-        .px-2.py-1
-          .whitespace-pre-wrap = paragraph
+      - if @post.body.present?
+        - @post.body.split("\n\n").each_with_index do |paragraph, index|
+          .px-2.py-1
+            .whitespace-pre-wrap = paragraph
+      - else
+        .text-gray-400.italic 本文が入力されていません
 
     / 返事を書くボタン（公開済み投稿で、自分のターン かつ この投稿がスレッドの最新投稿の場合のみ）
     - if @post.published? && logged_in? && @thread.my_turn?(current_user) && @next_post.nil?
-      .mt-12.pt-8.border-t.border-gray-200
+      .mt-24
         - if @draft
           / 下書きがある場合
           .flex.flex-col.items-center.gap-3
@@ -87,7 +93,7 @@
         - else
           / 下書きがない場合
           .text-center
-            = button_to thread_posts_path(@thread.slug), method: :post, class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors" do
+            = button_to thread_posts_path(@thread.slug), method: :post, class: "inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-6 py-3 text-base font-medium hover:bg-gray-700 transition-colors cursor-pointer" do
               span ✍️
               span 返事を書く
 
@@ -114,7 +120,7 @@
           .p-4.border-b
             .flex.items-center.justify-between.mb-2
               h2.text-lg.font-semibold data-annotation-target="modalTitle" 付箋を追加
-              button.text-gray-400.hover:text-gray-600 data-action="click->annotation#closeModal" type="button"
+              button.text-gray-400.hover:text-gray-600.cursor-pointer data-action="click->annotation#closeModal" type="button"
                 | ✕
             .text-xs.text-gray-600
               | 投稿の気になる箇所に段落単位で自分だけのメモや公開コメントを残せます。自分の付箋は
@@ -160,7 +166,7 @@
 
             / ボタン
             .flex.gap-2.justify-end
-              button.px-4.py-2.text-sm.text-gray-700.bg-gray-100.rounded.hover:bg-gray-200.transition-colors type="button" data-action="click->annotation#closeModal"
+              button.px-4.py-2.text-sm.text-gray-700.bg-gray-100.rounded.hover:bg-gray-200.transition-colors.cursor-pointer type="button" data-action="click->annotation#closeModal"
                 | キャンセル
-              button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors type="submit" data-annotation-target="submitButton"
+              button.px-4.py-2.text-sm.text-white.bg-gray-900.rounded.hover:bg-gray-700.transition-colors.cursor-pointer type="submit" data-annotation-target="submitButton"
                 | 追加

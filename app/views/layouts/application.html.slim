@@ -17,12 +17,11 @@ html
     / Sign In With Google スクリプト
     script src="https://accounts.google.com/gsi/client" async=true defer=true
 
-  body
-    header.bg-white
-      nav.h-14.flex.items-center
-        .px-4.flex.items-center.gap-3
-          = link_to "coconikki", root_path, class: "text-xl tracking-wide"
-          = yield :back_link
+  body style="background-color: var(--color-bg-main);" data-controller="smooth-scroll"
+    header.pt-3 style="background-color: var(--color-bg-main);"
+      nav.h-14.flex.items-center.justify-center
+        = link_to root_path, class: "block", style: "height: 26px;" do
+          = image_tag "logo.svg", alt: "coconikki", class: "h-full w-auto"
 
     / メニューボタン（PC: 左下固定、スマホ: 右下固定）
     - if logged_in?
@@ -55,11 +54,7 @@ html
           - if current_user.admin?
             = link_to admin_root_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
               | 管理者ダッシュボード
-          = link_to terms_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
-            | 利用規約
-          = link_to privacy_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
-            | プライバシーポリシー
-          = button_to logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do
+          = button_to logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer" do
             | ログアウト
     - else
       .fixed.bottom-0.left-0.z-50.p-4

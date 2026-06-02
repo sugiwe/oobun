@@ -9,6 +9,24 @@
  * Note: Markdown rendering styles have been consolidated into this file for simplicity.
  */
 
+/* カスタムカラー変数 */
+:root {
+  /* ブランドカラー */
+  --color-primary: #cc816e;
+  --color-secondary: #e0b3a8;
+  --color-bg-main: #fff;
+  /* --color-bg-main: #fbf6f4; */
+
+  /* 意味的カラー（用途別） */
+  --color-border: var(--color-secondary);
+  --color-border-light: #f0d5ce; /* secondaryより明るめ */
+  --color-button-primary: var(--color-primary);
+  --color-button-primary-hover: #b36b5a; /* primaryより濃いめ */
+  --color-bg-notice: #fff5f0; /* secondaryよりかなり明るめ（注意事項背景） */
+  --color-bg-default: #f5ebe7; /* secondaryより明るめ（デフォルト背景） */
+  --color-bg-avatar: var(--color-secondary);
+}
+
 /* Markdown rendered content styles */
 .markdown-body {
   font-size: 1rem;

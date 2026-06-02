@@ -74,7 +74,7 @@
 
               / アクションボタン
               .flex.items-center.gap-2
-                = button_to "削除", thread_delete_invitation_path(@thread.slug, invitation.token), method: :delete, data: { turbo_confirm: "この招待リンクを削除しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+                = button_to "削除", thread_delete_invitation_path(@thread.slug, invitation.token), method: :delete, data: { turbo_confirm: "この招待リンクを削除しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1 cursor-pointer"
       - else
         p.text-sm.text-gray-500 招待リンクはまだ作成されていません
 
@@ -108,13 +108,13 @@
             .flex.items-center.gap-2
               / 管理者に昇格・降格ボタン
               - if membership.moderator?
-                = button_to "メンバーに降格", thread_demote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "管理者権限を削除してメンバーに降格しますか？" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1"
+                = button_to "メンバーに降格", thread_demote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "管理者権限を削除してメンバーに降格しますか？" }, class: "text-xs text-gray-600 hover:text-gray-900 border border-gray-300 rounded px-2 py-1 cursor-pointer"
               - else
-                = button_to "管理者に昇格", thread_promote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "このメンバーを管理者に昇格しますか？" }, class: "text-xs text-blue-600 hover:text-blue-900 border border-blue-300 rounded px-2 py-1"
+                = button_to "管理者に昇格", thread_promote_membership_path(@thread.slug, membership.user.id), method: :patch, data: { turbo_confirm: "このメンバーを管理者に昇格しますか？" }, class: "text-xs text-blue-600 hover:text-blue-900 border border-blue-300 rounded px-2 py-1 cursor-pointer"
 
               / メンバー削除ボタン（退会済みユーザー or 管理者以上）
               - if membership.user.deleted?
-                = button_to "除外", thread_remove_membership_path(@thread.slug, membership.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1"
+                = button_to "除外", thread_remove_membership_path(@thread.slug, membership.user.id), method: :delete, data: { turbo_confirm: "この退会済みメンバーを除外しますか？" }, class: "text-xs text-red-600 hover:text-red-900 border border-red-300 rounded px-2 py-1 cursor-pointer"
 
   / Danger Zone
   .mt-16.border.border-red-300.rounded-lg.p-6.bg-red-50
