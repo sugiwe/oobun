@@ -11,7 +11,7 @@ div data=autosave_data
 
     .flex.items-center.justify-between.mb-6
       h1.text-xl 投稿する
-      = button_to "下書きを削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "下書きを削除しますか？この操作は取り消せません。" }
+      = button_to "下書きを削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline cursor-pointer", data: { turbo_confirm: "下書きを削除しますか？この操作は取り消せません。" }
 
     .flex.flex-col.md:flex-row.gap-6
       / 左: 前回の投稿（PC: 固定幅、スマホ: 折りたたみ可）
@@ -34,7 +34,7 @@ div data=autosave_data
 
       .flex.items-center.justify-between.mb-6
         h1.text-xl 投稿を編集
-        = button_to "投稿を削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline", data: { turbo_confirm: "投稿を削除しますか？この操作は取り消せません。" }
+        = button_to "投稿を削除", thread_post_path(@thread.slug, @post), method: :delete, class: "text-xs text-red-600 hover:text-red-900 underline cursor-pointer", data: { turbo_confirm: "投稿を削除しますか？この操作は取り消せません。" }
 
       / 付箋がある場合の警告
       - if @post.annotations.active.exists?
