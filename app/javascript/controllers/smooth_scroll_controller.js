@@ -4,11 +4,12 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   connect() {
     // ページ内のすべてのリンクをチェック
-    document.addEventListener("click", this.handleClick.bind(this))
+    this.boundHandleClick = this.handleClick.bind(this)
+    document.addEventListener("click", this.boundHandleClick)
   }
 
   disconnect() {
-    document.removeEventListener("click", this.handleClick.bind(this))
+    document.removeEventListener("click", this.boundHandleClick)
   }
 
   handleClick(event) {
