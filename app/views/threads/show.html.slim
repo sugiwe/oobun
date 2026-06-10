@@ -1,4 +1,8 @@
-- content_for :title, "#{@thread.title} - coconikki"
+/ メタタグ設定
+- content_for :meta_title, "#{@thread.title} - coconikki"
+- content_for :meta_description, @thread.description.present? ? @thread.description : "#{@thread.title} の投稿一覧です。"
+- if @thread.thumbnail.attached?
+  - content_for :meta_image, url_for(@thread.thumbnail)
 
 - turn_user = @thread.current_turn_user
 - is_member = logged_in? && @thread.member?(current_user)
