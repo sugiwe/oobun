@@ -56,18 +56,18 @@ module MetaTagsHelper
     text.gsub!(/\*\*([^\*]+)\*\*/, '\1')
     text.gsub!(/\*([^\*]+)\*/, '\1')
     # 見出し: # text → text
-    text.gsub!(/^#+\s+/, '')
+    text.gsub!(/^#+\s+/, "")
     # コードブロック: ```code``` → code
-    text.gsub!(/```[^`]*```/m, '')
+    text.gsub!(/```[^`]*```/m, "")
     text.gsub!(/`([^`]+)`/, '\1')
     # 引用: > text → text
-    text.gsub!(/^>\s+/, '')
+    text.gsub!(/^>\s+/, "")
     # リスト: - text or * text → text
-    text.gsub!(/^[\-\*]\s+/, '')
+    text.gsub!(/^[\-\*]\s+/, "")
     # 改行を空白に変換
-    text.gsub!(/\n+/, ' ')
+    text.gsub!(/\n+/, " ")
     # 複数の空白を1つに
-    text.gsub!(/\s+/, ' ')
+    text.gsub!(/\s+/, " ")
     # 前後の空白を削除
     text.strip!
 
