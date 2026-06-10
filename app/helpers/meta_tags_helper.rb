@@ -30,6 +30,11 @@ module MetaTagsHelper
     content_for?(:meta_type) ? content_for(:meta_type) : "website"
   end
 
+  # Twitter Cardのタイプを取得（summary_large_image or summary）
+  def meta_twitter_card
+    content_for(:twitter_card).presence || "summary_large_image"
+  end
+
   # マークダウンテキストからプレーンテキストを抽出（description用）
   def extract_plain_text(markdown_text, max_length: 100)
     return "" if markdown_text.blank?
@@ -45,12 +50,15 @@ module MetaTagsHelper
     # 太字・斜体: **text** or *text* → text（改行を跨がないようにしてリスト記号との誤判定を防ぐ）
     text.gsub!(/\*\*([^\*\n]+)\*\*/, '\1')
     text.gsub!(/\*([^\*\n]+)\*/, '\1')
+    # 太字・斜体（アンダースコア版）: __text__ or _text_ → text
+    text.gsub!(/__([^_\n]+)__/, '\1')
+    text.gsub!(/_([^_\n]+)_/, '\1')
     # 見出し: # text → text
     text.gsub!(/^#+\s+/, "")
     # インラインコード: `code` → code（改行を含まない）
     text.gsub!(/`([^`\n]+)`/, '\1')
-    # 引用: > text → text
-    text.gsub!(/^>\s+/, "")
+    # 引用: > text → text（スペースなしでも対応）
+    text.gsub!(/^>\s*/, "")
     # リスト: - text, * text, 1. text → text（インデント対応）
     text.gsub!(/^\s*(?:[\-\*]|\d+\.)\s+/, "")
     # HTMLタグを削除し、HTMLエンティティをデコード

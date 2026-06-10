@@ -1,6 +1,7 @@
 / メタタグ設定
 - content_for :meta_title, "#{@user.display_name} (@#{@user.username}) - coconikki"
 - content_for :meta_description, "#{@user.display_name} さんのcoconikkiページです。参加中の交換日記や投稿をご覧いただけます。"
+- content_for :twitter_card, "summary"
 - if @user.avatar.attached? && @user.avatar.representable?
   - content_for :meta_image, polymorphic_url(@user.avatar.representation(resize_to_limit: [600, 600]))
 
