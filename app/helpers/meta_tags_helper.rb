@@ -34,9 +34,9 @@ module MetaTagsHelper
     end
   end
 
-  # 現在のページURLを取得
+  # 現在のページURLを取得（クエリパラメータを除外した正規化URL）
   def meta_url
-    request.original_url
+    "#{request.base_url}#{request.path}"
   end
 
   # OGPタイプを取得（article or website）
@@ -50,17 +50,19 @@ module MetaTagsHelper
 
     # マークダウン記法を削除
     text = markdown_text.dup
-    # コードブロックを削除（他の置換処理の前に実行して誤判定を防ぐ）
-    text.gsub!(/```[^`]*```/m, "")
+    # コードブロックを削除（非貪欲マッチでバックティックが内部に含まれる場合に対応）
+    text.gsub!(/```.*?```/m, "")
+    # 画像を削除（! が残るのを防ぐ）
+    text.gsub!(/!\[[^\]]*\]\([^\)]+\)/, "")
     # リンク: [text](url) → text
     text.gsub!(/\[([^\]]+)\]\([^\)]+\)/, '\1')
-    # 太字・斜体: **text** or *text* → text
-    text.gsub!(/\*\*([^\*]+)\*\*/, '\1')
-    text.gsub!(/\*([^\*]+)\*/, '\1')
+    # 太字・斜体: **text** or *text* → text（改行を跨がないようにしてリスト記号との誤判定を防ぐ）
+    text.gsub!(/\*\*([^\*\n]+)\*\*/, '\1')
+    text.gsub!(/\*([^\*\n]+)\*/, '\1')
     # 見出し: # text → text
     text.gsub!(/^#+\s+/, "")
-    # インラインコード: `code` → code
-    text.gsub!(/`([^`]+)`/, '\1')
+    # インラインコード: `code` → code（改行を含まない）
+    text.gsub!(/`([^`\n]+)`/, '\1')
     # 引用: > text → text
     text.gsub!(/^>\s+/, "")
     # リスト: - text, * text, 1. text → text（インデント対応）

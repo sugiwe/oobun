@@ -1,6 +1,9 @@
-/ メタタグ設定（トップページは常に同じタイトルとディスクリプション）
-- content_for :meta_title, "coconikki - 公開交換日記・往復書簡・文通サービス"
-- content_for :meta_description, "誰でも読める、公開交換日記・往復書簡・文通サービス。蓄積されていく対話を読み物として楽しめます。"
+/ メタタグ設定（ログイン時は「ホーム」、未ログイン時はマーケティング用タイトル）
+- if logged_in?
+  - content_for :meta_title, "ホーム - coconikki"
+- else
+  - content_for :meta_title, "coconikki - 公開交換日記・往復書簡・文通サービス"
+  - content_for :meta_description, "誰でも読める、公開交換日記・往復書簡・文通サービス。蓄積されていく対話を読み物として楽しめます。"
 
 - if logged_in?
   / ログイン時: パーソナライズドフィード
