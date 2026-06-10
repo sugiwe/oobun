@@ -6,32 +6,18 @@ module MetaTagsHelper
 
   # ページタイトルを生成
   def meta_title
-    if content_for?(:meta_title)
-      content_for(:meta_title)
-    elsif content_for?(:title)
-      content_for(:title)
-    else
-      DEFAULT_TITLE
-    end
+    content_for(:meta_title).presence || content_for(:title).presence || DEFAULT_TITLE
   end
 
-  # ページ説明文を生成
+  # ページ説明文を生成（改行や余分な空白を1つの半角スペースに統一）
   def meta_description
-    if content_for?(:meta_description)
-      content_for(:meta_description)
-    else
-      DEFAULT_DESCRIPTION
-    end
+    description = content_for(:meta_description).presence || DEFAULT_DESCRIPTION
+    description.to_s.gsub(/\s+/, " ").strip
   end
 
   # OGP画像URLを生成
   def meta_image
-    if content_for?(:meta_image)
-      content_for(:meta_image)
-    else
-      # デフォルトのOGP画像（app/assets/images/ogp.png）
-      image_url("ogp.png")
-    end
+    content_for(:meta_image).presence || image_url("ogp.png")
   end
 
   # 現在のページURLを取得（クエリパラメータを除外した正規化URL）
@@ -67,6 +53,8 @@ module MetaTagsHelper
     text.gsub!(/^>\s+/, "")
     # リスト: - text, * text, 1. text → text（インデント対応）
     text.gsub!(/^\s*(?:[\-\*]|\d+\.)\s+/, "")
+    # HTMLタグを削除し、HTMLエンティティをデコード
+    text = CGI.unescapeHTML(strip_tags(text))
     # 改行を空白に変換
     text.gsub!(/\n+/, " ")
     # 複数の空白を1つに

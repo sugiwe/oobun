@@ -2,10 +2,10 @@
 - content_for :meta_title, "#{@post.display_title} - #{@thread.title} - coconikki"
 - content_for :meta_description, extract_plain_text(@post.body, max_length: 120)
 - content_for :meta_type, "article"
-- if @post.thumbnail.attached?
-  - content_for :meta_image, polymorphic_url(@post.thumbnail.variable? ? @post.thumbnail.variant(resize_to_limit: [1200, 630]) : @post.thumbnail)
-- elsif @thread.thumbnail.attached?
-  - content_for :meta_image, polymorphic_url(@thread.thumbnail.variable? ? @thread.thumbnail.variant(resize_to_limit: [1200, 630]) : @thread.thumbnail)
+- if @post.thumbnail.attached? && @post.thumbnail.representable?
+  - content_for :meta_image, polymorphic_url(@post.thumbnail.representation(resize_to_limit: [1200, 630]))
+- elsif @thread.thumbnail.attached? && @thread.thumbnail.representable?
+  - content_for :meta_image, polymorphic_url(@thread.thumbnail.representation(resize_to_limit: [1200, 630]))
 
 .max-w-2xl.mx-auto
   .mb-6
