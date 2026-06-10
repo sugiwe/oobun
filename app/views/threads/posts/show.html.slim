@@ -3,9 +3,9 @@
 - content_for :meta_description, extract_plain_text(@post.body, max_length: 120)
 - content_for :meta_type, "article"
 - if @post.thumbnail.attached?
-  - content_for :meta_image, url_for(@post.thumbnail)
+  - content_for :meta_image, polymorphic_url(@post.thumbnail)
 - elsif @thread.thumbnail.attached?
-  - content_for :meta_image, url_for(@thread.thumbnail)
+  - content_for :meta_image, polymorphic_url(@thread.thumbnail)
 
 .max-w-2xl.mx-auto
   .mb-6

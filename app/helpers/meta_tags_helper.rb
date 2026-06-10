@@ -50,6 +50,8 @@ module MetaTagsHelper
 
     # マークダウン記法を削除
     text = markdown_text.dup
+    # コードブロックを削除（他の置換処理の前に実行して誤判定を防ぐ）
+    text.gsub!(/```[^`]*```/m, "")
     # リンク: [text](url) → text
     text.gsub!(/\[([^\]]+)\]\([^\)]+\)/, '\1')
     # 太字・斜体: **text** or *text* → text
@@ -57,13 +59,12 @@ module MetaTagsHelper
     text.gsub!(/\*([^\*]+)\*/, '\1')
     # 見出し: # text → text
     text.gsub!(/^#+\s+/, "")
-    # コードブロック: ```code``` → code
-    text.gsub!(/```[^`]*```/m, "")
+    # インラインコード: `code` → code
     text.gsub!(/`([^`]+)`/, '\1')
     # 引用: > text → text
     text.gsub!(/^>\s+/, "")
-    # リスト: - text or * text → text
-    text.gsub!(/^[\-\*]\s+/, "")
+    # リスト: - text, * text, 1. text → text（インデント対応）
+    text.gsub!(/^\s*(?:[\-\*]|\d+\.)\s+/, "")
     # 改行を空白に変換
     text.gsub!(/\n+/, " ")
     # 複数の空白を1つに

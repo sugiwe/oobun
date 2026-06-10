@@ -2,7 +2,7 @@
 - content_for :meta_title, "#{@user.display_name} (@#{@user.username}) - coconikki"
 - content_for :meta_description, "#{@user.display_name} さんのcoconikkiページです。参加中の交換日記や投稿をご覧いただけます。"
 - if @user.avatar.attached?
-  - content_for :meta_image, url_for(@user.avatar)
+  - content_for :meta_image, polymorphic_url(@user.avatar)
 
 .max-w-4xl.mx-auto
   / ユーザー情報
