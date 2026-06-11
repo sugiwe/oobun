@@ -26,8 +26,8 @@ html
     = csrf_meta_tags
     = csp_meta_tag
     = yield :head
-    link rel="icon" href="/icon.png" type="image/png"
-    link rel="icon" href="/icon.svg" type="image/svg+xml"
+    link rel="icon" href="/icon.png?v=2" type="image/png"
+    link rel="icon" href="/icon.svg?v=2" type="image/svg+xml"
     = stylesheet_link_tag :app, "data-turbo-track": "reload"
     = javascript_importmap_tags
     / Sign In With Google スクリプト
