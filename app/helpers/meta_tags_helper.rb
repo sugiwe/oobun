@@ -27,7 +27,7 @@ module MetaTagsHelper
 
   # OGPタイプを取得（article or website）
   def meta_type
-    content_for?(:meta_type) ? content_for(:meta_type) : "website"
+    content_for(:meta_type).presence || "website"
   end
 
   # Twitter Cardのタイプを取得（summary_large_image or summary）
@@ -39,8 +39,9 @@ module MetaTagsHelper
   def extract_plain_text(markdown_text, max_length: 100)
     return "" if markdown_text.blank?
 
-    # マークダウン記法を削除
-    text = markdown_text.dup
+    # パフォーマンス向上のため、処理前に文字列を一定の長さに制限する
+    # （マークダウン記法が途中で切れることを考慮し、十分に余裕を持たせた文字数にする）
+    text = markdown_text[0, max_length * 10]
     # コードブロックを削除（非貪欲マッチでバックティックが内部に含まれる場合に対応）
     text.gsub!(/```.*?```/m, "")
     # 画像を削除（! が残るのを防ぐ）
