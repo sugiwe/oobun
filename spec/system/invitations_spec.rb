@@ -15,7 +15,7 @@ RSpec.describe "Invitations", type: :system do
     it "招待ページのタイトルが正しく表示される" do
       visit invitation_path(invitation.token)
 
-      expect(page).to have_title("招待 - #{correspondence_thread.title} - coconikki")
+      expect(page).to have_title("#{correspondence_thread.title}への招待 - coconikki")
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.describe "Invitations", type: :system do
       it "ログインボタンが表示される" do
         visit invitation_path(invitation.token)
 
-        expect(page).to have_content("交換日記への招待")
+        expect(page).to have_content("「テスト交換日記」への招待")
         expect(page).to have_content("@#{user.username}")
         expect(page).to have_content("テスト交換日記")
         expect(page).to have_content("参加するにはログインが必要です")
@@ -46,11 +46,11 @@ RSpec.describe "Invitations", type: :system do
       it "参加ボタンが表示される" do
         visit invitation_path(invitation.token)
 
-        expect(page).to have_content("交換日記への招待")
+        expect(page).to have_content("「テスト交換日記」への招待")
         expect(page).to have_content("@#{user.username}")
         expect(page).to have_content("テスト交換日記")
-        expect(page).to have_button("参加する")
-        expect(page).to have_link("断る", href: root_path)
+        expect(page).to have_button("この交換日記に参加する")
+        expect(page).to have_link("今回は見送る", href: root_path)
       end
     end
   end
