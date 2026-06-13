@@ -1,6 +1,8 @@
 / メタタグ設定
 - content_for :meta_title, "#{@thread.title} - coconikki"
-- content_for :meta_description, @thread.description.present? ? @thread.description : "#{@thread.title} の投稿一覧です。"
+- content_for :meta_description, @thread.description.present? ? truncate(@thread.description, length: 120) : "#{@thread.title} の投稿一覧です。"
+- content_for :meta_type, "article"
+- content_for :twitter_card, "summary"
 - if @thread.thumbnail.attached? && @thread.thumbnail.representable?
   - content_for :meta_image, polymorphic_url(@thread.thumbnail.representation(resize_to_limit: [1200, 630]))
 
@@ -39,7 +41,7 @@
 
         h1.text-2xl.mb-4 = @thread.title
         - if @thread.description.present?
-          p.text-gray-500.text-sm.mt-2 = @thread.description
+          p.text-gray-500.text-sm.mt-2.whitespace-pre-wrap = @thread.description
 
         / 参加者（アバター付き）
         .flex.items-center.gap-3.mt-4.flex-wrap

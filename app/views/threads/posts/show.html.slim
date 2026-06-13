@@ -4,8 +4,12 @@
 - content_for :meta_type, "article"
 - if @post.thumbnail.attached? && @post.thumbnail.representable?
   - content_for :meta_image, polymorphic_url(@post.thumbnail.representation(resize_to_limit: [1200, 630]))
+  - content_for :twitter_card, "summary_large_image"
 - elsif @thread.thumbnail.attached? && @thread.thumbnail.representable?
   - content_for :meta_image, polymorphic_url(@thread.thumbnail.representation(resize_to_limit: [1200, 630]))
+  - content_for :twitter_card, "summary_large_image"
+- else
+  - content_for :twitter_card, "summary"
 
 .max-w-2xl.mx-auto
   .mb-6

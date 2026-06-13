@@ -1,33 +1,92 @@
-- content_for :title, "招待 - #{@invitation.thread.title} - coconikki"
+/ メタタグ設定
+- inviter_name = (@invitation.invited_by.nil? || @invitation.invited_by.deleted?) ? "退会済みユーザー" : @invitation.invited_by.display_name
+- content_for :meta_title, "#{@invitation.thread.title}への招待 - coconikki"
+- content_for :meta_description, @invitation.thread.description.present? ? truncate(@invitation.thread.description, length: 120) : "#{inviter_name}さんがあなたを交換日記「#{@invitation.thread.title}」に招待しています。"
+- content_for :meta_type, "article"
+- content_for :twitter_card, "summary"
+- if @invitation.thread.thumbnail.attached? && @invitation.thread.thumbnail.representable?
+  - content_for :meta_image, polymorphic_url(@invitation.thread.thumbnail.representation(resize_to_limit: [1200, 630]))
 
-.flex.flex-col.items-center.justify-center.min-h-64.gap-8
-  .text-center.max-w-sm
-    h1.text-xl.font-semibold.mb-2 交換日記への招待
-    p.text-gray-500.text-sm.mb-1
-      = "@#{@invitation.invited_by.username}"
-      | さんから招待が届いています
-    p.text-lg.font-medium.mt-4 = @invitation.thread.title
-    - if @invitation.thread.description.present?
-      p.text-sm.text-gray-500.mt-1 = @invitation.thread.description
-
-    .mt-6.text-xs.text-gray-400
-      - if @invitation.expires_at.present?
-        | 有効期限：
-        = @invitation.expires_at.strftime("%Y年%m月%d日")
-        | まで
+.max-w-2xl.mx-auto
+  / 招待ヘッダー
+  .text-center.mb-8
+    h1.text-2xl.font-semibold.mb-2
+      | 「
+      = @invitation.thread.title
+      | 」への招待
+    p.text-gray-600.text-sm
+      - if @invitation.invited_by.nil? || @invitation.invited_by.deleted?
+        | 退会済みユーザーさんがあなたを招待しています
       - else
-        | 有効期限：無期限
+        = link_to "@#{@invitation.invited_by.username}", user_path(@invitation.invited_by.username), class: "text-blue-600 hover:underline"
+        | さんがあなたを招待しています
 
+  / 交換日記情報カード
+  .bg-white.border.border-gray-200.rounded-lg.p-6.md:p-8.mb-8
+    / カバーアート
+    .mb-6
+      = render "threads/cover_art", thread: @invitation.thread, size_class: "rounded-lg mx-auto max-w-md"
+
+    / タイトル・説明
+    .mb-6
+      h2.text-xl.font-bold.text-gray-900.mb-3.text-center = @invitation.thread.title
+      - if @invitation.thread.description.present?
+        p.text-gray-600.text-sm.text-center.whitespace-pre-wrap = @invitation.thread.description
+
+    / 参加者一覧
+    .mb-6
+      .text-sm.font-medium.text-gray-700.mb-3.text-center 参加者
+      .flex.flex-wrap.items-center.justify-center.gap-3
+        - @invitation.thread.memberships.includes(:user).order(:position).each do |membership|
+          - next if membership.user.nil? || membership.user.deleted?
+          .flex.items-center.gap-2
+            = link_to user_path(membership.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
+              = render "shared/avatar", user: membership.user, show_fallback: true
+            = link_to membership.user.display_name, user_path(membership.user.username), class: "text-sm text-gray-700 hover:text-gray-900 hover:underline"
+
+  / 最新投稿プレビュー（公開スレッドの場合）
+  - if @invitation.thread.free? || @invitation.thread.paid?
+    - recent_posts = @invitation.thread.posts.published.includes(:user, thumbnail_attachment: :blob).order(published_at: :desc).limit(3)
+    - if recent_posts.any?
+      .mb-8
+        .text-sm.font-medium.text-gray-700.mb-3.text-center 最近の投稿
+        .flex.flex-col.gap-3
+          - recent_posts.each do |post|
+            = link_to thread_post_path(@invitation.thread.slug, post), class: "block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" do
+              .flex.items-start.gap-3
+                .w-12.h-12.flex-shrink-0.rounded.bg-gray-100.flex.items-center.justify-center.overflow-hidden
+                  - if post.thumbnail.attached? && post.thumbnail.representable?
+                    = image_tag post.thumbnail.representation(resize_to_limit: [100, 100]), class: "w-full h-full object-cover", alt: post.display_title
+                  - else
+                    .text-xl 📮
+                .flex-1.min-w-0
+                  .text-sm.font-medium.text-gray-900.truncate = post.display_title
+                  .text-xs.text-gray-500.line-clamp-2.mt-1 = extract_plain_text(post.body, max_length: 80)
+                  .text-xs.text-gray-400.mt-1
+                    = post.user&.display_name || "退会済みユーザー"
+                    |  ·
+                    = post.display_published_at&.strftime("%Y/%m/%d")
+
+  / 有効期限表示
+  .text-center.mb-6.text-xs.text-gray-400
+    - if @invitation.expires_at.present?
+      | 有効期限：
+      = @invitation.expires_at.strftime("%Y年%m月%d日")
+      | まで
+    - else
+      | 有効期限：無期限
+
+  / アクションボタン
   - if logged_in?
     = form_with url: accept_invitation_path(@invitation.token), method: :post do |f|
       .flex.flex-col.items-center.gap-3
-        = f.submit "参加する", class: "bg-gray-900 text-white rounded-md px-8 py-3 text-sm font-medium hover:bg-gray-700 cursor-pointer"
-        = link_to "断る", root_path, class: "text-sm text-gray-400 hover:text-gray-600"
+        = f.submit "この交換日記に参加する", class: "bg-gray-900 text-white rounded-md px-8 py-3 text-base font-medium hover:bg-gray-700 cursor-pointer w-full md:w-auto"
+        = link_to "今回は見送る", root_path, class: "text-sm text-gray-400 hover:text-gray-600"
   - else
     .flex.flex-col.items-center.gap-3
-      p.text-sm.text-gray-500 参加するにはログインが必要です
-      = link_to "ログインして参加する", login_path, class: "bg-gray-900 text-white rounded-md px-8 py-3 text-sm font-medium hover:bg-gray-700"
+      p.text-sm.text-gray-600.mb-2 参加するにはログインが必要です
+      = link_to "ログインして参加する", login_path, class: "bg-gray-900 text-white rounded-md px-8 py-3 text-base font-medium hover:bg-gray-700 w-full md:w-auto text-center"
 
-  / coconikkiについてリンク（未ログイン・ログイン共通）
-  .mt-6.text-center
+  / coconikkiについてリンク
+  .mt-8.text-center
     = link_to "coconikkiについて", about_path, target: "_blank", rel: "noopener noreferrer", class: "inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 underline"
