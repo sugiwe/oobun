@@ -1,6 +1,6 @@
 / メタタグ設定
 - content_for :meta_title, "#{@invitation.thread.title}への招待 - coconikki"
-- content_for :meta_description, @invitation.thread.description.present? ? @invitation.thread.description : "#{@invitation.invited_by.display_name}さんがあなたを交換日記「#{@invitation.thread.title}」に招待しています。"
+- content_for :meta_description, @invitation.thread.description.present? ? truncate(@invitation.thread.description, length: 120) : "#{@invitation.invited_by.display_name}さんがあなたを交換日記「#{@invitation.thread.title}」に招待しています。"
 - content_for :meta_type, "article"
 - content_for :twitter_card, "summary"
 - if @invitation.thread.thumbnail.attached? && @invitation.thread.thumbnail.representable?
@@ -41,7 +41,7 @@
 
   / 最新投稿プレビュー（公開スレッドの場合）
   - if @invitation.thread.free? || @invitation.thread.paid?
-    - recent_posts = @invitation.thread.posts.published.order(published_at: :desc).limit(3)
+    - recent_posts = @invitation.thread.posts.published.includes(:user, thumbnail_attachment: :blob).order(published_at: :desc).limit(3)
     - if recent_posts.any?
       .mb-8
         .text-sm.font-medium.text-gray-700.mb-3.text-center 最近の投稿
