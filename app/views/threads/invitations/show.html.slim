@@ -34,6 +34,7 @@
       .text-sm.font-medium.text-gray-700.mb-3.text-center 参加者
       .flex.flex-wrap.items-center.justify-center.gap-3
         - @invitation.thread.memberships.includes(:user).each do |membership|
+          - next if membership.user.nil? || membership.user.deleted?
           .flex.items-center.gap-2
             = link_to user_path(membership.user.username), class: "w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden transition-opacity hover:opacity-70" do
               = render "shared/avatar", user: membership.user, show_fallback: true
@@ -50,13 +51,13 @@
             = link_to thread_post_path(@invitation.thread.slug, post), class: "block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" do
               .flex.items-start.gap-3
                 .w-12.h-12.flex-shrink-0.rounded.bg-gray-100.flex.items-center.justify-center.overflow-hidden
-                  - if post.thumbnail.attached?
-                    = image_tag post.thumbnail, class: "w-full h-full object-cover", alt: post.display_title
+                  - if post.thumbnail.attached? && post.thumbnail.representable?
+                    = image_tag post.thumbnail.representation(resize_to_limit: [100, 100]), class: "w-full h-full object-cover", alt: post.display_title
                   - else
                     .text-xl 📮
                 .flex-1.min-w-0
                   .text-sm.font-medium.text-gray-900.truncate = post.display_title
-                  .text-xs.text-gray-500.line-clamp-2.mt-1 = truncate(post.body, length: 80)
+                  .text-xs.text-gray-500.line-clamp-2.mt-1 = extract_plain_text(post.body, max_length: 80)
                   .text-xs.text-gray-400.mt-1
                     = post.user.display_name
                     |  ·
