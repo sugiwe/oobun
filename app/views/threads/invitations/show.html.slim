@@ -27,7 +27,7 @@
     .mb-6
       h2.text-xl.font-bold.text-gray-900.mb-3.text-center = @invitation.thread.title
       - if @invitation.thread.description.present?
-        p.text-gray-600.text-sm.text-center = @invitation.thread.description
+        p.text-gray-600.text-sm.text-center.whitespace-pre-wrap = @invitation.thread.description
 
     / 参加者一覧
     .mb-6
