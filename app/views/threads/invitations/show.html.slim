@@ -1,6 +1,7 @@
 / メタタグ設定
+- inviter_name = (@invitation.invited_by.nil? || @invitation.invited_by.deleted?) ? "退会済みユーザー" : @invitation.invited_by.display_name
 - content_for :meta_title, "#{@invitation.thread.title}への招待 - coconikki"
-- content_for :meta_description, @invitation.thread.description.present? ? truncate(@invitation.thread.description, length: 120) : "#{@invitation.invited_by.display_name}さんがあなたを交換日記「#{@invitation.thread.title}」に招待しています。"
+- content_for :meta_description, @invitation.thread.description.present? ? truncate(@invitation.thread.description, length: 120) : "#{inviter_name}さんがあなたを交換日記「#{@invitation.thread.title}」に招待しています。"
 - content_for :meta_type, "article"
 - content_for :twitter_card, "summary"
 - if @invitation.thread.thumbnail.attached? && @invitation.thread.thumbnail.representable?
@@ -14,8 +15,11 @@
       = @invitation.thread.title
       | 」への招待
     p.text-gray-600.text-sm
-      = link_to "@#{@invitation.invited_by.username}", user_path(@invitation.invited_by.username), class: "text-blue-600 hover:underline"
-      | さんがあなたを招待しています
+      - if @invitation.invited_by.nil? || @invitation.invited_by.deleted?
+        | 退会済みユーザーさんがあなたを招待しています
+      - else
+        = link_to "@#{@invitation.invited_by.username}", user_path(@invitation.invited_by.username), class: "text-blue-600 hover:underline"
+        | さんがあなたを招待しています
 
   / 交換日記情報カード
   .bg-white.border.border-gray-200.rounded-lg.p-6.md:p-8.mb-8
@@ -59,9 +63,9 @@
                   .text-sm.font-medium.text-gray-900.truncate = post.display_title
                   .text-xs.text-gray-500.line-clamp-2.mt-1 = extract_plain_text(post.body, max_length: 80)
                   .text-xs.text-gray-400.mt-1
-                    = post.user.display_name
+                    = post.user&.display_name || "退会済みユーザー"
                     |  ·
-                    = post.display_published_at.strftime("%Y/%m/%d")
+                    = post.display_published_at&.strftime("%Y/%m/%d")
 
   / 有効期限表示
   .text-center.mb-6.text-xs.text-gray-400
